@@ -2,8 +2,6 @@
 
 **Your tasks and habits, together.**
 
-Today+ is an independent, community-built plugin for [Super Productivity](https://app.super-productivity.com/), created by [phuongtt2a](https://github.com/phuongtt2a). It brings **tasks due today** and **habits scheduled for today** onto one calm screen, so you can see your work and routines without switching views.
-
 > Today+ is separate from [Five](https://github.com/phuongtt2a/super-productivity-five), the five-priority focus plugin. Installing either does not replace the other.
 
 [![For Super Productivity](https://img.shields.io/badge/For-Super%20Productivity-4d7560)](https://app.super-productivity.com/) [![MIT License](https://img.shields.io/badge/license-MIT-informational)](LICENSE)
@@ -20,8 +18,6 @@ Today+ is an independent, community-built plugin for [Super Productivity](https:
 ![Today+ manual time entry for stopwatch habits](docs/screenshots/log-time.webp)
 
 </details>
-
-*Screenshots use demonstration tasks and habits, not real account data.*
 
 ## Why Today+?
 
