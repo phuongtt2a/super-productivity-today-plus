@@ -9,6 +9,16 @@ class TestPlugin(unittest.TestCase):
         self.assertTrue(data['iFrame'])
         self.assertEqual(data['name'],'Today+')
         self.assertIn('tasks due today',data['description'])
+    def test_logo_consistency(self):
+        import re
+        icon=(ROOT/'plugin/icon.svg').read_text()
+        html=(ROOT/'plugin/index.html').read_text()
+        header=html.split('<div class="brand-mark">', 1)[1].split('</svg>', 1)[0] + '</svg>'
+        self.assertNotIn('<div class="brand-mark">✓</div>', html)
+        self.assertIn('viewBox="0 0 64 64"', header)
+        icon_shapes=re.findall(r'<(?:rect|path)\b[^>]*>', icon)
+        for shape in icon_shapes:
+            self.assertIn(shape, header)
     def test_api_contract(self):
         s=(ROOT/'plugin/index.html').read_text()
         for api in ('getTasks()', 'getAllSimpleCounters()', 'getAllProjects()', 'updateTask(', 'setCounter('):

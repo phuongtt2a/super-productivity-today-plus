@@ -27,3 +27,7 @@ containing **`today-plus-super-productivity.zip`**.
 Never overwrite an older release's assets or move published tags to hide updates.
 
 GitHub About description, website, and topics are documented in [ABOUT.md](ABOUT.md). They are separate from plugin manifest metadata.
+
+## Logo-only source correction
+
+The shared calendar-check logo has been aligned in the page header with the menu icon, while retaining the existing `1.0.1` manifest version. No new release has been created. The immutable `v1.0.1` Release asset refers to its original commit; use the checked-in plugin source and rebuild the ZIP to install the updated artwork.

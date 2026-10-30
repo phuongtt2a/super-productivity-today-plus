@@ -1,13 +1,19 @@
 # Changelog
 
+## Unreleased — logo alignment (manifest stays v1.0.1)
+
+- Use the same calendar-and-check artwork in the Super Productivity plugin menu and the Today+ header.
+- Keep the original plugin identifier and the behavior of tasks and habit controls unchanged.
+- Refresh desktop and mobile documentation screenshots.
+
+
 ## 1.0.1 — Stable version and clearer documentation
 
-- Publish Today+ as **v1.0.1** with matching plugin manifest and GitHub release.
-- Rewrite the README's user-facing features and usage explanations in plain language; keep API and implementation details in the development guide.
-- Improve the plugin description, introduction, usage instructions and repository documentation.
-- Keep task completion, habit goals, manual time logging and the plugin ID unchanged.
-- Preserve the previous v0.2.0 release for users who need the historical version.
-
+- Publish Today+ as stable **v1.0.1** with matching manifest and GitHub Release.
+- Improve project introduction and the description shown in Super Productivity.
+- Document the full workflow for tasks, scheduled habits, habit goals and time logging.
+- Keep the original plugin ID, native app integration, and tested behavior unchanged.
+- Preserve historical v0.2.0 release without rewriting its tag.
 
 ## 0.2.0 — Initial public release of Today+
 

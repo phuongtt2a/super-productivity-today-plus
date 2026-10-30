@@ -25,7 +25,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--today-accent);o
 .app{width:min(1220px,100%);margin:auto;padding:clamp(18px,3vw,44px) clamp(14px,4vw,54px) 38px}
 .topbar{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:clamp(24px,4vw,48px)}
 .brand{display:flex;align-items:center;gap:12px;min-width:0}
-.brand-mark{width:41px;height:41px;border-radius:13px;background:#51745f;color:white;display:grid;place-items:center;font-size:19px;flex:none;font-weight:750}
+.brand-mark{width:41px;height:41px;flex:none;display:grid;place-items:center}
+.brand-mark svg{display:block;width:100%;height:100%;max-width:100%;max-height:100%}
 .brand-name{font-size:18px;line-height:1.2;font-weight:700;letter-spacing:-.035em}
 .brand-credit{color:var(--today-muted);font-size:11px;margin-top:3px}
 .today-date{text-transform:uppercase;letter-spacing:.085em;font-size:11px;font-weight:700;color:var(--today-muted)}
@@ -99,7 +100,11 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--today-accent);o
 <body>
 <main class="app">
   <header class="topbar">
-    <div class="brand"><div class="brand-mark">✓</div><div><div class="brand-name">Today+</div><div class="brand-credit">Tasks &amp; Habits · by phuongtt2a</div></div></div>
+    <div class="brand"><div class="brand-mark"><svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="16" fill="#4d7560"/>
+  <rect x="14" y="16" width="36" height="33" rx="5" fill="none" stroke="#f7faf6" stroke-width="3"/>
+  <path d="M21 12v9m22-9v9M21 30h23M23 39l5 4 9-11" stroke="#f7faf6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg></div><div><div class="brand-name">Today+</div><div class="brand-credit">Tasks &amp; Habits · by phuongtt2a</div></div></div>
     <div class="top-right"><div class="today-date" id="today-date">TODAY</div><button type="button" class="refresh" id="refresh" title="Refresh from Super Productivity" aria-label="Refresh from Super Productivity">↻</button></div>
   </header>
   <div class="hero"><div><h1>A clearer today.</h1><p>Tasks to move forward. Habits to keep.</p></div><div class="overall" aria-live="polite"><strong id="done-count">0 of 0</strong>complete<div class="overall-bar"><span id="done-bar"></span></div></div></div>
