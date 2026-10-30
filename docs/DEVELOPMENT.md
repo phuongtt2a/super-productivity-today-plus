@@ -21,7 +21,7 @@ Today+ runs as a self-contained Super Productivity iframe plugin. All runtime HT
 
 ```bash
 python -m unittest discover -s tests -p 'test_*.py' -v
-python scripts/package.py --tag v0.2.0
+python scripts/package.py --tag v1.0.1
 node --check plugin/plugin.js
 python tests/integration_check.py
 python tests/browser_check.py

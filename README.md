@@ -1,80 +1,108 @@
 # Today+
 
-**Your tasks and habits, together.**  
-An independent, community-built plugin for [Super Productivity](https://app.super-productivity.com/) by [phuongtt2a](https://github.com/phuongtt2a).
+**Your tasks and habits, together.**
 
-**Today+ is a completely separate plugin from Five.** It has its own ID, source and installable ZIP. Installing it doesn't replace or change Five.
+Today+ is an independent, community-built plugin for [Super Productivity](https://app.super-productivity.com/), created by [phuongtt2a](https://github.com/phuongtt2a). It brings **tasks due today** and **habits scheduled for today** onto one calm screen, so you can see your work and routines without switching views.
+
+> Today+ is separate from [Five](https://github.com/phuongtt2a/super-productivity-five), the five-priority focus plugin. Installing either does not replace the other.
+
+[![For Super Productivity](https://img.shields.io/badge/For-Super%20Productivity-4d7560)](https://app.super-productivity.com/) [![MIT License](https://img.shields.io/badge/license-MIT-informational)](LICENSE)
 
 ## Preview
 
-![Today+ on desktop](docs/screenshots/desktop.webp)
+![Today+ desktop view: tasks and habits side by side](docs/screenshots/desktop.webp)
 
-![Today+ on mobile](docs/screenshots/phone.webp)
+<details>
+<summary>Mobile layout and manual time entry</summary>
 
-## What it shows
+![Today+ mobile view: tasks followed by habits](docs/screenshots/phone.webp)
 
-- **Tasks**: active tasks with a due date on or before today; overdue tasks can be hidden, and finished tasks can be shown. Tasks are read from Super Productivity with `PluginAPI.getTasks()`.
-- **Habits**: enabled habit tracker/counters scheduled for today, from `PluginAPI.getAllSimpleCounters()`. Weekday streak schedules are respected; weekly-frequency habits can be completed on any day of the week.
-- **Progress**: completion and daily progress for tasks, simple checkbox habits, counter habits and weekly habits.
-- **Actions**: mark tasks done / to do, complete or undo one-click habits, and increase/decrease goal counters with the supported API. Stopwatch habits show logged duration and offer **Log time** to add minutes already spent when the native timer is paused. Today+ never starts or stops the native stopwatch.
-- **Theme**: inherits host font and theme variables; the page stays transparent over Super Productivity's wallpaper. Works on desktop and mobile.
+![Today+ manual time entry for stopwatch habits](docs/screenshots/log-time.webp)
 
-![Today+ manual time logging for a paused stopwatch habit](docs/screenshots/log-time.webp)
+</details>
 
-## Installation
+*Screenshots use demonstration tasks and habits, not real account data.*
 
-1. Download **today-plus-super-productivity.zip** under **Assets** in the [latest GitHub Release](https://github.com/phuongtt2a/super-productivity-today-plus/releases/latest) (not GitHub's automatic Source code archive).
-2. In [Super Productivity](https://app.super-productivity.com/), go to **Settings → Plugins**.
-3. Choose the plugin ZIP. Do **not** unzip it before importing.
-4. Open **Today+** from the plugin navigation.
+## Why Today+?
 
-## Definition of today
+Super Productivity organizes tasks and habits in different views. **Today+ brings tasks due today and habits scheduled for today together**, helping you review your work and routines without switching screens. Complete tasks, track habit goals and manually log time spent without replacing the native habit tracker.
 
-The plugin uses the device's local calendar date, matching the task `dueDay` field where present and falling back to `dueWithTime`. It displays tasks due today and overdue, not every task in all projects. The **Overdue** button hides overdue tasks; the **Finished** button includes tasks already marked complete.
+## Features
 
-Habits use `streakWeekDays` for weekday schedules. Non-streak counters visible in the host's habit tracker appear as general daily counters. Weekly-frequency habits remain visible throughout the week and show weekly progress. Stopwatch habit values are stored in milliseconds. The **Log time** action adds minutes to today's value, and is disabled while the native stopwatch is running.
+- **Tasks:** See Super Productivity tasks due today and overdue. Toggle overdue tasks and completed tasks, mark a task complete or return it to To Do, and open its details.
+- **Scheduled habits:** Read existing enabled habits from Super Productivity. Follow weekday schedules; show weekly-frequency habits during the week.
+- **Single-completion habits:** Tap once to complete; tap again to undo.
+- **Count or goal-based habits:** Increase or decrease today's value and see progress toward the configured goal.
+- **Stopwatch habits:** View accumulated time and the target. Use **Log time** to manually add minutes already spent **only when the built-in stopwatch is not running**. Today+ does not start, stop, or replace the app's timer.
+- **One dashboard:** See both sections and overall progress; it automatically refreshes periodically and when the app regains focus.
+- **Theme and mobile:** Uses Super Productivity's font and theme variables, keeps the host wallpaper visible, supports light/dark mode and small phone screens.
 
-No data is stored separately by this plugin. Task and habit changes are written to Super Productivity itself. Values refresh when the plugin regains focus, when task hooks fire, and periodically while visible (the host does not provide a dedicated habit-change hook).
+No separate login, external service, duplicate tasks, or additional local data store is required.
 
-## Package structure
+## Install
+
+1. Open the [latest Today+ release](https://github.com/phuongtt2a/super-productivity-today-plus/releases/latest).
+2. Under **Assets**, download **`today-plus-super-productivity.zip`** (not GitHub's **Source code (zip)**).
+3. In [Super Productivity](https://app.super-productivity.com/), go to **Settings → Plugins** and choose **Choose Plugin File**.
+4. Import the downloaded ZIP **without unpacking it**. Then open **Today+** from the plugin menu.
+
+The installable ZIP contains exactly four root files:
 
 ```text
-plugin/
+today-plus-super-productivity.zip
 ├── manifest.json
 ├── plugin.js
 ├── index.html
 └── icon.svg
 ```
 
-All UI CSS and JavaScript is inlined in `index.html`, consistent with the [official plugin development guide](https://github.com/super-productivity/super-productivity/blob/master/docs/plugin-development.md).
+## How Today+ decides what appears
 
-## Development and tests
+**Tasks:** Today+ reads active tasks using `PluginAPI.getTasks()`. It shows tasks due on or before the local calendar date (`dueDay` or `dueWithTime`). Tasks without a due date are not included. Completed tasks are hidden by default; **Finished** makes them visible. **Overdue** controls whether earlier dates appear. This is a *due-date dashboard*, not an exact copy of Super Productivity's Today work-context ordering.
+
+**Habits:** In Super Productivity, the habit tracker is backed by *Simple Counters*. Today+ reads enabled counters using `PluginAPI.getAllSimpleCounters()`. For streaks scheduled on specific weekdays, only the matching weekdays appear. Weekly-frequency habits are eligible throughout the week; their progress is shown separately. General daily counters are also shown.
+
+**Progress:** Click-counter goals are counts. Stopwatch goal and stored progress values are in **milliseconds** and are displayed in minutes/hours. Completing a task or incrementing a counter writes to Super Productivity through its plugin APIs.
+
+## Safety and limitations
+
+- Today+ does not create tasks or habits. Manage definitions and habit schedules in the main Super Productivity app.
+- To log a stopwatch habit, pause its existing stopwatch in Super Productivity first. The dialog **adds** time already spent, not a replacement total. It does not control the native stopwatch or countdown reminders.
+- Updates to habits made in another screen may appear after refresh or when the plugin regains focus. The API does not provide a dedicated habit-change hook.
+- In a desktop app or mobile app, Super Productivity's own stored data remains the source of truth. In a standalone browser preview without the plugin API, Today+ shows explicitly labelled demo data only.
+- Compatible with Super Productivity versions exposing the documented iframe Plugin API, including `getAllSimpleCounters()` and `setCounter()`. Older versions may differ; please report issues with app version and reproduction steps.
+- Today+ is a community project, not an official Super Productivity feature or an affiliated product.
+
+## Development
+
+Today+ is intentionally lightweight: no framework, build chain, external scripts or network requests.
+
+```text
+plugin/               # Files packaged at ZIP root
+scripts/package.py    # Deterministic ZIP builder
+scripts/              # Preview and screenshot helpers
+tests/                # Package and browser integration tests
+docs/                 # Screenshots and guides
+.github/workflows/    # CI and versioned GitHub release
+```
+
+Run from the repository root:
 
 ```bash
 python -m unittest discover -s tests -p 'test_*.py' -v
-python scripts/package.py --tag v0.2.0
-# Browser tests, after installing Playwright and Chromium:
-python tests/integration_check.py
-python tests/browser_check.py
+python scripts/package.py --tag v1.0.1
 ```
 
-Open `plugin/index.html` in a browser for a clearly labeled static-data preview. Actual API integration must be tested inside a supported Super Productivity build.
+For browser tests, install Python Playwright and Chromium, then run `python tests/integration_check.py` and `python tests/browser_check.py`. See [development notes](docs/DEVELOPMENT.md) and [release instructions](docs/RELEASING.md).
 
-## Manual time logging
+For the official plugin contract, see the [Super Productivity Plugin Development Guide](https://github.com/super-productivity/super-productivity/blob/master/docs/plugin-development.md).
 
-For a stopwatch habit, click **Log time**, enter the minutes you already spent, then choose **Add time**. The native Super Productivity stopwatch must be paused. Today+ checks its state again before saving, and updates the native habit total instead of maintaining a separate timer.
+## About and releases
 
-## Scope and limitations
+- [Repository description, website and topics](docs/ABOUT.md)
+- [Release notes and version history](CHANGELOG.md)
+- [How to publish a new version](docs/RELEASING.md)
 
-- Unlike Five, there is **no five-task limit**. The combined view scrolls naturally when you have many items.
-- It does not provide task creation, habit creation, or custom habit schedule editing. Use the native app for those.
-- For repeated countdown habits, the plugin edits the daily counter, not the countdown timer itself.
-- `getAllSimpleCounters()` and `setCounter()` are present in the current Super Productivity iframe plugin bridge. Older host versions may not expose them.
-- This is not an official Super Productivity feature or affiliated product.
+## Contributing
 
-## More information
-
-- [Development guide](docs/DEVELOPMENT.md)
-- [Release process](docs/RELEASING.md)
-- [Repository About description and topics](docs/ABOUT.md)
-- [Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md) · [MIT License](LICENSE)
+Issues and pull requests are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md). License: [MIT](LICENSE).

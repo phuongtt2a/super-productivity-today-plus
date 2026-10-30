@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.1 — Stable version and clearer documentation
+
+- Publish Today+ as **v1.0.1** with matching plugin manifest and GitHub release.
+- Improve the plugin description, introduction, usage instructions and repository documentation.
+- Keep task completion, habit goals, manual time logging and the plugin ID unchanged.
+- Preserve the previous v0.2.0 release for users who need the historical version.
+
+
 ## 0.2.0 — Initial public release of Today+
 
 - Publish **Today+** as a separate plugin with tasks due today and scheduled habits in one view.
