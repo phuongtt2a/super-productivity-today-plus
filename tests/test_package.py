@@ -22,7 +22,7 @@ class TestPlugin(unittest.TestCase):
         self.assertEqual(result.returncode,0,result.stderr)
     def test_zip(self):
         subprocess.run(['python',str(ROOT/'scripts/package.py')],capture_output=True,check=True)
-        with zipfile.ZipFile(ROOT/'dist/today-tasks-habits.zip') as z:
+        with zipfile.ZipFile(ROOT/'dist/today-plus-super-productivity.zip') as z:
             self.assertEqual(z.namelist(),['manifest.json','plugin.js','index.html','icon.svg'])
             self.assertIsNone(z.testzip())
 if __name__=='__main__':unittest.main(verbosity=2)

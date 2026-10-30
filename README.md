@@ -27,17 +27,15 @@ Today+ is an independent, community-built plugin for [Super Productivity](https:
 
 Super Productivity organizes tasks and habits in different views. **Today+ brings tasks due today and habits scheduled for today together**, helping you review your work and routines without switching screens. Complete tasks, track habit goals and manually log time spent without replacing the native habit tracker.
 
-## Features
+## What it shows
 
-- **Tasks:** See Super Productivity tasks due today and overdue. Toggle overdue tasks and completed tasks, mark a task complete or return it to To Do, and open its details.
-- **Scheduled habits:** Read existing enabled habits from Super Productivity. Follow weekday schedules; show weekly-frequency habits during the week.
-- **Single-completion habits:** Tap once to complete; tap again to undo.
-- **Count or goal-based habits:** Increase or decrease today's value and see progress toward the configured goal.
-- **Stopwatch habits:** View accumulated time and the target. Use **Log time** to manually add minutes already spent **only when the built-in stopwatch is not running**. Today+ does not start, stop, or replace the app's timer.
-- **One dashboard:** See both sections and overall progress; it automatically refreshes periodically and when the app regains focus.
-- **Theme and mobile:** Uses Super Productivity's font and theme variables, keeps the host wallpaper visible, supports light/dark mode and small phone screens.
+- **Today's tasks:** See work due today, with overdue tasks included when you want them. You can also show completed tasks.
+- **Today's habits:** See routines scheduled for today, including habits you aim to complete several times each week.
+- **Your progress:** Check what's finished, what's still pending, and how close you are to each habit's goal.
+- **Simple actions:** Finish or reopen a task, check off a habit, adjust a daily count, or log time already spent on a time-based habit.
+- **A comfortable view:** Everything is together on one screen, with a clean layout that works on laptops and phones and follows your Super Productivity theme.
 
-No separate login, external service, duplicate tasks, or additional local data store is required.
+Today+ uses your existing tasks and habits. There's no separate account or second set of lists to maintain.
 
 ## Install
 
@@ -56,46 +54,26 @@ today-plus-super-productivity.zip
 └── icon.svg
 ```
 
-## How Today+ decides what appears
+## What counts as today?
 
-**Tasks:** Today+ reads active tasks using `PluginAPI.getTasks()`. It shows tasks due on or before the local calendar date (`dueDay` or `dueWithTime`). Tasks without a due date are not included. Completed tasks are hidden by default; **Finished** makes them visible. **Overdue** controls whether earlier dates appear. This is a *due-date dashboard*, not an exact copy of Super Productivity's Today work-context ordering.
+**Tasks** appear when their due date is today or earlier. You can hide overdue tasks or show tasks you've already finished. Tasks without a due date aren't automatically added.
 
-**Habits:** In Super Productivity, the habit tracker is backed by *Simple Counters*. Today+ reads enabled counters using `PluginAPI.getAllSimpleCounters()`. For streaks scheduled on specific weekdays, only the matching weekdays appear. Weekly-frequency habits are eligible throughout the week; their progress is shown separately. General daily counters are also shown.
+**Habits** appear according to the schedule you've set in Super Productivity. Weekly-frequency habits stay available during the week so you can work toward your goal.
 
-**Progress:** Click-counter goals are counts. Stopwatch goal and stored progress values are in **milliseconds** and are displayed in minutes/hours. Completing a task or incrementing a counter writes to Super Productivity through its plugin APIs.
+**Time-based habits** show the time you've already recorded. To add time manually, pause the habit's stopwatch in Super Productivity, select **Log time** in Today+, and enter the minutes you've spent. This adds to your recorded time; it doesn't start or stop the stopwatch.
 
-## Safety and limitations
+## Good to know
 
-- Today+ does not create tasks or habits. Manage definitions and habit schedules in the main Super Productivity app.
-- To log a stopwatch habit, pause its existing stopwatch in Super Productivity first. The dialog **adds** time already spent, not a replacement total. It does not control the native stopwatch or countdown reminders.
-- Updates to habits made in another screen may appear after refresh or when the plugin regains focus. The API does not provide a dedicated habit-change hook.
-- In a desktop app or mobile app, Super Productivity's own stored data remains the source of truth. In a standalone browser preview without the plugin API, Today+ shows explicitly labelled demo data only.
-- Compatible with Super Productivity versions exposing the documented iframe Plugin API, including `getAllSimpleCounters()` and `setCounter()`. Older versions may differ; please report issues with app version and reproduction steps.
-- Today+ is a community project, not an official Super Productivity feature or an affiliated product.
+- Today+ doesn't create tasks or habits. You can create them and change their schedules in Super Productivity.
+- Progress and completed tasks remain in Super Productivity, so you can return to the main app anytime.
+- If you update a habit in another screen, Today+ may need a moment to refresh.
+- Today+ is a community-made plugin, not an official feature of Super Productivity.
 
-## Development
+## For contributors
 
-Today+ is intentionally lightweight: no framework, build chain, external scripts or network requests.
+The plugin is open source. If you want to explore the code or contribute, see the [development guide](docs/DEVELOPMENT.md), [release guide](docs/RELEASING.md), and [official Super Productivity plugin documentation](https://github.com/super-productivity/super-productivity/blob/master/docs/plugin-development.md).
 
-```text
-plugin/               # Files packaged at ZIP root
-scripts/package.py    # Deterministic ZIP builder
-scripts/              # Preview and screenshot helpers
-tests/                # Package and browser integration tests
-docs/                 # Screenshots and guides
-.github/workflows/    # CI and versioned GitHub release
-```
-
-Run from the repository root:
-
-```bash
-python -m unittest discover -s tests -p 'test_*.py' -v
-python scripts/package.py --tag v1.0.1
-```
-
-For browser tests, install Python Playwright and Chromium, then run `python tests/integration_check.py` and `python tests/browser_check.py`. See [development notes](docs/DEVELOPMENT.md) and [release instructions](docs/RELEASING.md).
-
-For the official plugin contract, see the [Super Productivity Plugin Development Guide](https://github.com/super-productivity/super-productivity/blob/master/docs/plugin-development.md).
+For technical details about how tasks and habits are read and updated, see [DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
 ## About and releases
 
