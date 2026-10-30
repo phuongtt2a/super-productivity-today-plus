@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<title>Today+ — Tasks and Habits</title>
+<style>
+:root {
+  --today-text:var(--text-color,#28372d);
+  --today-muted:var(--text-color-muted,#697a70);
+  --today-accent:var(--c-primary,#52745c);
+  --today-line:var(--divider-color,rgba(89,113,97,.22));
+  --today-bg:color-mix(in srgb,var(--card-bg,#fff) 55%,transparent);
+  --today-hover:color-mix(in srgb,var(--c-primary,#52745c) 9%,transparent);
+  --today-font:var(--font-primary-stack,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif);
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{min-width:0;margin:0;background:transparent!important;color:var(--today-text);font-family:var(--today-font);}
+body{min-height:100dvh;-webkit-font-smoothing:antialiased}
+button,input{font:inherit}
+button{color:inherit;cursor:pointer}
+button:disabled{opacity:.45;cursor:default}
+button:focus-visible,input:focus-visible{outline:2px solid var(--today-accent);outline-offset:2px}
+.app{width:min(1220px,100%);margin:auto;padding:clamp(18px,3vw,44px) clamp(14px,4vw,54px) 38px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:clamp(24px,4vw,48px)}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.brand-mark{width:41px;height:41px;border-radius:13px;background:#51745f;color:white;display:grid;place-items:center;font-size:19px;flex:none;font-weight:750}
+.brand-name{font-size:18px;line-height:1.2;font-weight:700;letter-spacing:-.035em}
+.brand-credit{color:var(--today-muted);font-size:11px;margin-top:3px}
+.today-date{text-transform:uppercase;letter-spacing:.085em;font-size:11px;font-weight:700;color:var(--today-muted)}
+.top-right{display:flex;align-items:center;gap:16px}
+.refresh{background:transparent;border:1px solid var(--today-line);border-radius:50%;width:39px;height:39px;min-width:39px;padding:0;display:grid;place-items:center;font-size:19px}
+.refresh:hover,.chip:hover,.mini-btn:hover{background:var(--today-hover)}
+.hero{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:25px}
+.hero h1{font-size:clamp(29px,4.1vw,47px);line-height:1.09;letter-spacing:-.055em;font-weight:650;margin:0}
+.hero p{font-size:clamp(12px,1.3vw,14px);line-height:1.6;color:var(--today-muted);margin:10px 0 0}
+.overall{min-width:135px;text-align:right;color:var(--today-muted);font-size:12px;line-height:1.6}
+.overall strong{display:block;color:var(--today-text);font-size:22px;font-weight:700;line-height:1.2}
+.overall-bar{margin-top:9px;height:4px;background:var(--today-line);border-radius:20px;overflow:hidden}
+.overall-bar span{height:100%;display:block;background:var(--today-accent);border-radius:20px;width:0;transition:width .2s}
+.demo-note,.error-note{font-size:13px;line-height:1.5;padding:10px 13px;border:1px solid var(--today-line);border-radius:10px;margin:0 0 18px;color:var(--today-muted);background:var(--today-bg)}
+.error-note{color:var(--today-text)}
+.hidden{display:none!important}
+.workspace{display:grid;grid-template-columns:minmax(0,1.16fr) minmax(0,.9fr);gap:clamp(22px,3vw,40px);align-items:start}
+.section{min-width:0}
+.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--today-line);padding-bottom:15px;margin-bottom:5px}
+.section-title{display:flex;align-items:center;gap:10px;min-width:0}
+.section-head h2{margin:0;font-size:21px;letter-spacing:-.04em;font-weight:650}
+.count{display:inline-block;min-width:23px;text-align:center;padding:4px 7px;font-size:11px;border-radius:99px;color:var(--today-muted);border:1px solid var(--today-line);font-variant-numeric:tabular-nums}
+.section-actions{display:flex;gap:8px;align-items:center}
+.chip{white-space:nowrap;font-size:11px;border:1px solid var(--today-line);border-radius:99px;background:transparent;padding:7px 11px;color:var(--today-muted)}
+.chip[aria-pressed=true]{background:var(--today-hover);border-color:var(--today-accent);color:var(--today-text)}
+.item{display:grid;grid-template-columns:29px minmax(0,1fr) auto;column-gap:12px;align-items:center;min-height:78px;padding:13px 1px;border-bottom:1px solid var(--today-line);min-width:0;}
+.check{width:25px;height:25px;min-width:25px;max-width:25px;aspect-ratio:1;border:1.5px solid var(--today-accent);background:transparent;border-radius:50%;padding:0;display:grid;place-items:center;color:var(--today-accent);font-size:16px;line-height:1;}
+.check:hover{background:var(--today-hover)}
+.check.is-done{background:var(--today-accent);color:white}
+.item-copy{min-width:0;overflow-wrap:anywhere}
+.item-name{margin:0;font-size:clamp(14px,1.42vw,17px);font-weight:600;line-height:1.35;letter-spacing:-.015em}
+.item.is-done .item-name{text-decoration:line-through;color:var(--today-muted)}
+.item-meta{margin:5px 0 0;color:var(--today-muted);font-size:11.5px;line-height:1.45;display:flex;flex-wrap:wrap;gap:5px 8px;min-width:0}
+.dot{opacity:.5}
+.status{font-size:11px;white-space:nowrap;color:var(--today-muted);text-align:right;max-width:135px}
+.status.overdue{color:var(--c-warn,#b36c45)}
+.status.done{color:var(--today-accent)}
+.item-task .item-copy{cursor:pointer}
+.item-task .item-copy:hover .item-name{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+.counter-btns{display:flex;gap:6px;align-items:center;white-space:nowrap}
+.mini-btn{border:1px solid var(--today-line);background:transparent;border-radius:50%;width:29px;height:29px;min-width:29px;max-width:29px;aspect-ratio:1;padding:0;font-size:17px;display:grid;place-items:center}
+.counter-value{font-size:11px;color:var(--today-muted);font-variant-numeric:tabular-nums}
+.habit-progress{margin-top:7px;height:3px;width:min(150px,100%);background:var(--today-line);border-radius:3px;overflow:hidden}
+.habit-symbol{width:25px;height:25px;display:grid;place-items:center;color:var(--today-accent);font-size:18px;line-height:1;user-select:none}
+.action-btn{border:1px solid var(--today-line);border-radius:999px;background:transparent;padding:9px 13px;font-size:12px;font-weight:600;color:var(--today-text);white-space:nowrap}
+.action-btn:hover{background:var(--today-hover)}
+.action-btn.filled{background:var(--today-accent);color:white;border-color:var(--today-accent)}
+.action-btn.filled:hover{filter:brightness(1.07)}
+.time-overlay{position:fixed;inset:0;z-index:50;background:rgba(10,18,15,.55);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;padding:18px}
+.time-dialog{width:min(420px,100%);max-height:calc(100dvh - 36px);overflow:auto;background:var(--card-bg,#f4f6f2);color:var(--today-text);border:1px solid var(--today-line);border-radius:19px;padding:clamp(19px,4vw,28px);box-shadow:0 18px 65px rgba(0,0,0,.25)}
+.time-dialog-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.eyebrow{font-size:10px;color:var(--today-muted);font-weight:700;letter-spacing:.14em;margin:0 0 8px}
+.time-dialog h2{font-size:23px;letter-spacing:-.035em;margin:0;font-weight:650;line-height:1.25;overflow-wrap:anywhere}.time-close{width:35px;height:35px;min-width:35px;display:grid;place-items:center;border:1px solid var(--today-line);border-radius:50%;padding:0;font-size:21px;background:transparent}
+.time-close:hover{background:var(--today-hover)}.time-help{font-size:13px;line-height:1.55;color:var(--today-muted);margin:17px 0 0}.time-current{font-size:13px;margin:18px 0;padding:11px 0;border-top:1px solid var(--today-line);border-bottom:1px solid var(--today-line)}
+#time-form label{font-size:12px;font-weight:650;display:block;margin-bottom:8px}.time-field{border:1px solid var(--today-line);border-radius:10px;display:flex;align-items:center;gap:10px;padding:0 13px;background:color-mix(in srgb,var(--card-bg,#fff) 86%,transparent)}
+.time-field input{width:100%;min-width:0;font-size:20px;background:transparent;color:var(--today-text);border:0;outline:0;padding:12px 2px}.time-field:focus-within{outline:2px solid var(--today-accent);outline-offset:2px}
+.time-field span{font-size:12px;color:var(--today-muted)}.time-error{color:var(--c-warn,#b36c45);font-size:12px;line-height:1.4}
+.time-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:23px}
+
+.habit-progress span{display:block;height:100%;background:var(--today-accent);border-radius:3px}
+.group-caption{margin:17px 0 0;color:var(--today-muted);font-size:11px;font-weight:700;letter-spacing:.055em;text-transform:uppercase}
+.empty{padding:31px 5px 34px;color:var(--today-muted);text-align:center;font-size:13px;line-height:1.65;border-bottom:1px solid var(--today-line)}
+.empty strong{font-size:16px;color:var(--today-text);font-weight:600;display:block;margin-bottom:6px}
+.foot{font-size:11px;line-height:1.5;color:var(--today-muted);margin-top:24px;padding-top:14px;border-top:1px solid var(--today-line)}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+.item .action-btn{justify-self:end}
+@media(max-width:740px){.app{padding:18px 18px 28px}.topbar{margin-bottom:25px}.workspace{grid-template-columns:1fr;gap:35px}.hero{margin-bottom:22px}.hero h1{font-size:clamp(26px,7.6vw,36px)}.overall{min-width:110px}.item-name{font-size:15px}.item{min-height:70px}.section-head h2{font-size:20px}}
+@media(max-width:380px){.item .action-btn{padding:7px 9px;font-size:11px}.item-meta{flex-wrap:wrap}.time-actions .action-btn{min-height:40px}.app{padding-left:13px;padding-right:13px}.top-right{gap:8px}.today-date{font-size:10px;letter-spacing:.02em}.brand-name{font-size:16px}.hero{align-items:start}.hero h1{font-size:27px}.overall{min-width:88px;font-size:10px}.overall strong{font-size:18px}.item{grid-template-columns:26px minmax(0,1fr) auto;column-gap:8px}.status{font-size:10px;max-width:66px}.item-name{font-size:14px}.item-meta{font-size:10px}.section-actions{gap:5px}.chip{padding:6px 8px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main class="app">
+  <header class="topbar">
+    <div class="brand"><div class="brand-mark">✓</div><div><div class="brand-name">Today+</div><div class="brand-credit">Tasks &amp; Habits · by phuongtt2a</div></div></div>
+    <div class="top-right"><div class="today-date" id="today-date">TODAY</div><button type="button" class="refresh" id="refresh" title="Refresh from Super Productivity" aria-label="Refresh from Super Productivity">↻</button></div>
+  </header>
+  <div class="hero"><div><h1>A clearer today.</h1><p>Tasks to move forward. Habits to keep.</p></div><div class="overall" aria-live="polite"><strong id="done-count">0 of 0</strong>complete<div class="overall-bar"><span id="done-bar"></span></div></div></div>
+  <p class="demo-note hidden" id="demo-note">Preview data only. Install this plugin in Super Productivity to see your real tasks and habits.</p>
+  <p class="error-note hidden" id="error-note" role="alert"></p>
+  <div class="workspace">
+    <section class="section" aria-labelledby="task-heading">
+      <div class="section-head"><div class="section-title"><h2 id="task-heading">Tasks</h2><span class="count" id="task-count">0</span></div><div class="section-actions"><button class="chip" id="overdue-filter" type="button" aria-pressed="true">Overdue</button><button class="chip" id="completed-filter" type="button" aria-pressed="false">Finished</button></div></div>
+      <div id="tasks"></div>
+    </section>
+    <section class="section" aria-labelledby="habit-heading">
+      <div class="section-head"><div class="section-title"><h2 id="habit-heading">Habits</h2><span class="count" id="habit-count">0</span></div><span class="today-date" id="habit-caption">TODAY</span></div>
+      <div id="habits"></div>
+    </section>
+  </div>
+  <footer class="foot">Tasks and habits stay in sync with Super Productivity. Today+ does not change your existing routines or timers.</footer>
+</main>
+<div id="time-overlay" class="time-overlay hidden" role="presentation">
+  <section class="time-dialog" role="dialog" aria-modal="true" aria-labelledby="time-title" aria-describedby="time-help">
+    <div class="time-dialog-head"><div><p class="eyebrow">TODAY'S HABIT</p><h2 id="time-title">Log time</h2></div><button type="button" class="time-close" id="time-close" aria-label="Close time editor">×</button></div>
+    <p id="time-help" class="time-help">Add time you already spent on this habit. This will not start or stop a running timer.</p>
+    <p class="time-current" id="time-current">0 min logged today</p>
+    <form id="time-form" novalidate>
+      <label for="time-minutes">Minutes to add</label>
+      <div class="time-field"><input type="number" id="time-minutes" name="minutes" min="0.5" max="1440" step="0.5" inputmode="decimal" required placeholder="e.g. 25" /><span>min</span></div>
+      <p class="time-error hidden" id="time-error" role="alert"></p>
+      <div class="time-actions"><button type="button" class="action-btn" id="time-cancel">Cancel</button><button type="submit" class="action-btn filled" id="time-save">Add time</button></div>
+    </form>
+  </section>
+</div>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const state = {api:null, tasks:[], habits:[], projects:new Map(), today:'', showOverdue:true, showFinished:false, demo:false, refreshing:false, busy:new Set(), timeHabitId:null, previousFocus:null};
+const safe = str => String(str ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+const localDay = (date=new Date()) => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+const dueKey = t => t.dueDay || (Number.isFinite(t.dueWithTime)?localDay(new Date(t.dueWithTime)):null);
+const fmtDate = dateStr => { if(!dateStr) return ''; const [y,m,d]=dateStr.split('-').map(Number); if(!y||!m||!d)return dateStr; return new Date(y,m-1,d).toLocaleDateString(undefined,{month:'short',day:'numeric'}); };
+const getToday = () => new Date();
+function habitDue(h, date=getToday()) {
+  if (!h.isEnabled) return false;
+  if (!h.isTrackStreaks || h.streakMode==='weekly-frequency') return true;
+  if (!h.streakWeekDays) return true;
+  return Boolean(h.streakWeekDays[date.getDay()]);
+}
+function habitGoal(h) {return Number(h.streakMinValue)>0?Number(h.streakMinValue):1;}
+function habitValue(h,day=state.today){return Number(h.countOnDay?.[day]||0);}
+function dailyDone(h) {return habitValue(h)>=habitGoal(h);}
+function formatMinutes(ms){
+  const min=Math.round(Math.max(0,Number(ms)||0)/30000)/2;
+  if(min<60)return `${min} min`;
+  const hours=Math.floor(min/60), remaining=Math.round((min-hours*60)*10)/10;
+  return remaining?`${hours}h ${remaining}m`:`${hours}h`;
+}
+function isSimpleHabit(h) {return h.type==='ClickCounter' && !!h.isTrackStreaks && habitGoal(h)===1;}
+function weekProgress(h, date=getToday()) {
+  const monday=new Date(date.getFullYear(),date.getMonth(),date.getDate());monday.setDate(monday.getDate()-((monday.getDay()+6)%7));
+  let done=0;
+  for(let i=0;i<7;i++){const day=new Date(monday);day.setDate(monday.getDate()+i);if(Number(h.countOnDay?.[localDay(day)]||0)>=habitGoal(h))done++}
+  return {done,goal:Number(h.streakWeeklyFrequency)>0?Number(h.streakWeeklyFrequency):1};
+}
+function currentTasks(){return allDueTasks().filter(t=>{const d=dueKey(t);return (state.showOverdue||d===state.today) && (!t.isDone||state.showFinished)}).sort((a,b)=>Number(a.isDone)-Number(b.isDone)||String(dueKey(a)).localeCompare(String(dueKey(b)))||a.title.localeCompare(b.title));}
+function allDueTasks(){return state.tasks.filter(t=>{const d=dueKey(t);if(!d||d>state.today)return false;if(!t.isDone||d===state.today)return true;return Number.isFinite(t.doneOn)&&localDay(new Date(t.doneOn))===state.today;});}
+function todayHabits(){return state.habits.filter(h=>habitDue(h));}
+function sectionEmpty(name,caption){return `<div class="empty"><strong>${safe(name)}</strong>${safe(caption)}</div>`;}
+function taskRow(t){const id=safe(t.id), d=dueKey(t),project=state.projects.get(t.projectId)||'Inbox';const isOverdue=d<state.today;
+  return `<article class="item item-task ${t.isDone?'is-done':''}"><button class="check ${t.isDone?'is-done':''}" data-task="${id}" aria-label="${t.isDone?'Return':'Complete'} task: ${safe(t.title)}" type="button">${t.isDone?'✓':''}</button><div class="item-copy" data-open="${id}" tabindex="0" role="button" aria-label="Open task: ${safe(t.title)}"><p class="item-name">${safe(t.title)}</p><p class="item-meta"><span>${safe(project)}</span><span class="dot">·</span><span>${t.isDone?'Finished':isOverdue?'Overdue':'Due today'}${d===state.today?'':' · '+safe(fmtDate(d))}</span></p></div><span class="status ${t.isDone?'done':isOverdue?'overdue':''}">${t.isDone?'Done':isOverdue?'Overdue':'Today'}</span></article>`;
+}
+function habitRow(h){
+  const id=safe(h.id),value=habitValue(h),goal=habitGoal(h),done=dailyDone(h),weekly=h.streakMode==='weekly-frequency'?weekProgress(h):null;
+  const stopwatch=h.type==='StopWatch',simple=isSimpleHabit(h),percent=Math.min(100,value/goal*100);
+  const status=stopwatch?`${formatMinutes(value)} / ${formatMinutes(goal)}`:weekly?`${weekly.done}/${weekly.goal} days this week`:simple?(done?'Done':'To do'):`${value} / ${goal}`;
+  const desc=stopwatch?(h.isOn?'Timer running in Super Productivity':'Time-based habit'):weekly?'Flexible this week':!h.isTrackStreaks?'Daily counter':simple?'Daily habit':'Daily goal';
+  const control=stopwatch
+    ?`<button type="button" class="action-btn" data-log-time="${id}" ${h.isOn?'disabled':''} title="${h.isOn?'Pause the timer in Super Productivity before logging manually':'Add time you already spent'}">${h.isOn?'Timer running':'Log time'}</button>`
+    :simple?`<span class="status ${done?'done':''}">${done?'Finished':'Open'}</span>`
+    :`<div class="counter-btns"><button type="button" class="mini-btn" data-less="${id}" aria-label="Decrease ${safe(h.title)}" ${value<=0?'disabled':''}>−</button><span class="counter-value">${value}</span><button type="button" class="mini-btn" data-more="${id}" aria-label="Increase ${safe(h.title)}">+</button></div>`;
+  const marker=simple?`<button type="button" class="check ${done?'is-done':''}" data-habit="${id}" aria-label="${done?'Undo':'Complete'} habit: ${safe(h.title)}">${done?'✓':''}</button>`
+    :`<span class="habit-symbol" aria-hidden="true">${stopwatch?'◷':'◈'}</span>`;
+  return `<article class="item ${done?'is-done':''}">${marker}<div class="item-copy"><p class="item-name">${safe(h.title)}</p><p class="item-meta"><span>${safe(desc)}</span><span class="dot">·</span><span>${safe(status)}</span></p>${!simple?`<div class="habit-progress" aria-label="Progress ${Math.round(percent)} percent"><span style="width:${percent}%"></span></div>`:''}</div>${control}</article>`;
+}
+function render(){state.today=localDay();$('today-date').textContent=new Date().toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'});const tasks=currentTasks(),habits=todayHabits(),totalTasks=allDueTasks().length;const taskDone=allDueTasks().filter(t=>t.isDone).length,habitDone=habits.filter(h=>dailyDone(h)).length;
+  $('tasks').innerHTML=tasks.length?tasks.map(taskRow).join(''):sectionEmpty('All clear','No tasks due today in this view.');
+  $('habits').innerHTML=habits.length?habits.map(habitRow).join(''):sectionEmpty('No habits scheduled','Enabled habits will show here on their scheduled days.');
+  $('task-count').textContent=String(tasks.length);$('habit-count').textContent=String(habits.length);$('done-count').textContent=`${taskDone+habitDone} of ${totalTasks+habits.length}`;
+  $('done-bar').style.width=((totalTasks+habits.length)?Math.round(100*(taskDone+habitDone)/(totalTasks+habits.length)):0)+'%';$('overdue-filter').setAttribute('aria-pressed',String(state.showOverdue));$('completed-filter').setAttribute('aria-pressed',String(state.showFinished));
+}
+function demoData(){const today=localDay();const yesterday=new Date();yesterday.setDate(yesterday.getDate()-1);
+  state.tasks=[{id:'t1',title:'Complete the proposal draft',projectId:'work',dueDay:today,isDone:false},{id:'t2',title:'Review the team feedback',projectId:'work',dueDay:today,isDone:false},{id:'t3',title:'Gửi báo cáo tiến độ dự án',projectId:'work',dueDay:today,isDone:false},{id:'t4',title:'Follow up on an overdue task',projectId:'personal',dueDay:localDay(yesterday),isDone:false},{id:'t5',title:'Plan tomorrow',projectId:'personal',dueDay:today,isDone:true}];
+  const days={0:true,1:true,2:true,3:true,4:true,5:true,6:true};state.habits=[{id:'h1',title:'Read for 20 minutes',type:'ClickCounter',isEnabled:true,isTrackStreaks:true,streakMinValue:1,streakWeekDays:days,countOnDay:{}},{id:'h2',title:'Drink enough water',type:'ClickCounter',isEnabled:true,isTrackStreaks:true,streakMinValue:8,streakWeekDays:days,countOnDay:{[today]:3}},{id:'h3',title:'Exercise',type:'ClickCounter',isEnabled:true,isTrackStreaks:true,streakMinValue:1,streakMode:'weekly-frequency',streakWeeklyFrequency:3,countOnDay:{[today]:1}},
+    {id:'h4',title:'Tập thể dục 30 phút',type:'StopWatch',isEnabled:true,isTrackStreaks:true,streakMinValue:1800000,streakWeekDays:days,countOnDay:{[today]:600000},isOn:false}];state.projects=new Map([['work','Work'],['personal','Personal']]);}
+function reportError(err){$('error-note').textContent=`Could not refresh from Super Productivity: ${err?.message||err}`;$('error-note').classList.remove('hidden');}
+async function refresh(){if(state.refreshing)return;state.refreshing=true;$('refresh').disabled=true;
+  try{if(!state.api){if(!state.demo){state.demo=true;demoData();$('demo-note').classList.remove('hidden');}}else{const [tasks,habits,projects]=await Promise.all([state.api.getTasks(),state.api.getAllSimpleCounters(),state.api.getAllProjects()]);if(!Array.isArray(tasks)||!Array.isArray(habits))throw new Error('Unexpected tasks or habits response');state.tasks=tasks;state.habits=habits;state.projects=new Map((projects||[]).map(p=>[p.id,p.title]));$('error-note').classList.add('hidden');}}catch(err){reportError(err);}finally{state.refreshing=false;$('refresh').disabled=false;render();}}
+async function updateTask(id){if(state.busy.has('t:'+id))return;const t=state.tasks.find(x=>x.id===id);if(!t)return;if(!state.api){t.isDone=!t.isDone;render();return;}state.busy.add('t:'+id);try{await state.api.updateTask(id,{isDone:!t.isDone});t.isDone=!t.isDone;render();}catch(err){reportError(err)}finally{state.busy.delete('t:'+id)}}
+async function updateHabit(id,delta){if(state.busy.has('h:'+id))return;const h=state.habits.find(x=>x.id===id);if(!h)return;if(h.type==='StopWatch')return;const value=habitValue(h),next=delta==='toggle'?(value>0?0:1):Math.max(0,value+delta);if(!state.api){h.countOnDay={...h.countOnDay,[state.today]:next};render();return;}state.busy.add('h:'+id);try{await state.api.setCounter(id,next);h.countOnDay={...h.countOnDay,[state.today]:next};render();}catch(err){reportError(err)}finally{state.busy.delete('h:'+id)}}
+function openTimeEditor(id){
+  const h=state.habits.find(x=>x.id===id);
+  if(!h||h.type!=='StopWatch'||h.isOn||state.busy.has('h:'+id))return;
+  state.timeHabitId=id;state.previousFocus=document.activeElement;
+  $('time-title').textContent=h.title;
+  $('time-current').textContent=`${formatMinutes(habitValue(h))} logged today · Goal ${formatMinutes(habitGoal(h))}`;
+  $('time-minutes').value='';$('time-error').textContent='';$('time-error').classList.add('hidden');
+  $('time-overlay').classList.remove('hidden');$('time-minutes').focus();
+}
+function closeTimeEditor(){
+  $('time-overlay').classList.add('hidden');state.timeHabitId=null;
+  if(state.previousFocus&&state.previousFocus.isConnected)state.previousFocus.focus();
+  state.previousFocus=null;
+}
+async function saveLoggedTime(event){
+  event.preventDefault();
+  const id=state.timeHabitId,h=state.habits.find(x=>x.id===id);
+  const minutes=Number($('time-minutes').value),valid=$('time-minutes').value.trim()!=='' && Number.isFinite(minutes) && minutes>=.5 && minutes<=1440 && Math.round(minutes*2)===minutes*2;
+  if(!valid){$('time-error').textContent='Enter between 0.5 and 1,440 minutes, in 30-second increments.';$('time-error').classList.remove('hidden');return;}
+  if(!h||h.type!=='StopWatch'||h.isOn){$('time-error').textContent='This timer is running or is no longer available. Pause it in Super Productivity and refresh.';$('time-error').classList.remove('hidden');return;}
+  if(state.busy.has('h:'+id))return;
+  state.busy.add('h:'+id);$('time-save').disabled=true;
+  try{
+    // Re-read the native timer before writing, to avoid overwriting progress
+    // collected since the time-entry dialog was opened.
+    let current=h;
+    if(state.api){
+      const latest=await state.api.getAllSimpleCounters();
+      current=latest.find(entry=>entry.id===id);
+      if(!current||current.isOn)throw new Error('The native stopwatch is running or unavailable. Pause it and refresh first.');
+    }
+    const today=localDay();
+    const next=Number(current.countOnDay?.[today]||0)+Math.round(minutes*60000);
+    if(state.api)await state.api.setCounter(id,next);
+    h.countOnDay={...current.countOnDay,[today]:next};state.today=today;closeTimeEditor();render();
+  }catch(err){reportError(err);$('time-error').textContent=String(err.message||'Could not save the time. Please try again.');$('time-error').classList.remove('hidden');}
+  finally{state.busy.delete('h:'+id);$('time-save').disabled=false;}
+}
+$('time-form').addEventListener('submit',event=>void saveLoggedTime(event));
+$('time-close').addEventListener('click',closeTimeEditor);
+$('time-cancel').addEventListener('click',closeTimeEditor);
+$('time-overlay').addEventListener('click',event=>{if(event.target===$('time-overlay'))closeTimeEditor()});
+document.addEventListener('keydown',event=>{if(!$('time-overlay').classList.contains('hidden')&&event.key==='Escape'){event.preventDefault();closeTimeEditor()}});
+async function openTask(id){if(state.api&&typeof state.api.selectTask==='function'){try{await state.api.selectTask(id)}catch(err){reportError(err)}}}
+document.addEventListener('click',event=>{const target=event.target.closest('button,[data-open]');if(!target)return;const d=target.dataset;if(d.task)void updateTask(d.task);else if(d.habit)void updateHabit(d.habit,'toggle');else if(d.more)void updateHabit(d.more,1);else if(d.less)void updateHabit(d.less,-1);else if(d.logTime)openTimeEditor(d.logTime);else if(d.open)void openTask(d.open);});
+document.addEventListener('keydown',event=>{if((event.key==='Enter'||event.key===' ')&&event.target.matches('[data-open]')){event.preventDefault();void openTask(event.target.dataset.open)}});
+$('refresh').addEventListener('click',()=>void refresh());$('overdue-filter').addEventListener('click',()=>{state.showOverdue=!state.showOverdue;render()});$('completed-filter').addEventListener('click',()=>{state.showFinished=!state.showFinished;render()});
+window.addEventListener('focus',()=>void refresh());document.addEventListener('visibilitychange',()=>{if(!document.hidden)void refresh()});
+const api=window.PluginAPI;
+if(api){state.api=api;if(typeof api.registerHook==='function'&&api.Hooks){for(const hook of ['TASK_CREATED','TASK_UPDATE','TASK_COMPLETE','TASK_DELETE']){if(api.Hooks[hook])try{api.registerHook(api.Hooks[hook],()=>void refresh())}catch(err){console.warn('Today+ hook unavailable',err)}}}}
+void refresh();setInterval(()=>{if(document.visibilityState!=='hidden')void refresh()},30000);
+</script>
+</body>
+</html>

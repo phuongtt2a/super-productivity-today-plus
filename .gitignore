@@ -1,0 +1,10 @@
+# Generated release assets
+/dist/
+# Python
+__pycache__/
+*.pyc
+# Editor/system
+.DS_Store
+.vscode/
+# Temporary browser captures
+/tests/results/

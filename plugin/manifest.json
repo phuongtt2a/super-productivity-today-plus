@@ -1,0 +1,26 @@
+{
+  "id": "sp-today-tasks-habits",
+  "name": "Today+",
+  "version": "0.2.0",
+  "description": "A calm Super Productivity dashboard that brings tasks due today and scheduled habits into one view, with task completion, habit counters and manual time logging.",
+  "manifestVersion": 1,
+  "minSupVersion": "14.0.0",
+  "author": "phuongtt2a",
+  "icon": "icon.svg",
+  "iFrame": true,
+  "sidePanel": false,
+  "permissions": [
+    "getTasks",
+    "getAllProjects",
+    "getAllSimpleCounters",
+    "updateTask",
+    "setCounter",
+    "selectTask"
+  ],
+  "hooks": [
+    "taskCreated",
+    "taskUpdate",
+    "taskComplete",
+    "taskDelete"
+  ]
+}

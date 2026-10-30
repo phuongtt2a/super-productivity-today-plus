@@ -1,0 +1,55 @@
+name: Publish Today+ release
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    if: >-
+      startsWith(github.ref, 'refs/tags/v') ||
+      github.event_name == 'workflow_dispatch' ||
+      (github.ref == 'refs/heads/main' && startsWith(github.event.head_commit.message, 'release:'))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Resolve matching plugin version
+        id: version
+        shell: bash
+        run: |
+          VERSION="$(python -c 'import json; print(json.load(open("plugin/manifest.json"))["version"])')"
+          TAG="v$VERSION"
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            TAG="${GITHUB_REF#refs/tags/}"
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+      - name: Test and build the installable ZIP
+        run: |
+          python -m unittest discover -s tests -p 'test_*.py' -v
+          node --check plugin/plugin.js
+          python scripts/package.py --tag "${{ steps.version.outputs.tag }}"
+      - name: Create immutable GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists; bump the version for a new release." >&2
+            exit 1
+          fi
+          gh release create "$TAG" \
+            dist/today-plus-super-productivity.zip \
+            --target "$GITHUB_SHA" \
+            --title "Today+ $TAG" \
+            --notes "Today+ brings due tasks and scheduled habits together in Super Productivity, including task completion, habit counters and manual time logging for paused stopwatch habits. Download the installable ZIP from Assets." \
+            --latest
