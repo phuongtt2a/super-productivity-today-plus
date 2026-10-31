@@ -61,9 +61,12 @@ with sync_playwright() as playwright:
             assert page.get_by_text('Overdue task').count()==0
             assert page.get_by_text('Completed task').count()==0
             btn=page.locator('[data-wont-do="p1"]')
-            assert btn.get_attribute('aria-label').startswith('Won’t Do:')
-            assert btn.get_attribute('title').startswith('Won’t Do')
-            assert btn.bounding_box()['width']>=40
+            assert btn.get_attribute('aria-label')=="Won't Do"
+            assert btn.get_attribute('title')=="Won't Do"
+            assert btn.inner_text().strip()=="Won't Do"
+            assert btn.locator('svg rect').count()==1
+            assert btn.bounding_box()['width']>=88
+            assert btn.bounding_box()['height']>=40
             assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),width
 
             # Mocked host confirms genuine Won't Do; Today+ must not fake a Done
