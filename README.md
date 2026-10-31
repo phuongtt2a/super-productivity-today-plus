@@ -40,7 +40,7 @@ No separate login, external service, duplicate tasks, or additional local data s
 
 ## Install
 
-1. [Download the latest installable Today+ ZIP](https://github.com/phuongtt2a/super-productivity-today-plus/raw/refs/heads/main/dist/today-plus-super-productivity.zip) from the current repository build. This also includes minor UI fixes that retain the same version number. (GitHub Release assets are historical, unchanged snapshots; do not install GitHub’s automatic source ZIP.)
+1. [Download the latest installable Today+ ZIP](https://github.com/phuongtt2a/super-productivity-today-plus/releases/latest/download/today-plus-super-productivity.zip) from the official latest GitHub Release. New builds are published automatically after tested changes merge into `main` (including same-version UI fixes). Install the ZIP under **Assets**, not GitHub's automatically generated source archive.
 2. In [Super Productivity](https://app.super-productivity.com/), go to **Settings → Plugins** and choose **Choose Plugin File**.
 3. Import the downloaded ZIP **without unpacking it**. Then open **Today+** from the plugin menu.
 
@@ -84,7 +84,7 @@ scripts/package.py    # Deterministic ZIP builder
 scripts/              # Preview and screenshot helpers
 tests/                # Package and browser integration tests
 docs/                 # Screenshots and guides
-.github/workflows/    # CI and versioned GitHub release
+.github/workflows/    # PR validation and automatic release publishing
 ```
 
 Run from the repository root:

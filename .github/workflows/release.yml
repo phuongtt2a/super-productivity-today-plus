@@ -1,19 +1,21 @@
 name: Publish Today+ release
+
 on:
   push:
     branches: [main]
-    tags: ['v*']
   workflow_dispatch:
 
 permissions:
   contents: write
 
+# Never let two merges replace the same release asset concurrently.
+concurrency:
+  group: today-plus-release
+  cancel-in-progress: false
+
 jobs:
   release:
-    if: >-
-      startsWith(github.ref, 'refs/tags/v') ||
-      github.event_name == 'workflow_dispatch' ||
-      (github.ref == 'refs/heads/main' && startsWith(github.event.head_commit.message, 'release:'))
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,33 +25,91 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Resolve matching plugin version
+
+      - name: Resolve version from plugin manifest
         id: version
         shell: bash
         run: |
           VERSION="$(python -c 'import json; print(json.load(open("plugin/manifest.json"))["version"])')"
-          TAG="v$VERSION"
-          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
-            TAG="${GITHUB_REF#refs/tags/}"
-          fi
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-      - name: Test and build the installable ZIP
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Validate and build the installable ZIP
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
         run: |
           python -m unittest discover -s tests -p 'test_*.py' -v
           node --check plugin/plugin.js
-          python scripts/package.py --tag "${{ steps.version.outputs.tag }}"
-      - name: Create immutable GitHub Release
+          python scripts/package.py --tag "$TAG"
+
+      - name: Publish new version or refresh existing release
+        shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.version.outputs.tag }}
         run: |
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            echo "Release $TAG already exists; bump the version for a new release." >&2
-            exit 1
+          set -euo pipefail
+          ASSET="dist/today-plus-super-productivity.zip"
+          NAME="today-plus-super-productivity.zip"
+          BACKUP="$RUNNER_TEMP/today-plus-previous"
+          VERIFY="$RUNNER_TEMP/today-plus-verified"
+          mkdir -p "$BACKUP" "$VERIFY"
+
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Existing release $TAG: compare with latest tested ZIP"
+            if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' | grep -Fxq "$NAME"; then
+              # Keep a rollback copy: --clobber deletes the previous asset first.
+              gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --pattern "$NAME" --dir "$BACKUP"
+              if cmp -s "$ASSET" "$BACKUP/$NAME"; then
+                echo "ZIP is unchanged; nothing to publish."
+                exit 0
+              fi
+            fi
+
+            if ! gh release upload "$TAG" "$ASSET" --clobber --repo "$GITHUB_REPOSITORY"; then
+              echo "::error::Release upload failed. Attempting to restore previous asset."
+              if test -f "$BACKUP/$NAME"; then
+                gh release upload "$TAG" "$BACKUP/$NAME" --clobber --repo "$GITHUB_REPOSITORY" || true
+              fi
+              exit 1
+            fi
+          else
+            echo "Creating release $TAG for a new manifest version"
+            gh release create "$TAG" "$ASSET" \
+              --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+              --title "Today+ $TAG" --latest \
+              --notes "Today+ brings today's tasks, subtasks and scheduled habits together. Install the ZIP attached under Assets."
           fi
-          gh release create "$TAG" \
-            dist/today-plus-super-productivity.zip \
-            --target "$GITHUB_SHA" \
-            --title "Today+ $TAG" \
-            --notes "Today+ shows tasks with nested subtasks and today’s habits in one calm dashboard. Overdue and completed tasks start hidden. Complete work or choose Not today to clear its due date, track habit goals and log time for paused stopwatch habits. Download the installable ZIP from Assets." \
-            --latest
+
+          # Check the actual public release asset, not merely the build output.
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --pattern "$NAME" --dir "$VERIFY"
+          cmp "$ASSET" "$VERIFY/$NAME"
+          echo "Release ZIP verified byte-for-byte."
+
+          # Preserve existing notes; update only the automated build footer.
+          NOTES="$RUNNER_TEMP/today-plus-release-notes.md"
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json body --jq '.body' > "$NOTES"
+          export NOTES ASSET_SHA256
+          ASSET_SHA256="$(sha256sum "$ASSET" | cut -d ' ' -f1)"
+          export ASSET_SHA256
+          python - <<'PY'
+          import os
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          path = Path(os.environ["NOTES"])
+          marker = "\n\n<!-- today-plus-automated-build -->"
+          original = path.read_text(encoding="utf-8").split(marker, 1)[0].rstrip()
+          sha = os.environ["GITHUB_SHA"]
+          repo = os.environ["GITHUB_REPOSITORY"]
+          timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+          footer = (
+              f"{marker}\n"
+              f"**Latest tested ZIP:** built from [`{sha[:12]}`](https://github.com/{repo}/commit/{sha}) "
+              f"on {timestamp}. SHA-256: `{os.environ['ASSET_SHA256']}`.\n\n"
+              "_Download the ZIP under Assets. GitHub's autogenerated source archives stay pinned "
+              "to the original release tag, which may point to an earlier commit._\n"
+          )
+          path.write_text(original + footer, encoding="utf-8")
+          PY
+          gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --notes-file "$NOTES"
+          echo "Published and documented tested $TAG build."

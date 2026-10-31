@@ -2,27 +2,36 @@
 
 Repository: https://github.com/phuongtt2a/super-productivity-today-plus
 
-## Current version
+## Workflow: issue → PR → merge → published ZIP
 
-**v1.1.0** adds nested subtasks, hides overdue and finished tasks by default, and introduces the **Not today** control to clear a due date without completing the task. The published v1.0.1 release remains available as historical reference; never overwrite an existing version tag or release asset.
+1. Track bugs and enhancements in GitHub Issues.
+2. Work in an issue-linked branch and open a pull request. CI checks the package and source; it does **not** publish from PR branches.
+3. Review, test and merge the PR into `main`.
+4. The **Publish Today+ release** GitHub Action runs automatically after every successful merge to `main`. It runs the tests and builds the four-file ZIP before publishing.
+5. Check the GitHub Actions run and download the installable ZIP from [Latest Release](https://github.com/phuongtt2a/super-productivity-today-plus/releases/latest). Never install GitHub's automatically generated **Source code** archives.
 
-## Publishing a new release
+No manual deletion or replacement of release attachments is required for normal releases.
 
-1. Update the version in `plugin/manifest.json`, README if necessary, and `CHANGELOG.md`.
-2. Run the package and browser tests. Check the ZIP contains exactly four root files: `manifest.json`, `plugin.js`, `index.html`, `icon.svg`.
-3. Refresh README screenshots when the UI changes.
-4. Commit and push to `main` with a message beginning `release:`; the GitHub Action runs validation and publishes the version-matched release ZIP. Alternatively, push the corresponding `vX.Y.Z` tag.
-5. Verify the GitHub Actions run and the release's `today-plus-super-productivity.zip` asset. Never tell users to install GitHub's automatic source archive.
+## Minor changes with the same version
 
-## Same-version minor fixes
+- Leave `plugin/manifest.json` at its current version (for example `1.1.0`).
+- After merge, the Action compares the new ZIP with the Release asset. If identical, it does nothing. If different, it backs up the previous asset, replaces the ZIP using `gh release upload --clobber`, then downloads and byte-compares the uploaded ZIP.
+- The version and its existing Git tag remain unchanged. The release notes record the updated ZIP's source commit and SHA-256 so the refreshed build is traceable.
+- GitHub's automatic source archives continue to refer to the **original version tag**, which may not match the latest ZIP. Users should always install `today-plus-super-productivity.zip` from **Assets**.
+- If GitHub release immutability is enabled, updating an old release is not allowed; publish a new version instead. Do not work around that protection.
 
-For small UI changes that intentionally **retain v1.1.0**, rebuild and commit `dist/today-plus-super-productivity.zip` on `main` alongside updated source, docs and screenshots. Do **not** use a `release:` commit message or move the existing version tag. The release attachment remains an immutable snapshot; link users to the installable ZIP on the current `main` branch for these fixes.
+## New version
 
-## Important constraints
+1. Update `plugin/manifest.json`, `CHANGELOG.md`, and user-facing documentation as needed.
+2. Run the test suite and update screenshots for interface changes.
+3. Merge through a PR to `main`. If no release exists for the new `vX.Y.Z`, the Action creates a version-matched tag and GitHub Release with the tested ZIP.
+4. Verify the Action succeeds and the Release asset is installable.
 
-- Keep the plugin identifier `sp-today-tasks-habits` unchanged so installed copies continue working.
-- Verify the icon-only `Not today` action works on the first mouse click and mobile tap, including when the embedded view regains focus. It must only appear on tasks with a date to clear.
-- Verify `Not today` clears `dueDay` and `dueWithTime` while leaving `isDone` unchanged. If clearing `dueWithTime`, also clear its related reminder when present.
-- Recurring tasks require explicit user confirmation; modifying one occurrence's date may influence its repeat schedule.
-- The native `Won't do` completion status is different from `Not today`. The plugin API does not support writing `wontDoOn`.
-- Keep the GitHub About metadata suggestions in [ABOUT.md](ABOUT.md); the plugin manifest description is separate.
+## Safeguards
+
+- Publishing runs **only for `main`** (or an explicit manual workflow run targeting `main`), never for PRs.
+- Separate publication runs are serialized, and the Action exits on failed tests.
+- Before replacing an asset, the previous version is downloaded as a rollback copy. Upload failures attempt to restore it. Since `--clobber` deletes first, there can be a short gap if the replacement upload fails.
+- After publishing, the Action downloads the ZIP and checks that its bytes match the tested build.
+- Keep the plugin ID `sp-today-tasks-habits` unchanged to preserve installed plugin identity.
+- The native **Won't do** status differs from Today+'s **Not Today** (clear scheduled date). The Plugin API does not currently expose native `wontDoOn` updates.
