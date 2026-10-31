@@ -93,10 +93,12 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--today-accent);o
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
 /* Compact actions: completion on the left, unschedule on the right.
    "Not today" clears the date without marking the task finished. */
-.task-skip{justify-self:end;white-space:nowrap;border:1px solid transparent;background:transparent;
-  color:var(--today-muted);font-size:11px;line-height:1.3;font-weight:550;
-  border-radius:999px;padding:7px 8px;min-height:33px;max-width:86px}
-.task-skip:hover,.task-skip:focus-visible{color:var(--today-text);background:var(--today-hover);border-color:var(--today-line)}
+.task-skip{justify-self:end;white-space:nowrap;border:1px solid var(--today-line);background:var(--today-bg);
+  color:var(--today-text);font-size:11px;line-height:1.3;font-weight:650;
+  border-radius:999px;padding:8px 12px;min-height:35px;max-width:none;
+  transition:background .15s ease,border-color .15s ease,transform .15s ease}
+.task-skip:hover,.task-skip:focus-visible{background:var(--today-hover);border-color:var(--today-accent)}
+.task-skip:active{transform:translateY(1px)}
 .task-group{border-bottom:1px solid var(--today-line)}
 .task-group>.item{border-bottom:0}
 .task-children{margin:0 0 1px 35px;padding-left:12px;border-left:1px solid var(--today-line)}
@@ -108,7 +110,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--today-accent);o
 .task-note{font-size:12px;line-height:1.5;color:var(--today-muted);margin:9px 0 0;padding:9px 12px;border:1px solid var(--today-line);border-radius:11px;background:var(--today-bg)}
 .item .action-btn{justify-self:end}
 @media(max-width:740px){.app{padding:18px 18px 28px}.topbar{margin-bottom:25px}.workspace{grid-template-columns:1fr;gap:35px}.hero{margin-bottom:22px}.hero h1{font-size:clamp(26px,7.6vw,36px)}.overall{min-width:110px}.item-name{font-size:15px}.item{min-height:70px}.section-head h2{font-size:20px}}
-@media(max-width:380px){.item .action-btn{padding:7px 9px;font-size:11px}.item-meta{flex-wrap:wrap}.time-actions .action-btn{min-height:40px}.app{padding-left:13px;padding-right:13px}.top-right{gap:8px}.today-date{font-size:10px;letter-spacing:.02em}.brand-name{font-size:16px}.hero{align-items:start}.hero h1{font-size:27px}.overall{min-width:88px;font-size:10px}.overall strong{font-size:18px}.item{grid-template-columns:26px minmax(0,1fr) auto;column-gap:8px}.status{font-size:10px;max-width:66px}.task-skip{font-size:10px;padding:6px 4px;min-height:30px}.task-children{margin-left:27px;padding-left:9px}.task-children .item{column-gap:6px}.item-name{font-size:14px}.item-meta{font-size:10px}.section-actions{gap:5px}.chip{padding:6px 8px}}
+@media(max-width:380px){.item .action-btn{padding:7px 9px;font-size:11px}.item-meta{flex-wrap:wrap}.time-actions .action-btn{min-height:40px}.app{padding-left:13px;padding-right:13px}.top-right{gap:8px}.today-date{font-size:10px;letter-spacing:.02em}.brand-name{font-size:16px}.hero{align-items:start}.hero h1{font-size:27px}.overall{min-width:88px;font-size:10px}.overall strong{font-size:18px}.item{grid-template-columns:26px minmax(0,1fr) auto;column-gap:8px}.status{font-size:10px;max-width:66px}.task-skip{font-size:10px;padding:7px 8px;min-height:32px}.task-children{margin-left:27px;padding-left:9px}.task-children .item{column-gap:6px}.item-name{font-size:14px}.item-meta{font-size:10px}.section-actions{gap:5px}.chip{padding:6px 8px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 </style>
 </head>
@@ -122,7 +124,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--today-accent);o
 </svg></div><div><div class="brand-name">Today+</div><div class="brand-credit">Tasks &amp; Habits · by phuongtt2a</div></div></div>
     <div class="top-right"><div class="today-date" id="today-date">TODAY</div><button type="button" class="refresh" id="refresh" title="Refresh from Super Productivity" aria-label="Refresh from Super Productivity">↻</button></div>
   </header>
-  <div class="hero"><div><h1>A clearer today.</h1><p>Tasks to move forward. Habits to keep.</p></div><div class="overall" aria-live="polite"><strong id="done-count">0 of 0</strong>complete<div class="overall-bar"><span id="done-bar"></span></div></div></div>
+  <div class="hero"><div><h1>Focus on what matters.</h1><p>Not another endless checklist.</p></div><div class="overall" aria-live="polite"><strong id="done-count">0 of 0</strong>complete<div class="overall-bar"><span id="done-bar"></span></div></div></div>
   <p class="demo-note hidden" id="demo-note">Preview data only. Install this plugin in Super Productivity to see your real tasks and habits.</p>
   <p class="error-note hidden" id="error-note" role="alert"></p>
   <div class="workspace">

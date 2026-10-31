@@ -32,6 +32,13 @@ with sync_playwright() as p:
    page.evaluate(API)
    page.set_content((ROOT/'plugin/index.html').read_text(encoding="utf8"))
    page.wait_for_selector('[data-not-today="p1"]')
+   # Hero messaging and button affordance must match the current design.
+   assert page.locator('.hero h1').inner_text() == 'Focus on what matters.'
+   assert page.locator('.hero p').inner_text() == 'Not another endless checklist.'
+   btn=page.locator('[data-not-today="p1"]')
+   assert btn.evaluate("el => getComputedStyle(el).borderTopWidth") == '1px', (width,'button border')
+   assert btn.evaluate("el => getComputedStyle(el).backgroundColor") != 'rgba(0, 0, 0, 0)', (width,'button background')
+
    assert page.locator('.task-children .item').count()==2,(width,'subtask count')
    assert page.get_by_text('Overdue task').count()==0,(width,'overdue hidden')
    assert page.get_by_text('Completed task').count()==0,(width,'finished hidden')

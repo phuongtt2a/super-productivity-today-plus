@@ -14,6 +14,10 @@ Repository: https://github.com/phuongtt2a/super-productivity-today-plus
 4. Commit and push to `main` with a message beginning `release:`; the GitHub Action runs validation and publishes the version-matched release ZIP. Alternatively, push the corresponding `vX.Y.Z` tag.
 5. Verify the GitHub Actions run and the release's `today-plus-super-productivity.zip` asset. Never tell users to install GitHub's automatic source archive.
 
+## Same-version minor fixes
+
+For small UI changes that intentionally **retain v1.1.0**, rebuild and commit `dist/today-plus-super-productivity.zip` on `main` alongside updated source, docs and screenshots. Do **not** use a `release:` commit message or move the existing version tag. The release attachment remains an immutable snapshot; link users to the installable ZIP on the current `main` branch for these fixes.
+
 ## Important constraints
 
 - Keep the plugin identifier `sp-today-tasks-habits` unchanged so installed copies continue working.

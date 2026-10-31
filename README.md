@@ -1,6 +1,6 @@
 # Today+
 
-**Your tasks and habits, together.**
+**Focus on what matters. Not another endless checklist.**
 
 **Today+** is an independent, community-built plugin for [Super Productivity](https://app.super-productivity.com/), created by [phuongtt2a](https://github.com/phuongtt2a). It brings **tasks due today** and **habits scheduled for today** onto one calm screen, so you can see your work and routines without switching views.
 
@@ -32,7 +32,7 @@ Super Productivity organizes tasks and habits in different views. Today+ brings 
 ## Features
 
 - **Today’s tasks:** See tasks due today, with subtasks nested beneath their parents. Overdue and completed tasks are hidden at first; you can show either when needed.
-- **Clear daily actions:** Complete a task, or choose **Not today** to remove its due date without marking it completed. The task stays in its project until you schedule it again.
+- **Clear daily actions:** Complete a task, or use the clearly outlined **Not today** button to remove its due date without marking it completed. The task stays in its project until you schedule it again.
 - **Scheduled habits:** Read existing enabled habits from Super Productivity. Follow weekday schedules; show weekly-frequency habits during the week.
 - **Single-completion habits:** Tap once to complete; tap again to undo.
 - **Count or goal-based habits:** Increase or decrease today's value and see progress toward the configured goal.
@@ -44,7 +44,7 @@ No separate login, external service, duplicate tasks, or additional local data s
 
 ## Install
 
-1. [Download the latest Today+ ZIP](https://github.com/phuongtt2a/super-productivity-today-plus/releases/latest) from **Assets** on the GitHub Release page (do not use GitHub’s auto-generated source ZIP).
+1. [Download the latest installable Today+ ZIP](https://github.com/phuongtt2a/super-productivity-today-plus/raw/refs/heads/main/dist/today-plus-super-productivity.zip) from the current repository build. This also includes minor UI fixes that retain the same version number. (GitHub Release assets are historical, unchanged snapshots; do not install GitHub’s automatic source ZIP.)
 2. In [Super Productivity](https://app.super-productivity.com/), go to **Settings → Plugins** and choose **Choose Plugin File**.
 3. Import the downloaded ZIP **without unpacking it**. Then open **Today+** from the plugin menu.
 
