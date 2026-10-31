@@ -1,6 +1,6 @@
 # Today+ native Won't Do — beta verification checklist
 
-Status: **v1.1.1-beta.3 / experimental draft PR**. Super Productivity is unchanged; this is plugin-side UI integration. Do not merge to the release branch until the live-app checks pass.
+Status: **v1.2.0 / release candidate**. Super Productivity is unchanged; this is plugin-side UI integration. The user has tested one-click skip and confirmed the temporary UI blink is acceptable for this release. We are not changing the native UI integration in v1.2.0; document the remaining screen blink for future work.
 
 ## Intended native semantics
 
