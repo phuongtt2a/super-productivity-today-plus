@@ -31,6 +31,8 @@ window.__makeMenu=()=>{
   });
   container.appendChild(menu);
 };
+// Avoid Playwright treating the function-valued last expression as pageFunction.
+void 0;
 """
 with sync_playwright() as p:
     browser=p.chromium.launch(headless=True,args=['--no-sandbox'])
