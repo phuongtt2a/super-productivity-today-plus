@@ -227,7 +227,7 @@ function taskRow(t,level=0,context=false){
   const marker=context?'<span class="check" aria-hidden="true"></span>':`<button class="check ${t.isDone?'is-done':''}" data-task="${id}" aria-label="${t.isDone?'Return to do':'Mark as completed'}: ${safe(t.title)}" type="button">${t.isDone?'✓':''}</button>`;
   // An unscheduled subtask follows its parent's day. It has no date to clear,
   // so don't render an action that would have no effect.
-  const action=context||t.isDone||!d?'':`<button type="button" class="task-skip" data-not-today="${id}" aria-label="Not today: ${safe(t.title)}. Remove the scheduled date without completing the task." title="Not today · Remove scheduled date"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18M9 14l6 6m0-6-6 6"/></svg></button>`;
+  const action=context||t.isDone||!d?'':`<button type="button" class="task-skip" data-not-today="${id}" aria-label="Not Today: ${safe(t.title)}" title="Not Today"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18M9 14l6 6m0-6-6 6"/></svg></button>`;
   return `<article class="item item-task ${t.isDone?'is-done':''} ${context?'task-context':''} ${level?'subtask':''}">${marker}<div class="item-copy" data-open="${id}" tabindex="0" role="button" aria-label="Open ${level?'subtask':'task'}: ${safe(t.title)}"><p class="item-name">${safe(t.title)}</p><p class="item-meta"><span>${safe(project)}</span><span class="dot">·</span><span>${safe(status)}${d&&d!==state.today?' · '+safe(fmtDate(d)):''}</span></p></div>${action}</article>`;
 }
 function taskGroupRow(group){
