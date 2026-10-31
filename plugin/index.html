@@ -263,6 +263,7 @@ const state = {api:null, tasks:[], habits:[], projects:new Map(), today:'', show
 const safe = str => String(str ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const localDay = (date=new Date()) => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
 const dueKey = t => t.dueDay || (Number.isFinite(t.dueWithTime)?localDay(new Date(t.dueWithTime)):null);
+const isWontDo = t => !!t.isDone && t.wontDoOn != null && t.wontDoOn === t.doneOn;
 const fmtDate = dateStr => { if(!dateStr) return ''; const [y,m,d]=dateStr.split('-').map(Number); if(!y||!m||!d)return dateStr; return new Date(y,m-1,d).toLocaleDateString(undefined,{month:'short',day:'numeric'}); };
 const getToday = () => new Date();
 function habitDue(h, date=getToday()) {
@@ -325,11 +326,10 @@ function sectionEmpty(name,caption){return `<div class="empty"><strong>${safe(na
 function taskRow(t,level=0,context=false){
   const id=safe(t.id),d=dueKey(t),project=state.projects.get(t.projectId)||'Inbox';
   const isOverdue=d&&d<state.today;
-  const status=context?'Parent task':t.isDone?'Finished':isOverdue?'Overdue':d===state.today?'Due today':'Subtask';
-  const marker=context?'<span class="check" aria-hidden="true"></span>':`<button class="check ${t.isDone?'is-done':''}" data-task="${id}" aria-label="${t.isDone?'Return to do':'Mark as completed'}: ${safe(t.title)}" type="button">${t.isDone?'✓':''}</button>`;
-  // An unscheduled subtask follows its parent's day. It has no date to clear,
-  // so don't render an action that would have no effect.
-  const action=context||t.isDone||!d?'':`<button type="button" class="task-skip" data-not-today="${id}" aria-label="Not Today: ${safe(t.title)}" title="Not Today"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18M9 14l6 6m0-6-6 6"/></svg></button>`;
+  const status=context?'Parent task':isWontDo(t)?"Won't Do":t.isDone?'Finished':isOverdue?'Overdue':d===state.today?'Due today':'Subtask';
+  const marker=context?'<span class="check" aria-hidden="true"></span>':`<button class="check ${t.isDone?'is-done':''}" data-task="${id}" aria-label="${t.isDone?'Return to do':'Mark as completed'}: ${safe(t.title)}" type="button">${t.isDone?(isWontDo(t)?'×':'✓'):''}</button>`;
+  // Even an unscheduled subtask can be intentionally skipped.
+  const action=context||t.isDone?'':`<button type="button" class="task-skip" data-wont-do="${id}" aria-label="Won\u0027t Do: ${safe(t.title)}" title="Won\u0027t Do — skip this occurrence"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M6 6l12 12"/></svg></button>`;
   return `<article class="item item-task ${t.isDone?'is-done':''} ${context?'task-context':''} ${level?'subtask':''}">${marker}<div class="item-copy" data-open="${id}" tabindex="0" role="button" aria-label="Open ${level?'subtask':'task'}: ${safe(t.title)}"><p class="item-name">${safe(t.title)}</p><p class="item-meta"><span>${safe(project)}</span><span class="dot">·</span><span>${safe(status)}${d&&d!==state.today?' · '+safe(fmtDate(d)):''}</span></p></div>${action}</article>`;
 }
 function taskGroupRow(group){
@@ -368,7 +368,7 @@ function taskSummary(){
   }
   return state.tasks.filter(t=>ids.has(t.id));
 }
-function render(){state.today=localDay();$('today-date').textContent=new Date().toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'});const groups=taskGroups(),habits=todayHabits(),summary=taskSummary(),totalTasks=summary.length;const taskDone=summary.filter(t=>t.isDone).length,habitDone=habits.filter(h=>dailyDone(h)).length;
+function render(){state.today=localDay();$('today-date').textContent=new Date().toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'});const groups=taskGroups(),habits=todayHabits(),summary=taskSummary(),totalTasks=summary.length;const taskDone=summary.filter(t=>t.isDone&&!isWontDo(t)).length,habitDone=habits.filter(h=>dailyDone(h)).length;
   $('tasks').innerHTML=groups.length?groups.map(taskGroupRow).join(''):sectionEmpty('All clear','No tasks due today in this view.');
   $('habits').innerHTML=habits.length?habits.map(habitRow).join(''):sectionEmpty('No habits scheduled','Enabled habits will show here on their scheduled days.');
   $('task-count').textContent=String(groups.reduce((n,g)=>n+Number(!g.context)+g.children.length,0));$('habit-count').textContent=String(habits.length);$('done-count').textContent=`${taskDone+habitDone} of ${totalTasks+habits.length}`;
@@ -468,28 +468,67 @@ $('time-cancel').addEventListener('click',closeTimeEditor);
 $('time-overlay').addEventListener('click',event=>{if(event.target===$('time-overlay'))closeTimeEditor()});
 document.addEventListener('keydown',event=>{if(!$('time-overlay').classList.contains('hidden')&&event.key==='Escape'){event.preventDefault();closeTimeEditor()}});
 async function openTask(id){if(state.api&&typeof state.api.selectTask==='function'){try{await state.api.selectTask(id)}catch(err){reportError(err)}}}
-async function removeFromToday(id){
+// The plugin API cannot write wontDoOn. Ask our host-side plugin.js adapter to
+// use the *native* task menu instead of pretending isDone means Won't Do.
+function requestNativeWontDo(id) {
+  return new Promise(resolve => {
+    const messageId='today-plus-wont-do-'+Date.now()+'-'+Math.random().toString(36).slice(2);
+    let timer;
+    function cleanup(){clearTimeout(timer);window.removeEventListener('message',receive);}
+    function receive(event){
+      if(event.source!==window.parent||!event.data||event.data.messageId!==messageId)return;
+      if(event.data.type!=='PLUGIN_MESSAGE_RESPONSE'&&event.data.type!=='PLUGIN_MESSAGE_ERROR')return;
+      cleanup();
+      if(event.data.type==='PLUGIN_MESSAGE_ERROR')resolve({status:'manual',reason:String(event.data.error||'Host adapter failed')});
+      else resolve(event.data.result||{status:'manual'});
+    }
+    window.addEventListener('message',receive);
+    timer=setTimeout(()=>{cleanup();resolve({status:'manual',reason:'Host adapter did not respond'});},4500);
+    window.parent.postMessage({
+      type:'PLUGIN_MESSAGE',messageId,
+      message:{kind:'today-plus:native-wont-do',taskId:id}
+    },'*');
+  });
+}
+async function wontDo(id){
   if(state.busy.has('t:'+id))return;
   const task=state.tasks.find(t=>t.id===id);
-  if(!task||task.isDone||!dueKey(task))return;
-  // Removing the date is not the same as native "Won't do": the task remains open.
-  // A recurring instance is special: its repeat configuration is not changed,
-  // but clearing an occurrence's date can affect when the next one appears.
-  if(task.repeatCfgId&&!window.confirm('This is a recurring task. Removing its due date may affect when the next occurrence is scheduled. Continue?'))return;
-  const changes={dueDay:null,dueWithTime:null};
-  // A date-and-time reminder must not fire after the scheduled time is removed.
-  if(task.dueWithTime!=null&&task.remindAt!=null)changes.remindAt=null;
-  state.busy.add('t:'+id);
+  if(!task||task.isDone)return;
   const note=$('task-action-note');
+  note.classList.add('hidden');
+  state.busy.add('t:'+id);
   try{
-    if(state.api)await state.api.updateTask(id,changes);
-    Object.assign(task,changes);
-    note.textContent='Removed “'+task.title+'” from today. The task remains open in its project with no due date.';
+    if(!state.api){
+      note.textContent='Won’t Do requires Super Productivity. Preview mode does not change tasks.';
+    }else{
+      const result=await requestNativeWontDo(id);
+      if(result.status==='confirmed'){
+        note.textContent='Skipped “'+task.title+'” using Super Productivity’s native Won’t Do action.';
+        state.refreshDeferred=true;
+      }else if(result.status==='unverified'){
+        note.textContent='The native action was triggered but could not be verified. Check the task status in Super Productivity.';
+        state.refreshDeferred=true;
+      }else if(result.status==='menu-opened'){
+        note.textContent='The native task menu is open. Choose “Won’t Do” there to skip this occurrence.';
+      }else if(result.status==='unavailable'){
+        note.textContent='This task is already finished or no longer available. Refresh Today+ to check its status.';
+        state.refreshDeferred=true;
+      }else{
+        await openTask(id);
+        note.textContent='Task opened in Super Productivity. Open its menu (⋮ or right-click) and choose “Won’t Do” to skip this occurrence. Today+ has not changed the task.';
+      }
+    }
     note.classList.remove('hidden');
-    render();
-  }catch(err){reportError(err)}finally{state.busy.delete('t:'+id);flushDeferredRefresh()}
+  }catch(err){
+    reportError(err);
+    note.textContent='Could not open the native Won’t Do action. No task update was requested.';
+    note.classList.remove('hidden');
+  }finally{
+    state.busy.delete('t:'+id);
+    flushDeferredRefresh();
+  }
 }
-document.addEventListener('click',event=>{const target=event.target.closest('button,[data-open]');if(!target)return;const d=target.dataset;if(d.task)void updateTask(d.task);else if(d.notToday)void removeFromToday(d.notToday);else if(d.habit)void updateHabit(d.habit,'toggle');else if(d.more)void updateHabit(d.more,1);else if(d.less)void updateHabit(d.less,-1);else if(d.logTime)openTimeEditor(d.logTime);else if(d.open)void openTask(d.open);});
+document.addEventListener('click',event=>{const target=event.target.closest('button,[data-open]');if(!target)return;const d=target.dataset;if(d.task)void updateTask(d.task);else if(d.wontDo)void wontDo(d.wontDo);else if(d.habit)void updateHabit(d.habit,'toggle');else if(d.more)void updateHabit(d.more,1);else if(d.less)void updateHabit(d.less,-1);else if(d.logTime)openTimeEditor(d.logTime);else if(d.open)void openTask(d.open);});
 document.addEventListener('keydown',event=>{if((event.key==='Enter'||event.key===' ')&&event.target.matches('[data-open]')){event.preventDefault();void openTask(event.target.dataset.open)}});
 $('refresh').addEventListener('click',()=>{ $('task-action-note').classList.add('hidden');void refresh() });$('overdue-filter').addEventListener('click',()=>{state.showOverdue=!state.showOverdue;render()});$('completed-filter').addEventListener('click',()=>{state.showFinished=!state.showFinished;render()});
 window.addEventListener('focus',()=>void refresh());document.addEventListener('visibilitychange',()=>{if(!document.hidden)void refresh()});
