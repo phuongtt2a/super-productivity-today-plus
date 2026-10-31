@@ -202,6 +202,20 @@ html,body,.app{background:transparent!important}
 }
 @media(prefers-reduced-motion:reduce){.refresh,.action-btn{transition:none}}
 
+
+/* Standalone tasks must use the same tiles as task groups and habits. */
+#tasks>.item-task{
+ border:2px solid var(--neo-stroke);
+ border-radius:5px;
+ background:var(--neo-mint);
+ box-shadow:3px 3px 0 var(--neo-stroke);
+ margin:10px 5px 13px 0;
+ padding:11px 10px;
+ min-height:77px;
+}
+#tasks>.item-task.is-done{background:var(--neo-card)}
+@media(max-width:380px){#tasks>.item-task{padding:10px 7px}}
+
 </style>
 </head>
 <body>
