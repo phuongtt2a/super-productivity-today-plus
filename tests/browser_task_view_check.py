@@ -40,7 +40,8 @@ with sync_playwright() as p:
    assert btn.evaluate("el => getComputedStyle(el).backgroundColor") != 'rgba(0, 0, 0, 0)', (width,'button background')
    assert btn.locator('svg').count()==1,(width,'calendar-x icon')
    assert not btn.inner_text().strip(),(width,'icon only')
-   assert 'Not today' in btn.get_attribute('aria-label'),(width,'accessible label')
+   assert btn.get_attribute('aria-label').startswith('Not Today: '),(width,'accessible label')
+   assert btn.get_attribute('title')=='Not Today',(width,'plain tooltip')
    assert btn.bounding_box()['width']>=40,(width,'touch target')
    assert page.locator('[data-not-today="c2"]').count()==0,(width,'no button for unscheduled subtask')
 

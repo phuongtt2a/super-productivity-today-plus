@@ -28,7 +28,7 @@ Super Productivity organizes tasks and habits in different views. Today+ brings 
 ## Features
 
 - **Today’s tasks:** See tasks due today, with subtasks nested beneath their parents. Overdue and completed tasks are hidden at first; you can show either when needed.
-- **Clear daily actions:** Complete a task, or tap the small **calendar-with-X icon** ("Not today") to remove its due date without marking it completed. The task remains in its project until you schedule it again.
+- **Clear daily actions:** Complete a task, or tap the small **calendar-with-X icon** ("Not Today") to remove its due date without marking it completed. The task remains in its project until you schedule it again.
 - **Scheduled habits:** Read existing enabled habits from Super Productivity. Follow weekday schedules; show weekly-frequency habits during the week.
 - **Single-completion habits:** Tap once to complete; tap again to undo.
 - **Count or goal-based habits:** Increase or decrease today's value and see progress toward the configured goal.
@@ -61,9 +61,9 @@ Today+ starts with tasks due **today** and habits scheduled for **today**. Subta
 
 Habits follow your existing Super Productivity schedule. Daily habits show today's progress, while flexible weekly habits show progress toward their weekly goal. Nothing needs to be configured a second time inside Today+.
 
-## What “Not today” means
+## What “Not Today” means
 
-Choosing the **calendar-with-X icon** ("Not today") clears the task’s scheduled date and removes it from the daily list. The icon is labeled for screen readers and shows a tooltip on desktop. It is only shown when a task has its own scheduled date; undated subtasks inherited from a scheduled parent have no separate date to clear. It does **not** complete, delete, postpone until tomorrow, or mark the task as Super Productivity’s native “Won’t do.” To work on it another day, schedule it again in Super Productivity. For repeating tasks, Today+ asks for confirmation because changing an occurrence’s due date can affect its repetition schedule.
+Choosing the **calendar-with-X icon** ("Not Today") clears the task’s scheduled date and removes it from the daily list. The icon is labeled for screen readers and shows a tooltip on desktop. It is only shown when a task has its own scheduled date; undated subtasks inherited from a scheduled parent have no separate date to clear. It does **not** complete, delete, postpone until tomorrow, or mark the task as Super Productivity’s native “Won’t do.” To work on it another day, schedule it again in Super Productivity. For repeating tasks, Today+ asks for confirmation because changing an occurrence’s due date can affect its repetition schedule.
 
 ## Safety and limitations
 
