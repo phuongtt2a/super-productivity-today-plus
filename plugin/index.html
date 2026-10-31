@@ -329,7 +329,7 @@ function taskRow(t,level=0,context=false){
   const status=context?'Parent task':isWontDo(t)?"Won't Do":t.isDone?'Finished':isOverdue?'Overdue':d===state.today?'Due today':'Subtask';
   const marker=context?'<span class="check" aria-hidden="true"></span>':`<button class="check ${t.isDone?'is-done':''}" data-task="${id}" aria-label="${t.isDone?'Return to do':'Mark as completed'}: ${safe(t.title)}" type="button">${t.isDone?(isWontDo(t)?'×':'✓'):''}</button>`;
   // Even an unscheduled subtask can be intentionally skipped.
-  const action=context||t.isDone?'':`<button type="button" class="task-skip" data-wont-do="${id}" aria-label="Won\u0027t Do: ${safe(t.title)}" title="Won\u0027t Do — skip this occurrence"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M6 6l12 12"/></svg></button>`;
+  const action=context||t.isDone?'':`<button type="button" class="task-skip" data-wont-do="${id}" aria-label="Won’t Do: ${safe(t.title)}" title="Won\u0027t Do — skip this occurrence"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M6 6l12 12"/></svg></button>`;
   return `<article class="item item-task ${t.isDone?'is-done':''} ${context?'task-context':''} ${level?'subtask':''}">${marker}<div class="item-copy" data-open="${id}" tabindex="0" role="button" aria-label="Open ${level?'subtask':'task'}: ${safe(t.title)}"><p class="item-name">${safe(t.title)}</p><p class="item-meta"><span>${safe(project)}</span><span class="dot">·</span><span>${safe(status)}${d&&d!==state.today?' · '+safe(fmtDate(d)):''}</span></p></div>${action}</article>`;
 }
 function taskGroupRow(group){
