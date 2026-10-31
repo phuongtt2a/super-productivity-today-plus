@@ -35,6 +35,7 @@ jobs:
         run: |
           python tests/browser_task_view_check.py
           python tests/browser_native_menu_adapter_check.py
+          python tests/browser_native_navigation_check.py
           python tests/integration_check.py
           python tests/browser_check.py
       - name: Regenerate documentary screenshots with host font
