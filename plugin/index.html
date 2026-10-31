@@ -514,8 +514,7 @@ async function wontDo(id){
         note.textContent='This task is already finished or no longer available. Refresh Today+ to check its status.';
         state.refreshDeferred=true;
       }else{
-        await openTask(id);
-        note.textContent='Task opened in Super Productivity. Open its menu (⋮ or right-click) and choose “Won’t Do” to skip this occurrence. Today+ has not changed the task.';
+        note.textContent='Could not reach Super Productivity’s Won’t Do menu automatically. No task was changed. You can open the task yourself to choose Won’t Do.';
       }
     }
     note.classList.remove('hidden');
