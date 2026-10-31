@@ -107,3 +107,7 @@ For the official plugin contract, see the [Super Productivity Plugin Development
 ## Contributing
 
 Issues and pull requests are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md). License: [MIT](LICENSE).
+
+### NEO-Zen design family
+
+Today+ uses the shared [NEO-Zen Design System](docs/NEO-ZEN-DESIGN.md) with Five and Deadline Watch: crisp outlines, hard offset shadows, thoughtfully tinted task/habit cards and a 1220px shared desktop shell. The plugin's runtime font remains **Super Productivity's own configured font**, including Vietnamese diacritics. The iframe and page canvas are **transparent** so the host wallpaper and opacity settings remain visible through theme-aware individual surfaces. No task, habit or Not Today behavior changes were made for this visual refresh. The screenshots above were regenerated from synthetic Vietnamese sample data and checked at desktop, 390px and 320px.

@@ -24,7 +24,7 @@ window.PluginAPI={
 };
 """.replace('__DATA__',json.dumps(TASKS))
 with sync_playwright() as p:
- browser=p.chromium.launch(headless=True,executable_path='/usr/bin/chromium',args=['--no-sandbox'])
+ browser=p.chromium.launch(headless=True,args=['--no-sandbox'])
  try:
   for width,height in [(320,568),(390,844),(1200,800)]:
    page=browser.new_page(viewport={'width':width,'height':height},device_scale_factor=1)
