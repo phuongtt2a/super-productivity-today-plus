@@ -46,6 +46,18 @@ class TestPlugin(unittest.TestCase):
         self.assertIn('dueDay:null,dueWithTime:null', html)
         self.assertNotIn('data-wont-do=', html)
         self.assertNotIn('wontDoOn:', html)
+    def test_release_automation(self):
+        workflow=(ROOT/'.github/workflows/release.yml').read_text()
+        self.assertIn('branches: [main]',workflow)
+        self.assertIn("if: github.ref == 'refs/heads/main'",workflow)
+        self.assertIn('cancel-in-progress: false',workflow)
+        self.assertIn('gh release upload "$TAG" "$ASSET" --clobber',workflow)
+        self.assertIn('gh release create "$TAG" "$ASSET"',workflow)
+        self.assertIn('cmp "$ASSET" "$VERIFY/$NAME"',workflow)
+        self.assertNotIn("startsWith(github.event.head_commit.message, 'release:')",workflow)
+        guide=(ROOT/'docs/RELEASING.md').read_text()
+        self.assertIn('issue → PR → merge → published ZIP',guide)
+        self.assertIn('same version',guide.lower())
     def test_zip(self):
         subprocess.run(['python',str(ROOT/'scripts/package.py')],capture_output=True,check=True)
         with zipfile.ZipFile(ROOT/'dist/today-plus-super-productivity.zip') as z:
