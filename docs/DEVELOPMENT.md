@@ -46,3 +46,7 @@ The plugin does not replicate Super Productivity's Today virtual-tag membership;
 The native Planner uses an internal `TaskService` method that writes `isDone`, `doneOn`, and `wontDoOn` together. The official plugin bridge explicitly rejects `wontDoOn`, and `dispatchAction` only accepts a restricted action list that does not include that operation. Today+ must not emulate “Won’t do” with `isDone:true`. Today+ uses a distinct **Not today** action implemented with `updateTask(id, {dueDay: null, dueWithTime: null})`. This unschedules without setting `isDone` or `wontDoOn`; a timed task’s reminder is also cleared if present. Recurring occurrences require confirmation.
 
 Subtasks are assembled from both `parentId` and `subTaskIds`; grouping is UI-only and never changes parent-child data.
+
+## Shared NEO-Zen visual system
+
+See [NEO-Zen Design System](NEO-ZEN-DESIGN.md). The page shares a centered **1220px** outer shell, green 41px mark, app-provided font and responsive spacing with the other plugins. Use 2px contrast-aware outlines, geometric corners, and small zero-blur shadows on cards and controls; use semi-transparent, theme-token-derived surfaces that let Super Productivity's wallpaper and opacity through. **Do not introduce custom/neubrutalist fonts**; the host font must support Vietnamese. Preserve all existing task, subtask, habit, Not Today, recurring-warning and stopwatch behaviors. Screen captures and browser tests use synthetic Vietnamese data in 320px, 390px and desktop viewports.

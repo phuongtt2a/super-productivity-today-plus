@@ -24,7 +24,7 @@ window.PluginAPI={
 };
 """.replace('__DATA__',json.dumps(TASKS))
 with sync_playwright() as p:
- browser=p.chromium.launch(headless=True,executable_path='/usr/bin/chromium',args=['--no-sandbox'])
+ browser=p.chromium.launch(headless=True,args=['--no-sandbox'])
  try:
   for width,height in [(320,568),(390,844),(1200,800)]:
    page=browser.new_page(viewport={'width':width,'height':height},device_scale_factor=1)
@@ -32,6 +32,13 @@ with sync_playwright() as p:
    page.evaluate(API)
    page.set_content((ROOT/'plugin/index.html').read_text(encoding="utf8"))
    page.wait_for_selector('[data-not-today="p1"]')
+   page.evaluate("""() => document.documentElement.style.setProperty('--font-primary-stack','"Segoe UI",Arial,sans-serif')""")
+   assert 'Segoe UI' in page.locator('.item-name').first.evaluate('el=>getComputedStyle(el).fontFamily'),(width,'host font')
+   assert page.evaluate("getComputedStyle(document.body).backgroundColor")=='rgba(0, 0, 0, 0)',(width,'body transparent')
+   assert page.evaluate("getComputedStyle(document.documentElement).backgroundColor")=='rgba(0, 0, 0, 0)',(width,'root transparent')
+   assert page.locator('#tasks>.item-task').count()>=1,(width,'standalone task tile')
+   assert page.locator('.task-group').count()==1,(width,'subtask group tile')
+   assert page.locator('#tasks>.item-task').first.evaluate('el=>parseFloat(getComputedStyle(el).borderTopWidth)')>=2,(width,'NEO tile border')
    # Hero messaging and button affordance must match the current design.
    assert page.locator('.hero h1').inner_text() == 'Focus on what matters.'
    assert page.locator('.hero p').inner_text() == 'Not another endless checklist.'

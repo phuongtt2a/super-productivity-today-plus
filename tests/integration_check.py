@@ -3,7 +3,7 @@ from playwright.sync_api import sync_playwright
 ROOT=Path(__file__).resolve().parents[1]
 HTML=(ROOT/'plugin/index.html').read_text()
 with sync_playwright() as p:
-    browser=p.chromium.launch(executable_path='/usr/bin/chromium',args=['--no-sandbox'])
+    browser=p.chromium.launch(args=['--no-sandbox'])
     page=browser.new_page(viewport={'width':360,'height':760})
     page.evaluate('''() => {
       const date = new Date();const key=`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
