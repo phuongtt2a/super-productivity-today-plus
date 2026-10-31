@@ -18,6 +18,42 @@
   function visible(el) {
     return !!el && el.isConnected && el.getClientRects().length > 0;
   }
+  // The host context menu is required to invoke the native operation, but the
+  // user must not see a menu flash. Scope this only to menu overlays during this
+  // one Won't Do request. Never hide dialogs, snackbars or the host content.
+  function concealAutomationMenu() {
+    const token = "today-plus-wont-do-menu-automation";
+    const style = document.createElement("style");
+    style.setAttribute("data-today-plus-wont-do-style", "");
+    style.textContent = [
+      "." + token + " .cdk-overlay-container .cdk-overlay-pane:has([role='menu'])",
+      "." + token + " .cdk-overlay-container .mat-mdc-menu-panel",
+      "." + token + " .cdk-overlay-container .mat-menu-panel"
+    ].join(",") + "{ opacity: 0 !important; }";
+    document.head.appendChild(style);
+    document.documentElement.classList.add(token);
+    return function removeConcealment() {
+      document.documentElement.classList.remove(token);
+      style.remove();
+    };
+  }
+
+  function closeAutomationMenu() {
+    const menus = Array.from(
+      document.querySelectorAll(".cdk-overlay-container [role='menu']")
+    );
+    for (const menu of menus) {
+      menu.dispatchEvent(new KeyboardEvent("keydown", {
+        bubbles: true, cancelable: true, key: "Escape", code: "Escape"
+      }));
+    }
+    // Backdrop is a native Material close operation if Escape was not handled.
+    if (document.querySelector(".cdk-overlay-container [role='menu']")) {
+      const backdrop = document.querySelector(".cdk-overlay-container .cdk-overlay-backdrop");
+      if (backdrop && typeof backdrop.click === "function") backdrop.click();
+    }
+  }
+
 
   function getRows(taskId) {
     return Array.from(document.querySelectorAll("task[data-task-id]"))
@@ -177,7 +213,10 @@
       return { status: "manual", reason: "Invalid task identifier." };
     }
     if (pending) return { status: "manual", reason: "Another Won't Do request is running." };
+    // Do not conceal any menu that belongs to the user.
+    if (hasOtherMenu()) return { status: "manual", reason: "Another task menu is open." };
     pending = true;
+    const removeConcealment = concealAutomationMenu();
     try {
       const task = (await PluginAPI.getTasks()).find(function (item) {
         return item.id === taskId;
@@ -200,7 +239,12 @@
       // A failed attempt must stay non-destructive and must not open details.
       return await menuViaTemporaryTaskView(task);
     } finally {
-      pending = false;
+      // If the host menu failed to finish, dismiss it while it is still
+      // concealed. Always restore the host's normal menu visibility.
+      try { closeAutomationMenu(); } finally {
+        removeConcealment();
+        pending = false;
+      }
     }
   }
 
