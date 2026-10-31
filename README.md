@@ -28,7 +28,7 @@ Super Productivity organizes tasks and habits in different views. Today+ brings 
 ## Features
 
 - **Today’s tasks:** See tasks due today, with subtasks nested beneath their parents. Overdue and completed tasks are hidden at first; you can show either when needed.
-- **Clear daily actions:** Complete a task, or tap the small **calendar-with-X icon** ("Not Today") to remove its due date without marking it completed. The task remains in its project until you schedule it again.
+- **Native Won't Do:** Tap **Won’t Do** to invoke Super Productivity’s native skip using its task-row menu. Today+ briefly visits the native task list if needed, visually conceals only the temporary task menu, and returns to Today+. Task details do not open. If the native menu cannot be reached, it leaves the task unchanged and shows guidance. Native recurrence and completion semantics are preserved.
 - **Scheduled habits:** Read existing enabled habits from Super Productivity. Follow weekday schedules; show weekly-frequency habits during the week.
 - **Single-completion habits:** Tap once to complete; tap again to undo.
 - **Count or goal-based habits:** Increase or decrease today's value and see progress toward the configured goal.
@@ -37,6 +37,8 @@ Super Productivity organizes tasks and habits in different views. Today+ brings 
 - **Theme and mobile:** Uses Super Productivity's font and theme variables, keeps the host wallpaper visible, supports light/dark mode and small phone screens.
 
 No separate login, external service, duplicate tasks, or additional local data store is required.
+
+> **Known limitation in v1.2.0:** Won't Do uses Super Productivity's native task menu through a plugin-side workaround. Today+ may briefly switch to the host task list and back, causing a momentary screen blink. We are retaining this behavior for now rather than faking task completion or changing recurring-task schedules. The action is verified by checking the native `wontDoOn` state; UI automation may need maintenance after host updates.
 
 ## Install
 
@@ -61,9 +63,12 @@ Today+ starts with tasks due **today** and habits scheduled for **today**. Subta
 
 Habits follow your existing Super Productivity schedule. Daily habits show today's progress, while flexible weekly habits show progress toward their weekly goal. Nothing needs to be configured a second time inside Today+.
 
-## What “Not Today” means
+## What “Won't Do” means
 
-Choosing the **calendar-with-X icon** ("Not Today") clears the task’s scheduled date and removes it from the daily list. The icon is labeled for screen readers and shows a tooltip on desktop. It is only shown when a task has its own scheduled date; undated subtasks inherited from a scheduled parent have no separate date to clear. It does **not** complete, delete, postpone until tomorrow, or mark the task as Super Productivity’s native “Won’t do.” To work on it another day, schedule it again in Super Productivity. For repeating tasks, Today+ asks for confirmation because changing an occurrence’s due date can affect its repetition schedule.
+Choose the **task-with-X icon** and the **Won't Do** label to intentionally skip the current task occurrence using Super Productivity's **native Won't Do** action. Unlike the old **Not Today** action, this does **not** clear the scheduled date and is not a normal Done completion. The host records the skipped outcome; for recurring tasks, the app controls when the next occurrence appears.
+
+Today+ hides finished tasks by default. Turn on the **Finished** filter to review a skipped occurrence labelled **Won't Do** (×). If the host task row cannot be reached safely, the task is left unchanged and Today+ explains the problem. A brief screen blink may occur because the plugin temporarily visits the native task list.
+
 
 ## Safety and limitations
 
@@ -91,7 +96,7 @@ Run from the repository root:
 
 ```bash
 python -m unittest discover -s tests -p 'test_*.py' -v
-python scripts/package.py --tag v1.1.0
+python scripts/package.py --tag v1.2.0
 ```
 
 For browser tests, install Python Playwright and Chromium, then run `python tests/integration_check.py` and `python tests/browser_check.py`. See [development notes](docs/DEVELOPMENT.md) and [release instructions](docs/RELEASING.md).
