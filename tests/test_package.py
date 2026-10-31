@@ -5,7 +5,7 @@ class TestPlugin(unittest.TestCase):
     def test_manifest(self):
         data=json.loads((ROOT/'plugin/manifest.json').read_text())
         self.assertEqual(data['id'],'sp-today-tasks-habits')
-        self.assertEqual(data['version'],'1.1.1-beta.1')
+        self.assertEqual(data['version'],'1.1.1-beta.2')
         self.assertTrue(data['iFrame'])
         self.assertEqual(data['name'],'Today+')
         self.assertIn('tasks due today',data['description'])
