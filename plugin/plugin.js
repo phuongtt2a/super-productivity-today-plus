@@ -116,32 +116,6 @@
     return activateMenuItem(taskId);
   }
 
-  async function menuFromDetail(taskId) {
-    if (hasOtherMenu() || typeof PluginAPI.selectTask !== "function"
-      || typeof PluginAPI.getSelectedTask !== "function") {
-      return { status: "manual", reason: "Detail menu unavailable." };
-    }
-
-    // Touch/narrow layouts expose a native .task-detail-more-btn in the detail panel.
-    await PluginAPI.selectTask(taskId);
-    for (let attempt = 0; attempt < 14; attempt += 1) {
-      await delay(85);
-      const selected = await PluginAPI.getSelectedTask();
-      if (!selected || selected.id !== taskId) {
-        return { status: "manual", reason: "Selected task changed." };
-      }
-      const panels = Array.from(document.querySelectorAll("task-detail-panel"))
-        .filter(visible);
-      if (panels.length !== 1) continue;
-      const more = panels[0].querySelector(".task-detail-more-btn");
-      if (!visible(more)) continue;
-      if (hasOtherMenu()) return { status: "manual", reason: "Another menu opened." };
-      more.click();
-      return activateMenuItem(taskId);
-    }
-    return { status: "manual", reason: "The task detail has no native menu button." };
-  }
-
   async function waitForRow(taskId) {
     for (let attempt = 0; attempt < 42; attempt += 1) {
       const rows = getRows(taskId);
@@ -220,12 +194,10 @@
         if (result.status !== "manual") return result;
       }
 
-      // Mobile-first: select the task, then invoke the native menu in its detail panel.
-      const detailResult = await menuFromDetail(taskId);
-      if (detailResult.status !== "manual") return detailResult;
-
-      // Desktop: Today+ occupies the plugin route, hiding native task rows.
-      // Use the regular Today/project task view and return afterward.
+      // The task-detail-panel route creates an unwanted popup. Never select
+      // the task just to reach its native menu: only act on native task rows.
+      // If Today+ hides those rows, visit the native task list temporarily.
+      // A failed attempt must stay non-destructive and must not open details.
       return await menuViaTemporaryTaskView(task);
     } finally {
       pending = false;
