@@ -1,13 +1,19 @@
 # Changelog
 
-## Unreleased — minor interface refinements (version stays 1.1.0)
+## 1.2.0 — Native Won't Do and clear task actions
 
-- Display **Not today** as a compact calendar-with-X icon with a 40px touch target, accessible name and desktop tooltip.
-- Prevent focus-triggered refreshes from replacing a task action while the user taps it; the first tap now works.
-- Hide the action on subtasks without their own due date so there is no nonfunctional control.
-- Replace the dashboard headline with “Focus on what matters.” and the supporting line with “Not another endless checklist.”
-- Give **Not today** a visible but subtle outlined-button appearance on desktop and mobile.
-- Keep the existing task actions, filters and plugin version unchanged; refresh screenshots and the installable ZIP on the main branch.
+- Replace **Not Today** (which cleared due dates) with Super Productivity's genuine **Won't Do** task operation; recurring tasks retain the host's scheduling behavior.
+- Use a clearly labelled **Won't Do** button with a **task-with-X** icon instead of the ambiguous circle-with-slash symbol. Keep the tooltip and accessible label exactly “Won't Do.”
+- Allow skipping regular tasks and subtasks, including subtasks without their own due date.
+- Keep the temporary task context menu and detail panel from appearing during automated skipping. Do not change due dates or emulate Done.
+- **Known UX limitation:** temporarily switching to the host task list and back can briefly blink the screen. A seamless transition is deferred to a future improvement.
+- Preserve Today+'s NEO-Zen styling, host font/transparency, responsive task hierarchy and habit actions.
+
+## Unreleased — interface refinements incorporated into v1.2.0
+
+- Prevent focus-triggered refreshes from replacing task actions during taps.
+- Keep “Focus on what matters.” and “Not another endless checklist.” on the dashboard.
+- Retain responsive task actions and refreshed screenshots.
 
 ## 1.1.0 — Task hierarchy and clearer status controls
 
