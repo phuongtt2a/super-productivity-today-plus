@@ -53,7 +53,7 @@ with sync_playwright() as playwright:
             page.goto('about:blank')
             page.evaluate(API)
             page.set_content((ROOT/'plugin/index.html').read_text(encoding='utf8'))
-        page.evaluate(BRIDGE)
+            page.evaluate(BRIDGE)
             page.wait_for_selector('[data-wont-do="p1"]')
             assert page.locator('.task-group').count()==1
             assert page.locator('.task-children .item-task').count()==2
@@ -104,7 +104,7 @@ with sync_playwright() as playwright:
         page.goto('about:blank')
         page.evaluate(API)
         page.set_content((ROOT/'plugin/index.html').read_text(encoding='utf8'))
-            page.evaluate(BRIDGE)
+        page.evaluate(BRIDGE)
         page.wait_for_selector('[data-wont-do="timed"]')
         page.evaluate("window.__simulateFocus=()=>window.dispatchEvent(new Event('focus'));document.addEventListener('pointerdown',window.__simulateFocus,true)")
         page.locator('[data-wont-do="timed"]').tap()
