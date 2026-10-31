@@ -58,6 +58,19 @@ class TestPlugin(unittest.TestCase):
         guide=(ROOT/'docs/RELEASING.md').read_text()
         self.assertIn('issue → PR → merge → published ZIP',guide)
         self.assertIn('same version',guide.lower())
+    def test_neo_zen_theme_and_documentation(self):
+        html=(ROOT/'plugin/index.html').read_text()
+        self.assertIn('width:min(1220px,100%)',html)
+        self.assertIn('font-family:var(--font-primary-stack',html)
+        self.assertIn('html,body,.app{background:transparent!important}',html)
+        self.assertIn('#tasks>.item-task{',html)
+        self.assertIn('.task-group{',html)
+        self.assertIn('#habits .item{',html)
+        self.assertIn('box-shadow:3px 3px 0 var(--neo-stroke)',html)
+        for filename in ('today-plus-tasks-desktop-v1.1.0.webp','today-plus-tasks-phone-v1.1.0.webp','small-phone.webp','log-time.webp'):
+            self.assertTrue((ROOT/'docs/screenshots'/filename).is_file(),filename)
+        self.assertTrue((ROOT/'docs/NEO-ZEN-DESIGN.md').is_file())
+
     def test_zip(self):
         subprocess.run(['python',str(ROOT/'scripts/package.py')],capture_output=True,check=True)
         with zipfile.ZipFile(ROOT/'dist/today-plus-super-productivity.zip') as z:
