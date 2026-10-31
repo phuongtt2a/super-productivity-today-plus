@@ -34,4 +34,4 @@ No manual deletion or replacement of release attachments is required for normal 
 - Before replacing an asset, the previous version is downloaded as a rollback copy. Upload failures attempt to restore it. Since `--clobber` deletes first, there can be a short gap if the replacement upload fails.
 - After publishing, the Action downloads the ZIP and checks that its bytes match the tested build.
 - Keep the plugin ID `sp-today-tasks-habits` unchanged to preserve installed plugin identity.
-- The native **Won't do** status differs from Today+'s **Not Today** (clear scheduled date). The Plugin API does not currently expose native `wontDoOn` updates.
+- **v1.2.0** uses a plugin-side native task-menu workaround for **Won't Do** because the Plugin API does not expose `wontDoOn` updates. It can cause a brief screen blink while navigating to the host task list and back; test host compatibility after upgrades.
