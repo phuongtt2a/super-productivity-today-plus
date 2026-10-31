@@ -75,6 +75,8 @@ class TestPlugin(unittest.TestCase):
         self.assertIn('cancel-in-progress: false',workflow)
         self.assertIn('gh release upload "$TAG" "$ASSET" --clobber',workflow)
         self.assertIn('gh release create "$TAG" "$ASSET"',workflow)
+        self.assertIn('Prepare version-specific release notes',workflow)
+        self.assertIn('--notes-file dist/release-notes.md',workflow)
         self.assertIn('cmp "$ASSET" "$VERIFY/$NAME"',workflow)
         self.assertNotIn("startsWith(github.event.head_commit.message, 'release:')",workflow)
         guide=(ROOT/'docs/RELEASING.md').read_text()
