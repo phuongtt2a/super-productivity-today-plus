@@ -14,6 +14,8 @@ window.__tasks=[{id:'task-1',title:'Exercise',isDone:false,projectId:'project-1'
 window.__snacks=[];
 window.__selectedCalls=0;
 window.__routeChanges=[];
+window.__menuOpacityAtOpen=[];
+window.__dialogOpacityAtOpen=[];
 window.PluginAPI={
   onMessage:handler=>{window.__handler=handler;},
   getTasks:async()=>window.__tasks.map(t=>({...t})),
@@ -22,6 +24,7 @@ window.PluginAPI={
 };
 window.__makeMenu=()=>{
   const container=document.querySelector('.cdk-overlay-container');
+  const pane=document.createElement('div');pane.className='cdk-overlay-pane';
   const menu=document.createElement('div');menu.setAttribute('role','menu');
   const btn=document.createElement('button');btn.setAttribute('role','menuitem');
   const icon=document.createElement('mat-icon');icon.textContent='block';
@@ -29,15 +32,18 @@ window.__makeMenu=()=>{
   btn.addEventListener('click',()=>{
     const now=Date.now();
     Object.assign(window.__tasks[0],{isDone:true,doneOn:now,wontDoOn:now});
-    menu.remove();
+    pane.remove();
   });
-  container.appendChild(menu);
+  pane.appendChild(menu);
+  container.appendChild(pane);
+  window.__menuOpacityAtOpen.push(getComputedStyle(pane).opacity);
+  window.__dialogOpacityAtOpen.push(getComputedStyle(document.querySelector('#unrelated-dialog-pane')).opacity);
 };
 void 0;
 """
 def setup_route(page, mode):
     page.goto('about:blank')
-    page.set_content('<main id="host"></main><div class="cdk-overlay-container"></div>')
+    page.set_content('<main id="host"></main><div class="cdk-overlay-container"><div class="cdk-overlay-pane" id="unrelated-dialog-pane"><div role="dialog">Other host dialog</div></div></div>')
     page.evaluate(SETUP)
     page.evaluate("""mode=>{
       window.addEventListener('hashchange',()=>{
@@ -85,6 +91,10 @@ with sync_playwright() as p:
             routes=page.evaluate('window.__routeChanges')
             assert '#/tag/TODAY/tasks' in routes,(mode,routes)
             assert page.evaluate('window.__selectedCalls')==0,mode
+            assert page.evaluate('window.__menuOpacityAtOpen')==['0'],mode
+            assert page.evaluate('window.__dialogOpacityAtOpen')==['1'],mode
+            assert page.evaluate("document.querySelector('[data-today-plus-wont-do-style]')") is None,mode
+            assert page.evaluate("document.documentElement.classList.contains('today-plus-wont-do-menu-automation')") is False,mode
             task=page.evaluate('window.__tasks[0]')
             assert task['isDone'] and task['wontDoOn']==task['doneOn']
             assert page.evaluate("window.__snacks.at(-1).type")=='SUCCESS'
@@ -99,6 +109,8 @@ with sync_playwright() as p:
         })""")
         assert outcome['status']=='manual',outcome
         assert page.evaluate('window.__selectedCalls')==0
+        assert page.evaluate("document.querySelector('[data-today-plus-wont-do-style]')") is None
+        assert page.evaluate("document.documentElement.classList.contains('today-plus-wont-do-menu-automation')") is False
         assert page.evaluate('window.__tasks[0].isDone') is False
         page.wait_for_function("location.hash==='#/plugins/sp-today-tasks-habits/index'")
         print('missing row: PASS no popup, no mutation, original route restored')
