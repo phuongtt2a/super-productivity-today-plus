@@ -41,6 +41,32 @@ jobs:
           node --check plugin/plugin.js
           python scripts/package.py --tag "$TAG"
 
+      - name: Prepare version-specific release notes
+        shell: bash
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+
+          tag = os.environ["TAG"]
+          version = tag.removeprefix("v")
+          lines = Path("CHANGELOG.md").read_text(encoding="utf-8").splitlines()
+          heading = next((i for i, line in enumerate(lines)
+                          if line == f"## {version}" or line.startswith(f"## {version} ")), None)
+          if heading is None:
+              notes = f"Today+ {tag}. Download the tested installable ZIP from Assets.\n"
+          else:
+              section = []
+              for line in lines[heading + 1:]:
+                  if line.startswith("## "):
+                      break
+                  section.append(line)
+              notes = f"{lines[heading]}\n\n" + "\n".join(section).strip() + "\n"
+          Path("dist/release-notes.md").write_text(notes, encoding="utf-8")
+          PY
+
       - name: Publish new version or refresh existing release
         shell: bash
         env:
@@ -77,7 +103,7 @@ jobs:
             gh release create "$TAG" "$ASSET" \
               --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
               --title "Today+ $TAG" --latest \
-              --notes "Today+ brings today's tasks, subtasks and scheduled habits together. Install the ZIP attached under Assets."
+              --notes-file dist/release-notes.md
           fi
 
           # Check the actual public release asset, not merely the build output.
