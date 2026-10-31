@@ -1,6 +1,6 @@
 # Today+ native Won't Do — beta verification checklist
 
-Status: **v1.1.1-beta.2 / experimental draft PR**. Super Productivity is unchanged; this is plugin-side UI integration. Do not merge to the release branch until the live-app checks pass.
+Status: **v1.1.1-beta.3 / experimental draft PR**. Super Productivity is unchanged; this is plugin-side UI integration. Do not merge to the release branch until the live-app checks pass.
 
 ## Intended native semantics
 
@@ -14,6 +14,7 @@ Won't Do closes **one occurrence** without changing the recurring series. It is 
 - On touch/small-screen layouts, the adapter opens the native task-list row using its keyboard context-menu shortcut. It never calls selectTask() or opens task details.
 - When Today+ hides the task row, the adapter temporarily switches to the app's native Today task list, then (if needed) the project's task list. It opens that task's native row menu and returns to Today+. This route can briefly flash, but never opens a task-detail popup.
 - The adapter searches for the icon named "block" instead of translated text, checks for exactly one matching task/menu action, and checks for native wontDoOn/doneOn status afterward.
+- During the automatic operation, Today+ adds a short-lived CSS rule to conceal only the native Material **menu overlay**. Other host dialogs, snackbars, and the page remain visible. The overlay style is removed in a finally block; if the menu does not complete, the adapter tries to close it before restoring styling.
 - If UI elements are missing or ambiguous, it refuses to click, leaves task data unchanged, and shows guidance without opening task details. It never calls updateTask to fake completion or clear scheduling.
 
 This is a deliberately **fragile integration point**: Angular Material's rendered DOM is not a supported plugin API. A Super Productivity update could change it.
@@ -21,14 +22,14 @@ This is a deliberately **fragile integration point**: Angular Material's rendere
 ## Real-host testing required
 
 1. Install the beta ZIP using a **test profile** in Super Productivity 19.3+; back up any existing test data.
-2. On desktop, create a one-off task due today. Tap Won't Do in Today+. Confirm it briefly switches to the host task list, returns to Today+, shows a native skipped state, and is excluded from completed statistics.
-3. On mobile/touch, create a one-off task and ensure the action skips it without displaying a task-detail panel.
+2. On desktop, create a one-off task due today. Tap Won't Do in Today+. Confirm it briefly switches to the host task list, returns to Today+ **without flashing a native menu**, shows a native skipped state, and is excluded from completed statistics.
+3. On mobile/touch, create a one-off task and ensure the action skips it without displaying a task-detail panel or a flashing native menu.
 4. Create a **fixed-schedule daily/weekly repeated task**. Skip only the current occurrence. The repeat rule and next scheduled occurrence must remain intact.
 5. Test an **after-completion** repeat. Check the next occurrence follows the host's native skip behavior.
 6. Test parent/subtasks and a task with a linked issue. Confirm no unintended updates or issue closure.
 7. Test an overdue task, a timed due task, and a task visible only in the project rather than Today.
 8. Validate Done, Undo Done, and Reopen continue functioning.
-9. Verify task ID matching under multiple visible tasks, duplicate titles, and other open menus.
+9. Verify task ID matching under multiple visible tasks, duplicate titles, and other open menus. Confirm any unrelated open host dialog remains visible and the temporary CSS disappears after success or failure.
 10. Verify 320px, 390px, desktop, dark/light themes, wallpaper transparency, cross-device sync.
 11. Test with a task in the Inbox (no projectId) and an instance whose native task row is not rendered. Verify graceful fallback without corrupting data.
 12. Confirm the plugin returns to the **original screen** after temporary navigation; if the user navigates away during the operation, it must not override their navigation.
