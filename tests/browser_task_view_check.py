@@ -84,15 +84,16 @@ with sync_playwright() as playwright:
             # Missing native row => host requests manual intervention.
             page.evaluate("window.__bridgeMode='manual'")
             page.locator('[data-wont-do="timed"]').click()
-            page.wait_for_function("document.querySelector('#task-action-note').textContent.includes('Task opened')")
+            page.wait_for_function("document.querySelector('#task-action-note').textContent.includes('No task was changed')")
             events=page.evaluate('window.__actions')
-            assert events[-2:]==[{'kind':'native-request','id':'timed'}, {'kind':'select','id':'timed'}],events
+            assert events[-1]=={'kind':'native-request','id':'timed'},events
+            assert not any(e['kind']=='select' for e in events),events
             assert page.evaluate("window.__tasks.find(t=>t.id==='timed').dueDay")==TODAY
             assert page.evaluate("window.__tasks.find(t=>t.id==='timed').isDone") is False
 
             # Recurring instances are never unscheduled by the plugin.
             page.locator('[data-wont-do="repeating"]').click()
-            page.wait_for_function("document.querySelector('#task-action-note').textContent.includes('Task opened')")
+            page.wait_for_function("document.querySelector('#task-action-note').textContent.includes('No task was changed')")
             repeat=page.evaluate("window.__tasks.find(t=>t.id==='repeating')")
             assert repeat['repeatCfgId']=='r1' and repeat['dueDay']==TODAY and repeat['isDone'] is False
             assert not any(e['kind']=='update' for e in page.evaluate('window.__actions'))
