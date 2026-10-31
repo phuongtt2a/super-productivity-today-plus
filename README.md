@@ -65,7 +65,7 @@ Habits follow your existing Super Productivity schedule. Daily habits show today
 
 ## What “Won't Do” means
 
-Choose the **task-with-X icon** and the **Won't Do** label to intentionally skip the current task occurrence using Super Productivity's **native Won't Do** action. Unlike the old **Not Today** action, this does **not** clear the scheduled date and is not a normal Done completion. The host records the skipped outcome; for recurring tasks, the app controls when the next occurrence appears.
+Choose the compact **task-with-X icon** (with the exact tooltip and accessibility label **"Won't Do"**) to intentionally skip the current task occurrence using Super Productivity's **native Won't Do** action. Unlike the old **Not Today** action, this does **not** clear the scheduled date and is not a normal Done completion. The host records the skipped outcome; for recurring tasks, the app controls when the next occurrence appears.
 
 Today+ hides finished tasks by default. Turn on the **Finished** filter to review a skipped occurrence labelled **Won't Do** (×). If the host task row cannot be reached safely, the task is left unchanged and Today+ explains the problem. A brief screen blink may occur because the plugin temporarily visits the native task list.
 

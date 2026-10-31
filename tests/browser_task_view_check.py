@@ -63,10 +63,10 @@ with sync_playwright() as playwright:
             btn=page.locator('[data-wont-do="p1"]')
             assert btn.get_attribute('aria-label')=="Won't Do"
             assert btn.get_attribute('title')=="Won't Do"
-            assert btn.inner_text().strip()=="Won't Do"
+            assert btn.inner_text().strip()==""
             assert btn.locator('svg rect').count()==1
-            assert btn.bounding_box()['width']>=88
-            assert btn.bounding_box()['height']>=40
+            assert btn.bounding_box()['width']==40
+            assert btn.bounding_box()['height']==40
             assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),width
 
             # Mocked host confirms genuine Won't Do; Today+ must not fake a Done
