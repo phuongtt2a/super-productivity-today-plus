@@ -28,7 +28,7 @@ Super Productivity organizes tasks and habits in different views. Today+ brings 
 ## Features
 
 - **Today’s tasks:** See tasks due today, with subtasks nested beneath their parents. Overdue and completed tasks are hidden at first; you can show either when needed.
-- **Intentional skipping (experimental):** Tap **Won’t Do** to invoke Super Productivity’s native skip action. The plugin uses native task-row menus (on touch and desktop), briefly switching to the regular task list when needed and returning to Today+ afterward. It never automatically opens task details. If the host UI is unavailable, it opens the task for manual Won’t Do. No scheduling change or fake completion is made.
+- **Intentional skipping (experimental):** Tap **Won’t Do** to invoke Super Productivity’s native skip action. The plugin uses native task-row menus (on touch and desktop), briefly switching to the regular task list when needed and returning to Today+ afterward. It never automatically opens task details. If the host UI is unavailable, it keeps the task unchanged and shows guidance without opening any popup. No scheduling change or fake completion is made.
 - **Scheduled habits:** Read existing enabled habits from Super Productivity. Follow weekday schedules; show weekly-frequency habits during the week.
 - **Single-completion habits:** Tap once to complete; tap again to undo.
 - **Count or goal-based habits:** Increase or decrease today's value and see progress toward the configured goal.
