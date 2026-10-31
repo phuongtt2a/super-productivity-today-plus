@@ -21,6 +21,7 @@ For small UI changes that intentionally **retain v1.1.0**, rebuild and commit `d
 ## Important constraints
 
 - Keep the plugin identifier `sp-today-tasks-habits` unchanged so installed copies continue working.
+- Verify the icon-only `Not today` action works on the first mouse click and mobile tap, including when the embedded view regains focus. It must only appear on tasks with a date to clear.
 - Verify `Not today` clears `dueDay` and `dueWithTime` while leaving `isDone` unchanged. If clearing `dueWithTime`, also clear its related reminder when present.
 - Recurring tasks require explicit user confirmation; modifying one occurrence's date may influence its repeat schedule.
 - The native `Won't do` completion status is different from `Not today`. The plugin API does not support writing `wontDoOn`.

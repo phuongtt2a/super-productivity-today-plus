@@ -38,6 +38,11 @@ with sync_playwright() as p:
    btn=page.locator('[data-not-today="p1"]')
    assert btn.evaluate("el => getComputedStyle(el).borderTopWidth") == '1px', (width,'button border')
    assert btn.evaluate("el => getComputedStyle(el).backgroundColor") != 'rgba(0, 0, 0, 0)', (width,'button background')
+   assert btn.locator('svg').count()==1,(width,'calendar-x icon')
+   assert not btn.inner_text().strip(),(width,'icon only')
+   assert 'Not today' in btn.get_attribute('aria-label'),(width,'accessible label')
+   assert btn.bounding_box()['width']>=40,(width,'touch target')
+   assert page.locator('[data-not-today="c2"]').count()==0,(width,'no button for unscheduled subtask')
 
    assert page.locator('.task-children .item').count()==2,(width,'subtask count')
    assert page.get_by_text('Overdue task').count()==0,(width,'overdue hidden')
@@ -52,7 +57,12 @@ with sync_playwright() as p:
    page.locator('[data-task="c1"]').click()
    acts=page.evaluate('window.__actions')
    assert acts[-1]=={'kind':'update','id':'c1','values':{'isDone':True}},(width,acts)
+   # Reproduce an iframe regaining focus while the user presses the action.
+   # The focus listener starts a fast refresh; it must not replace the button
+   # between pointerdown and click (the old code needed a second tap).
+   page.evaluate("window.__simulateFocus=()=>window.dispatchEvent(new Event('focus'));document.addEventListener('pointerdown',window.__simulateFocus,true)")
    page.locator('[data-not-today="p1"]').click()
+   page.evaluate("document.removeEventListener('pointerdown',window.__simulateFocus,true)")
    acts=page.evaluate('window.__actions')
    assert acts[-1]=={'kind':'update','id':'p1','values':{'dueDay':None,'dueWithTime':None}},(width,acts)
    assert 'remains open in its project' in page.locator('#task-action-note').text_content(),width
@@ -81,5 +91,19 @@ with sync_playwright() as p:
    assert page.get_by_text('Completed task').count()==1,(width,'finished filter')
    print(f'{width}x{height}: PASS')
    page.close()
+  # Real touch gesture: first tap must work even if focus triggers a refresh.
+  mobile=browser.new_page(viewport={'width':390,'height':844},has_touch=True,is_mobile=True)
+  mobile.goto('about:blank')
+  mobile.evaluate(API)
+  mobile.set_content((ROOT/'plugin/index.html').read_text(encoding='utf8'))
+  mobile.wait_for_selector('[data-not-today="timed"]')
+  mobile.evaluate("window.__simulateFocus=()=>window.dispatchEvent(new Event('focus'));document.addEventListener('pointerdown',window.__simulateFocus,true)")
+  mobile.locator('[data-not-today="timed"]').tap()
+  mobile.wait_for_timeout(250)
+  actions=mobile.evaluate('window.__actions')
+  assert actions==[{'kind':'update','id':'timed','values':{'dueDay':None,'dueWithTime':None,'remindAt':None}}],actions
+  assert mobile.locator('[data-not-today="timed"]').count()==0
+  print('390x844 touch-first-tap: PASS')
+  mobile.close()
  finally:
   browser.close()

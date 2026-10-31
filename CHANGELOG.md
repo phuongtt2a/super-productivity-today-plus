@@ -2,6 +2,9 @@
 
 ## Unreleased — minor interface refinements (version stays 1.1.0)
 
+- Display **Not today** as a compact calendar-with-X icon with a 40px touch target, accessible name and desktop tooltip.
+- Prevent focus-triggered refreshes from replacing a task action while the user taps it; the first tap now works.
+- Hide the action on subtasks without their own due date so there is no nonfunctional control.
 - Replace the dashboard headline with “Focus on what matters.” and the supporting line with “Not another endless checklist.”
 - Give **Not today** a visible but subtle outlined-button appearance on desktop and mobile.
 - Keep the existing task actions, filters and plugin version unchanged; refresh screenshots and the installable ZIP on the main branch.

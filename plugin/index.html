@@ -91,14 +91,16 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--today-accent);o
 .empty strong{font-size:16px;color:var(--today-text);font-weight:600;display:block;margin-bottom:6px}
 .foot{font-size:11px;line-height:1.5;color:var(--today-muted);margin-top:24px;padding-top:14px;border-top:1px solid var(--today-line)}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
-/* Compact actions: completion on the left, unschedule on the right.
-   "Not today" clears the date without marking the task finished. */
-.task-skip{justify-self:end;white-space:nowrap;border:1px solid var(--today-line);background:var(--today-bg);
-  color:var(--today-text);font-size:11px;line-height:1.3;font-weight:650;
-  border-radius:999px;padding:8px 12px;min-height:35px;max-width:none;
-  transition:background .15s ease,border-color .15s ease,transform .15s ease}
+/* Icon-only secondary action. Keep a full touch target and a descriptive accessible name. */
+.task-skip{justify-self:end;display:grid;place-items:center;width:40px;height:40px;
+  min-width:40px;max-width:40px;min-height:40px;padding:0;
+  border:1px solid var(--today-line);border-radius:12px;
+  background:var(--today-bg);color:var(--today-text);
+  transition:background .15s ease,border-color .15s ease}
+.task-skip svg{display:block;width:20px;height:20px;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;fill:none;pointer-events:none}
 .task-skip:hover,.task-skip:focus-visible{background:var(--today-hover);border-color:var(--today-accent)}
-.task-skip:active{transform:translateY(1px)}
+.task-skip:focus-visible{outline:2px solid var(--today-accent);outline-offset:2px}
+.task-skip:active{background:var(--today-hover)}
 .task-group{border-bottom:1px solid var(--today-line)}
 .task-group>.item{border-bottom:0}
 .task-children{margin:0 0 1px 35px;padding-left:12px;border-left:1px solid var(--today-line)}
@@ -110,7 +112,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--today-accent);o
 .task-note{font-size:12px;line-height:1.5;color:var(--today-muted);margin:9px 0 0;padding:9px 12px;border:1px solid var(--today-line);border-radius:11px;background:var(--today-bg)}
 .item .action-btn{justify-self:end}
 @media(max-width:740px){.app{padding:18px 18px 28px}.topbar{margin-bottom:25px}.workspace{grid-template-columns:1fr;gap:35px}.hero{margin-bottom:22px}.hero h1{font-size:clamp(26px,7.6vw,36px)}.overall{min-width:110px}.item-name{font-size:15px}.item{min-height:70px}.section-head h2{font-size:20px}}
-@media(max-width:380px){.item .action-btn{padding:7px 9px;font-size:11px}.item-meta{flex-wrap:wrap}.time-actions .action-btn{min-height:40px}.app{padding-left:13px;padding-right:13px}.top-right{gap:8px}.today-date{font-size:10px;letter-spacing:.02em}.brand-name{font-size:16px}.hero{align-items:start}.hero h1{font-size:27px}.overall{min-width:88px;font-size:10px}.overall strong{font-size:18px}.item{grid-template-columns:26px minmax(0,1fr) auto;column-gap:8px}.status{font-size:10px;max-width:66px}.task-skip{font-size:10px;padding:7px 8px;min-height:32px}.task-children{margin-left:27px;padding-left:9px}.task-children .item{column-gap:6px}.item-name{font-size:14px}.item-meta{font-size:10px}.section-actions{gap:5px}.chip{padding:6px 8px}}
+@media(max-width:380px){.item .action-btn{padding:7px 9px;font-size:11px}.item-meta{flex-wrap:wrap}.time-actions .action-btn{min-height:40px}.app{padding-left:13px;padding-right:13px}.top-right{gap:8px}.today-date{font-size:10px;letter-spacing:.02em}.brand-name{font-size:16px}.hero{align-items:start}.hero h1{font-size:27px}.overall{min-width:88px;font-size:10px}.overall strong{font-size:18px}.item{grid-template-columns:26px minmax(0,1fr) auto;column-gap:8px}.status{font-size:10px;max-width:66px}.task-skip{width:40px;min-width:40px;max-width:40px;height:40px;min-height:40px}.task-children{margin-left:27px;padding-left:9px}.task-children .item{column-gap:6px}.item-name{font-size:14px}.item-meta{font-size:10px}.section-actions{gap:5px}.chip{padding:6px 8px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 </style>
 </head>
@@ -155,7 +157,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--today-accent);o
 <script>
 'use strict';
 const $ = id => document.getElementById(id);
-const state = {api:null, tasks:[], habits:[], projects:new Map(), today:'', showOverdue:false, showFinished:false, demo:false, refreshing:false, busy:new Set(), timeHabitId:null, previousFocus:null};
+const state = {api:null, tasks:[], habits:[], projects:new Map(), today:'', showOverdue:false, showFinished:false, demo:false, refreshing:false, busy:new Set(), pointerActive:false, refreshDeferred:false, timeHabitId:null, previousFocus:null};
 const safe = str => String(str ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const localDay = (date=new Date()) => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
 const dueKey = t => t.dueDay || (Number.isFinite(t.dueWithTime)?localDay(new Date(t.dueWithTime)):null);
@@ -223,7 +225,9 @@ function taskRow(t,level=0,context=false){
   const isOverdue=d&&d<state.today;
   const status=context?'Parent task':t.isDone?'Finished':isOverdue?'Overdue':d===state.today?'Due today':'Subtask';
   const marker=context?'<span class="check" aria-hidden="true"></span>':`<button class="check ${t.isDone?'is-done':''}" data-task="${id}" aria-label="${t.isDone?'Return to do':'Mark as completed'}: ${safe(t.title)}" type="button">${t.isDone?'✓':''}</button>`;
-  const action=context||t.isDone?'':`<button type="button" class="task-skip" data-not-today="${id}" aria-label="Remove from today: ${safe(t.title)}" title="Clear this task's due date. It remains unfinished in its project.">Not today</button>`;
+  // An unscheduled subtask follows its parent's day. It has no date to clear,
+  // so don't render an action that would have no effect.
+  const action=context||t.isDone||!d?'':`<button type="button" class="task-skip" data-not-today="${id}" aria-label="Not today: ${safe(t.title)}. Remove the scheduled date without completing the task." title="Not today · Remove scheduled date"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18M9 14l6 6m0-6-6 6"/></svg></button>`;
   return `<article class="item item-task ${t.isDone?'is-done':''} ${context?'task-context':''} ${level?'subtask':''}">${marker}<div class="item-copy" data-open="${id}" tabindex="0" role="button" aria-label="Open ${level?'subtask':'task'}: ${safe(t.title)}"><p class="item-name">${safe(t.title)}</p><p class="item-meta"><span>${safe(project)}</span><span class="dot">·</span><span>${safe(status)}${d&&d!==state.today?' · '+safe(fmtDate(d)):''}</span></p></div>${action}</article>`;
 }
 function taskGroupRow(group){
@@ -273,9 +277,50 @@ function demoData(){const today=localDay();const yesterday=new Date();yesterday.
   const days={0:true,1:true,2:true,3:true,4:true,5:true,6:true};state.habits=[{id:'h1',title:'Read for 20 minutes',type:'ClickCounter',isEnabled:true,isTrackStreaks:true,streakMinValue:1,streakWeekDays:days,countOnDay:{}},{id:'h2',title:'Drink enough water',type:'ClickCounter',isEnabled:true,isTrackStreaks:true,streakMinValue:8,streakWeekDays:days,countOnDay:{[today]:3}},{id:'h3',title:'Exercise',type:'ClickCounter',isEnabled:true,isTrackStreaks:true,streakMinValue:1,streakMode:'weekly-frequency',streakWeeklyFrequency:3,countOnDay:{[today]:1}},
     {id:'h4',title:'Tập thể dục 30 phút',type:'StopWatch',isEnabled:true,isTrackStreaks:true,streakMinValue:1800000,streakWeekDays:days,countOnDay:{[today]:600000},isOn:false}];state.projects=new Map([['work','Work'],['personal','Personal']]);}
 function reportError(err){$('error-note').textContent=`Could not refresh from Super Productivity: ${err?.message||err}`;$('error-note').classList.remove('hidden');}
-async function refresh(){if(state.refreshing)return;state.refreshing=true;$('refresh').disabled=true;
-  try{if(!state.api){if(!state.demo){state.demo=true;demoData();$('demo-note').classList.remove('hidden');}}else{const [tasks,habits,projects]=await Promise.all([state.api.getTasks(),state.api.getAllSimpleCounters(),state.api.getAllProjects()]);if(!Array.isArray(tasks)||!Array.isArray(habits))throw new Error('Unexpected tasks or habits response');state.tasks=tasks;state.habits=habits;state.projects=new Map((projects||[]).map(p=>[p.id,p.title]));$('error-note').classList.add('hidden');}}catch(err){reportError(err);}finally{state.refreshing=false;$('refresh').disabled=false;render();}}
-async function updateTask(id){if(state.busy.has('t:'+id))return;const t=state.tasks.find(x=>x.id===id);if(!t)return;if(!state.api){t.isDone=!t.isDone;render();return;}state.busy.add('t:'+id);try{await state.api.updateTask(id,{isDone:!t.isDone});t.isDone=!t.isDone;render();}catch(err){reportError(err)}finally{state.busy.delete('t:'+id)}}
+// A focus refresh can otherwise replace a row between pointerdown and click.
+// Keep the existing DOM until a pending tap has completed, then fetch fresh data.
+function flushDeferredRefresh(){
+  if(!state.refreshDeferred||state.pointerActive||state.refreshing||state.busy.size)return;
+  state.refreshDeferred=false;
+  void refresh();
+}
+document.addEventListener('pointerdown',event=>{
+  if(event.target.closest('button,[data-open]'))state.pointerActive=true;
+},true);
+function finishPointerInteraction(){
+  // pointerup precedes click. Wait until the click handler has executed.
+  setTimeout(()=>{state.pointerActive=false;flushDeferredRefresh()},0);
+}
+document.addEventListener('pointerup',finishPointerInteraction,true);
+document.addEventListener('pointercancel',finishPointerInteraction,true);
+async function refresh(){
+  if(state.refreshing||state.pointerActive||state.busy.size){state.refreshDeferred=true;return;}
+  state.refreshing=true;$('refresh').disabled=true;
+  let shouldRender=false;
+  try{
+    if(!state.api){
+      if(!state.demo){state.demo=true;demoData();$('demo-note').classList.remove('hidden');shouldRender=true;}
+    }else{
+      const [tasks,habits,projects]=await Promise.all([state.api.getTasks(),state.api.getAllSimpleCounters(),state.api.getAllProjects()]);
+      if(!Array.isArray(tasks)||!Array.isArray(habits))throw new Error('Unexpected tasks or habits response');
+      if(state.pointerActive||state.busy.size){state.refreshDeferred=true;return;}
+      state.tasks=tasks;state.habits=habits;state.projects=new Map((projects||[]).map(p=>[p.id,p.title]));
+      $('error-note').classList.add('hidden');shouldRender=true;
+    }
+  }catch(err){reportError(err);}
+  finally{
+    state.refreshing=false;$('refresh').disabled=false;
+    if(shouldRender&&!state.pointerActive&&!state.busy.size)render();
+    else if(shouldRender){state.refreshDeferred=true;}
+    // If an earlier focus refresh was deferred, flush when safe.
+    // Don't requeue synchronously during an active tap or mutation.
+    if(!state.pointerActive&&!state.busy.size&&state.refreshDeferred){
+      state.refreshDeferred=false;
+      setTimeout(()=>void refresh(),0);
+    }
+  }
+}
+async function updateTask(id){if(state.busy.has('t:'+id))return;const t=state.tasks.find(x=>x.id===id);if(!t)return;if(!state.api){t.isDone=!t.isDone;render();return;}state.busy.add('t:'+id);try{await state.api.updateTask(id,{isDone:!t.isDone});t.isDone=!t.isDone;render();}catch(err){reportError(err)}finally{state.busy.delete('t:'+id);flushDeferredRefresh()}}
 async function updateHabit(id,delta){if(state.busy.has('h:'+id))return;const h=state.habits.find(x=>x.id===id);if(!h)return;if(h.type==='StopWatch')return;const value=habitValue(h),next=delta==='toggle'?(value>0?0:1):Math.max(0,value+delta);if(!state.api){h.countOnDay={...h.countOnDay,[state.today]:next};render();return;}state.busy.add('h:'+id);try{await state.api.setCounter(id,next);h.countOnDay={...h.countOnDay,[state.today]:next};render();}catch(err){reportError(err)}finally{state.busy.delete('h:'+id)}}
 function openTimeEditor(id){
   const h=state.habits.find(x=>x.id===id);
@@ -340,7 +385,7 @@ async function removeFromToday(id){
     note.textContent='Removed “'+task.title+'” from today. The task remains open in its project with no due date.';
     note.classList.remove('hidden');
     render();
-  }catch(err){reportError(err)}finally{state.busy.delete('t:'+id)}
+  }catch(err){reportError(err)}finally{state.busy.delete('t:'+id);flushDeferredRefresh()}
 }
 document.addEventListener('click',event=>{const target=event.target.closest('button,[data-open]');if(!target)return;const d=target.dataset;if(d.task)void updateTask(d.task);else if(d.notToday)void removeFromToday(d.notToday);else if(d.habit)void updateHabit(d.habit,'toggle');else if(d.more)void updateHabit(d.more,1);else if(d.less)void updateHabit(d.less,-1);else if(d.logTime)openTimeEditor(d.logTime);else if(d.open)void openTask(d.open);});
 document.addEventListener('keydown',event=>{if((event.key==='Enter'||event.key===' ')&&event.target.matches('[data-open]')){event.preventDefault();void openTask(event.target.dataset.open)}});
