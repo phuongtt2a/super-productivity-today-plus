@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.0 — Task hierarchy and clearer status controls
+
+- Group subtasks below their parent tasks, including undated subtasks in today's scheduled parents.
+- Hide overdue and finished tasks by default; both remain available through filters.
+- Show a quiet “Won’t do…” action beside each task's completion circle. This opens the native task details for the built-in command, because the public plugin API does not expose direct “Won’t do” updates.
+- Keep the existing task, habit, manual time logging and synced data behavior.
+
+
 ## Unreleased — logo alignment (manifest stays v1.0.1)
 
 - Use the same calendar-and-check artwork in the Super Productivity plugin menu and the Today+ header.

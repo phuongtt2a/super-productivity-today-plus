@@ -21,7 +21,7 @@ Today+ runs as a self-contained Super Productivity iframe plugin. All runtime HT
 
 ```bash
 python -m unittest discover -s tests -p 'test_*.py' -v
-python scripts/package.py --tag v1.0.1
+python scripts/package.py --tag v1.1.0
 node --check plugin/plugin.js
 python tests/integration_check.py
 python tests/browser_check.py
@@ -40,3 +40,9 @@ The browser tests use Playwright and Chromium; `pip install playwright` and `pyt
 ## Limitations
 
 The plugin does not replicate Super Productivity's Today virtual-tag membership; it selects by due date. Data changes are written to Super Productivity and are not stored in a separate plugin database. Verify behavior on desktop/mobile hosts before sharing a release widely.
+
+## Task status API boundary
+
+The native Planner uses an internal `TaskService` method that writes `isDone`, `doneOn`, and `wontDoOn` together. The official plugin bridge explicitly rejects `wontDoOn`, and `dispatchAction` only accepts a restricted action list that does not include that operation. Today+ must not emulate “Won’t do” with `isDone:true`. Today+ uses a distinct **Not today** action implemented with `updateTask(id, {dueDay: null, dueWithTime: null})`. This unschedules without setting `isDone` or `wontDoOn`; a timed task’s reminder is also cleared if present. Recurring occurrences require confirmation.
+
+Subtasks are assembled from both `parentId` and `subTaskIds`; grouping is UI-only and never changes parent-child data.

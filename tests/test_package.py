@@ -5,7 +5,7 @@ class TestPlugin(unittest.TestCase):
     def test_manifest(self):
         data=json.loads((ROOT/'plugin/manifest.json').read_text())
         self.assertEqual(data['id'],'sp-today-tasks-habits')
-        self.assertEqual(data['version'],'1.0.1')
+        self.assertEqual(data['version'],'1.1.0')
         self.assertTrue(data['iFrame'])
         self.assertEqual(data['name'],'Today+')
         self.assertIn('tasks due today',data['description'])
@@ -30,6 +30,17 @@ class TestPlugin(unittest.TestCase):
         text=(ROOT/'plugin/index.html').read_text().split('<script>',1)[1].split('</script>',1)[0]
         result=subprocess.run(['node','--check'],input=text,text=True,capture_output=True)
         self.assertEqual(result.returncode,0,result.stderr)
+    def test_task_hierarchy_and_action_guard(self):
+        html=(ROOT/'plugin/index.html').read_text()
+        self.assertIn('showOverdue:false, showFinished:false', html)
+        self.assertIn('function taskGroups()', html)
+        self.assertIn('group.children=childIds.map(', html)
+        self.assertIn('class="task-skip"', html)
+        self.assertIn('data-not-today=', html)
+        self.assertIn('async function removeFromToday(id)', html)
+        self.assertIn('dueDay:null,dueWithTime:null', html)
+        self.assertNotIn('data-wont-do=', html)
+        self.assertNotIn('wontDoOn:', html)
     def test_zip(self):
         subprocess.run(['python',str(ROOT/'scripts/package.py')],capture_output=True,check=True)
         with zipfile.ZipFile(ROOT/'dist/today-plus-super-productivity.zip') as z:

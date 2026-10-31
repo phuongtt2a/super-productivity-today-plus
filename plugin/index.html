@@ -91,9 +91,24 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--today-accent);o
 .empty strong{font-size:16px;color:var(--today-text);font-weight:600;display:block;margin-bottom:6px}
 .foot{font-size:11px;line-height:1.5;color:var(--today-muted);margin-top:24px;padding-top:14px;border-top:1px solid var(--today-line)}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+/* Compact actions: completion on the left, unschedule on the right.
+   "Not today" clears the date without marking the task finished. */
+.task-skip{justify-self:end;white-space:nowrap;border:1px solid transparent;background:transparent;
+  color:var(--today-muted);font-size:11px;line-height:1.3;font-weight:550;
+  border-radius:999px;padding:7px 8px;min-height:33px;max-width:86px}
+.task-skip:hover,.task-skip:focus-visible{color:var(--today-text);background:var(--today-hover);border-color:var(--today-line)}
+.task-group{border-bottom:1px solid var(--today-line)}
+.task-group>.item{border-bottom:0}
+.task-children{margin:0 0 1px 35px;padding-left:12px;border-left:1px solid var(--today-line)}
+.task-children>.item{min-height:58px;padding:9px 1px;border-bottom:0;border-top:1px solid color-mix(in srgb,var(--today-line) 75%,transparent)}
+.task-children>.item:first-child{border-top:0}
+.task-children .item-name{font-size:clamp(13px,1.2vw,15px);font-weight:550}
+.task-children .item-meta{font-size:10.5px}
+.task-context .check{visibility:hidden;pointer-events:none}
+.task-note{font-size:12px;line-height:1.5;color:var(--today-muted);margin:9px 0 0;padding:9px 12px;border:1px solid var(--today-line);border-radius:11px;background:var(--today-bg)}
 .item .action-btn{justify-self:end}
 @media(max-width:740px){.app{padding:18px 18px 28px}.topbar{margin-bottom:25px}.workspace{grid-template-columns:1fr;gap:35px}.hero{margin-bottom:22px}.hero h1{font-size:clamp(26px,7.6vw,36px)}.overall{min-width:110px}.item-name{font-size:15px}.item{min-height:70px}.section-head h2{font-size:20px}}
-@media(max-width:380px){.item .action-btn{padding:7px 9px;font-size:11px}.item-meta{flex-wrap:wrap}.time-actions .action-btn{min-height:40px}.app{padding-left:13px;padding-right:13px}.top-right{gap:8px}.today-date{font-size:10px;letter-spacing:.02em}.brand-name{font-size:16px}.hero{align-items:start}.hero h1{font-size:27px}.overall{min-width:88px;font-size:10px}.overall strong{font-size:18px}.item{grid-template-columns:26px minmax(0,1fr) auto;column-gap:8px}.status{font-size:10px;max-width:66px}.item-name{font-size:14px}.item-meta{font-size:10px}.section-actions{gap:5px}.chip{padding:6px 8px}}
+@media(max-width:380px){.item .action-btn{padding:7px 9px;font-size:11px}.item-meta{flex-wrap:wrap}.time-actions .action-btn{min-height:40px}.app{padding-left:13px;padding-right:13px}.top-right{gap:8px}.today-date{font-size:10px;letter-spacing:.02em}.brand-name{font-size:16px}.hero{align-items:start}.hero h1{font-size:27px}.overall{min-width:88px;font-size:10px}.overall strong{font-size:18px}.item{grid-template-columns:26px minmax(0,1fr) auto;column-gap:8px}.status{font-size:10px;max-width:66px}.task-skip{font-size:10px;padding:6px 4px;min-height:30px}.task-children{margin-left:27px;padding-left:9px}.task-children .item{column-gap:6px}.item-name{font-size:14px}.item-meta{font-size:10px}.section-actions{gap:5px}.chip{padding:6px 8px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 </style>
 </head>
@@ -112,8 +127,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--today-accent);o
   <p class="error-note hidden" id="error-note" role="alert"></p>
   <div class="workspace">
     <section class="section" aria-labelledby="task-heading">
-      <div class="section-head"><div class="section-title"><h2 id="task-heading">Tasks</h2><span class="count" id="task-count">0</span></div><div class="section-actions"><button class="chip" id="overdue-filter" type="button" aria-pressed="true">Overdue</button><button class="chip" id="completed-filter" type="button" aria-pressed="false">Finished</button></div></div>
-      <div id="tasks"></div>
+      <div class="section-head"><div class="section-title"><h2 id="task-heading">Tasks</h2><span class="count" id="task-count">0</span></div><div class="section-actions"><button class="chip" id="overdue-filter" type="button" aria-pressed="false">Overdue</button><button class="chip" id="completed-filter" type="button" aria-pressed="false">Finished</button></div></div>
+      <div id="tasks"></div><p id="task-action-note" class="task-note hidden" role="status" aria-live="polite"></p>
     </section>
     <section class="section" aria-labelledby="habit-heading">
       <div class="section-head"><div class="section-title"><h2 id="habit-heading">Habits</h2><span class="count" id="habit-count">0</span></div><span class="today-date" id="habit-caption">TODAY</span></div>
@@ -138,7 +153,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--today-accent);o
 <script>
 'use strict';
 const $ = id => document.getElementById(id);
-const state = {api:null, tasks:[], habits:[], projects:new Map(), today:'', showOverdue:true, showFinished:false, demo:false, refreshing:false, busy:new Set(), timeHabitId:null, previousFocus:null};
+const state = {api:null, tasks:[], habits:[], projects:new Map(), today:'', showOverdue:false, showFinished:false, demo:false, refreshing:false, busy:new Set(), timeHabitId:null, previousFocus:null};
 const safe = str => String(str ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const localDay = (date=new Date()) => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
 const dueKey = t => t.dueDay || (Number.isFinite(t.dueWithTime)?localDay(new Date(t.dueWithTime)):null);
@@ -166,12 +181,53 @@ function weekProgress(h, date=getToday()) {
   for(let i=0;i<7;i++){const day=new Date(monday);day.setDate(monday.getDate()+i);if(Number(h.countOnDay?.[localDay(day)]||0)>=habitGoal(h))done++}
   return {done,goal:Number(h.streakWeeklyFrequency)>0?Number(h.streakWeeklyFrequency):1};
 }
-function currentTasks(){return allDueTasks().filter(t=>{const d=dueKey(t);return (state.showOverdue||d===state.today) && (!t.isDone||state.showFinished)}).sort((a,b)=>Number(a.isDone)-Number(b.isDone)||String(dueKey(a)).localeCompare(String(dueKey(b)))||a.title.localeCompare(b.title));}
+function isScheduledInView(t){
+  const d=dueKey(t);
+  if(!d||d>state.today)return false;
+  if(d<state.today&&!state.showOverdue)return false;
+  return !t.isDone||state.showFinished;
+}
+function currentTasks(){return allDueTasks().filter(isScheduledInView).sort(taskOrder);}
+function taskOrder(a,b){return Number(a.isDone)-Number(b.isDone)||String(dueKey(a)||'').localeCompare(String(dueKey(b)||''))||String(a.title||'').localeCompare(String(b.title||''));}
 function allDueTasks(){return state.tasks.filter(t=>{const d=dueKey(t);if(!d||d>state.today)return false;if(!t.isDone||d===state.today)return true;return Number.isFinite(t.doneOn)&&localDay(new Date(t.doneOn))===state.today;});}
+function taskGroups(){
+  const map=new Map(state.tasks.map(t=>[t.id,t]));
+  const selected=currentTasks();
+  const selectedIds=new Set(selected.map(t=>t.id));
+  const roots=new Map();
+  for(const t of selected){
+    const parent=t.parentId?map.get(t.parentId):null;
+    const root=parent||t;
+    if(!roots.has(root.id))roots.set(root.id,{task:root,children:[],context:!selectedIds.has(root.id)});
+  }
+  for(const group of roots.values()){
+    const root=group.task;
+    const childIds=[...new Set([...(root.subTaskIds||[]),...state.tasks.filter(t=>t.parentId===root.id).map(t=>t.id)])];
+    group.children=childIds.map(id=>map.get(id)).filter(Boolean).filter(t=>{
+      if(t.isDone&&!state.showFinished)return false;
+      const d=dueKey(t);
+      // Unscheduled subtasks belong to their scheduled parent; future and
+      // hidden-overdue subtasks follow their own schedule.
+      if(!d)return !group.context;
+      return selectedIds.has(t.id);
+    });
+  }
+  return [...roots.values()].sort((a,b)=>taskOrder(a.task,b.task));
+}
 function todayHabits(){return state.habits.filter(h=>habitDue(h));}
 function sectionEmpty(name,caption){return `<div class="empty"><strong>${safe(name)}</strong>${safe(caption)}</div>`;}
-function taskRow(t){const id=safe(t.id), d=dueKey(t),project=state.projects.get(t.projectId)||'Inbox';const isOverdue=d<state.today;
-  return `<article class="item item-task ${t.isDone?'is-done':''}"><button class="check ${t.isDone?'is-done':''}" data-task="${id}" aria-label="${t.isDone?'Return':'Complete'} task: ${safe(t.title)}" type="button">${t.isDone?'✓':''}</button><div class="item-copy" data-open="${id}" tabindex="0" role="button" aria-label="Open task: ${safe(t.title)}"><p class="item-name">${safe(t.title)}</p><p class="item-meta"><span>${safe(project)}</span><span class="dot">·</span><span>${t.isDone?'Finished':isOverdue?'Overdue':'Due today'}${d===state.today?'':' · '+safe(fmtDate(d))}</span></p></div><span class="status ${t.isDone?'done':isOverdue?'overdue':''}">${t.isDone?'Done':isOverdue?'Overdue':'Today'}</span></article>`;
+function taskRow(t,level=0,context=false){
+  const id=safe(t.id),d=dueKey(t),project=state.projects.get(t.projectId)||'Inbox';
+  const isOverdue=d&&d<state.today;
+  const status=context?'Parent task':t.isDone?'Finished':isOverdue?'Overdue':d===state.today?'Due today':'Subtask';
+  const marker=context?'<span class="check" aria-hidden="true"></span>':`<button class="check ${t.isDone?'is-done':''}" data-task="${id}" aria-label="${t.isDone?'Return to do':'Mark as completed'}: ${safe(t.title)}" type="button">${t.isDone?'✓':''}</button>`;
+  const action=context||t.isDone?'':`<button type="button" class="task-skip" data-not-today="${id}" aria-label="Remove from today: ${safe(t.title)}" title="Clear this task's due date. It remains unfinished in its project.">Not today</button>`;
+  return `<article class="item item-task ${t.isDone?'is-done':''} ${context?'task-context':''} ${level?'subtask':''}">${marker}<div class="item-copy" data-open="${id}" tabindex="0" role="button" aria-label="Open ${level?'subtask':'task'}: ${safe(t.title)}"><p class="item-name">${safe(t.title)}</p><p class="item-meta"><span>${safe(project)}</span><span class="dot">·</span><span>${safe(status)}${d&&d!==state.today?' · '+safe(fmtDate(d)):''}</span></p></div>${action}</article>`;
+}
+function taskGroupRow(group){
+  const children=group.children.map(t=>taskRow(t,1)).join('');
+  if(!children)return taskRow(group.task,0,group.context);
+  return `<div class="task-group">${taskRow(group.task,0,group.context)}<div class="task-children">${children}</div></div>`;
 }
 function habitRow(h){
   const id=safe(h.id),value=habitValue(h),goal=habitGoal(h),done=dailyDone(h),weekly=h.streakMode==='weekly-frequency'?weekProgress(h):null;
@@ -186,14 +242,32 @@ function habitRow(h){
     :`<span class="habit-symbol" aria-hidden="true">${stopwatch?'◷':'◈'}</span>`;
   return `<article class="item ${done?'is-done':''}">${marker}<div class="item-copy"><p class="item-name">${safe(h.title)}</p><p class="item-meta"><span>${safe(desc)}</span><span class="dot">·</span><span>${safe(status)}</span></p>${!simple?`<div class="habit-progress" aria-label="Progress ${Math.round(percent)} percent"><span style="width:${percent}%"></span></div>`:''}</div>${control}</article>`;
 }
-function render(){state.today=localDay();$('today-date').textContent=new Date().toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'});const tasks=currentTasks(),habits=todayHabits(),totalTasks=allDueTasks().length;const taskDone=allDueTasks().filter(t=>t.isDone).length,habitDone=habits.filter(h=>dailyDone(h)).length;
-  $('tasks').innerHTML=tasks.length?tasks.map(taskRow).join(''):sectionEmpty('All clear','No tasks due today in this view.');
+function taskSummary(){
+  // Summary includes finished tasks even while the Finished filter hides their
+  // rows. Unscheduled children of a task scheduled today belong to that work.
+  const byId=new Map(state.tasks.map(t=>[t.id,t]));
+  const ids=new Set();
+  for(const t of state.tasks){
+    const d=dueKey(t);
+    if(d===state.today||(state.showOverdue&&d&&d<state.today))ids.add(t.id);
+  }
+  for(const id of [...ids]){
+    const parent=byId.get(id);
+    for(const childId of parent?.subTaskIds||[]){
+      const child=byId.get(childId);
+      if(child&&!dueKey(child))ids.add(child.id);
+    }
+  }
+  return state.tasks.filter(t=>ids.has(t.id));
+}
+function render(){state.today=localDay();$('today-date').textContent=new Date().toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'});const groups=taskGroups(),habits=todayHabits(),summary=taskSummary(),totalTasks=summary.length;const taskDone=summary.filter(t=>t.isDone).length,habitDone=habits.filter(h=>dailyDone(h)).length;
+  $('tasks').innerHTML=groups.length?groups.map(taskGroupRow).join(''):sectionEmpty('All clear','No tasks due today in this view.');
   $('habits').innerHTML=habits.length?habits.map(habitRow).join(''):sectionEmpty('No habits scheduled','Enabled habits will show here on their scheduled days.');
-  $('task-count').textContent=String(tasks.length);$('habit-count').textContent=String(habits.length);$('done-count').textContent=`${taskDone+habitDone} of ${totalTasks+habits.length}`;
+  $('task-count').textContent=String(groups.reduce((n,g)=>n+Number(!g.context)+g.children.length,0));$('habit-count').textContent=String(habits.length);$('done-count').textContent=`${taskDone+habitDone} of ${totalTasks+habits.length}`;
   $('done-bar').style.width=((totalTasks+habits.length)?Math.round(100*(taskDone+habitDone)/(totalTasks+habits.length)):0)+'%';$('overdue-filter').setAttribute('aria-pressed',String(state.showOverdue));$('completed-filter').setAttribute('aria-pressed',String(state.showFinished));
 }
 function demoData(){const today=localDay();const yesterday=new Date();yesterday.setDate(yesterday.getDate()-1);
-  state.tasks=[{id:'t1',title:'Complete the proposal draft',projectId:'work',dueDay:today,isDone:false},{id:'t2',title:'Review the team feedback',projectId:'work',dueDay:today,isDone:false},{id:'t3',title:'Gửi báo cáo tiến độ dự án',projectId:'work',dueDay:today,isDone:false},{id:'t4',title:'Follow up on an overdue task',projectId:'personal',dueDay:localDay(yesterday),isDone:false},{id:'t5',title:'Plan tomorrow',projectId:'personal',dueDay:today,isDone:true}];
+  state.tasks=[{id:'t1',title:'Complete the proposal draft',projectId:'work',dueDay:today,isDone:false,subTaskIds:['t1a','t1b']},{id:'t1a',parentId:'t1',title:'Outline the key sections',projectId:'work',isDone:false},{id:'t1b',parentId:'t1',title:'Collect supporting examples',projectId:'work',isDone:false},{id:'t2',title:'Review the team feedback',projectId:'work',dueDay:today,isDone:false},{id:'t3',title:'Gửi báo cáo tiến độ dự án',projectId:'work',dueDay:today,isDone:false},{id:'t4',title:'Follow up on an overdue task',projectId:'personal',dueDay:localDay(yesterday),isDone:false},{id:'t5',title:'Plan tomorrow',projectId:'personal',dueDay:today,isDone:true}];
   const days={0:true,1:true,2:true,3:true,4:true,5:true,6:true};state.habits=[{id:'h1',title:'Read for 20 minutes',type:'ClickCounter',isEnabled:true,isTrackStreaks:true,streakMinValue:1,streakWeekDays:days,countOnDay:{}},{id:'h2',title:'Drink enough water',type:'ClickCounter',isEnabled:true,isTrackStreaks:true,streakMinValue:8,streakWeekDays:days,countOnDay:{[today]:3}},{id:'h3',title:'Exercise',type:'ClickCounter',isEnabled:true,isTrackStreaks:true,streakMinValue:1,streakMode:'weekly-frequency',streakWeeklyFrequency:3,countOnDay:{[today]:1}},
     {id:'h4',title:'Tập thể dục 30 phút',type:'StopWatch',isEnabled:true,isTrackStreaks:true,streakMinValue:1800000,streakWeekDays:days,countOnDay:{[today]:600000},isOn:false}];state.projects=new Map([['work','Work'],['personal','Personal']]);}
 function reportError(err){$('error-note').textContent=`Could not refresh from Super Productivity: ${err?.message||err}`;$('error-note').classList.remove('hidden');}
@@ -245,9 +319,30 @@ $('time-cancel').addEventListener('click',closeTimeEditor);
 $('time-overlay').addEventListener('click',event=>{if(event.target===$('time-overlay'))closeTimeEditor()});
 document.addEventListener('keydown',event=>{if(!$('time-overlay').classList.contains('hidden')&&event.key==='Escape'){event.preventDefault();closeTimeEditor()}});
 async function openTask(id){if(state.api&&typeof state.api.selectTask==='function'){try{await state.api.selectTask(id)}catch(err){reportError(err)}}}
-document.addEventListener('click',event=>{const target=event.target.closest('button,[data-open]');if(!target)return;const d=target.dataset;if(d.task)void updateTask(d.task);else if(d.habit)void updateHabit(d.habit,'toggle');else if(d.more)void updateHabit(d.more,1);else if(d.less)void updateHabit(d.less,-1);else if(d.logTime)openTimeEditor(d.logTime);else if(d.open)void openTask(d.open);});
+async function removeFromToday(id){
+  if(state.busy.has('t:'+id))return;
+  const task=state.tasks.find(t=>t.id===id);
+  if(!task||task.isDone||!dueKey(task))return;
+  // Removing the date is not the same as native "Won't do": the task remains open.
+  // A recurring instance is special: its repeat configuration is not changed,
+  // but clearing an occurrence's date can affect when the next one appears.
+  if(task.repeatCfgId&&!window.confirm('This is a recurring task. Removing its due date may affect when the next occurrence is scheduled. Continue?'))return;
+  const changes={dueDay:null,dueWithTime:null};
+  // A date-and-time reminder must not fire after the scheduled time is removed.
+  if(task.dueWithTime!=null&&task.remindAt!=null)changes.remindAt=null;
+  state.busy.add('t:'+id);
+  const note=$('task-action-note');
+  try{
+    if(state.api)await state.api.updateTask(id,changes);
+    Object.assign(task,changes);
+    note.textContent='Removed “'+task.title+'” from today. The task remains open in its project with no due date.';
+    note.classList.remove('hidden');
+    render();
+  }catch(err){reportError(err)}finally{state.busy.delete('t:'+id)}
+}
+document.addEventListener('click',event=>{const target=event.target.closest('button,[data-open]');if(!target)return;const d=target.dataset;if(d.task)void updateTask(d.task);else if(d.notToday)void removeFromToday(d.notToday);else if(d.habit)void updateHabit(d.habit,'toggle');else if(d.more)void updateHabit(d.more,1);else if(d.less)void updateHabit(d.less,-1);else if(d.logTime)openTimeEditor(d.logTime);else if(d.open)void openTask(d.open);});
 document.addEventListener('keydown',event=>{if((event.key==='Enter'||event.key===' ')&&event.target.matches('[data-open]')){event.preventDefault();void openTask(event.target.dataset.open)}});
-$('refresh').addEventListener('click',()=>void refresh());$('overdue-filter').addEventListener('click',()=>{state.showOverdue=!state.showOverdue;render()});$('completed-filter').addEventListener('click',()=>{state.showFinished=!state.showFinished;render()});
+$('refresh').addEventListener('click',()=>{ $('task-action-note').classList.add('hidden');void refresh() });$('overdue-filter').addEventListener('click',()=>{state.showOverdue=!state.showOverdue;render()});$('completed-filter').addEventListener('click',()=>{state.showFinished=!state.showFinished;render()});
 window.addEventListener('focus',()=>void refresh());document.addEventListener('visibilitychange',()=>{if(!document.hidden)void refresh()});
 const api=window.PluginAPI;
 if(api){state.api=api;if(typeof api.registerHook==='function'&&api.Hooks){for(const hook of ['TASK_CREATED','TASK_UPDATE','TASK_COMPLETE','TASK_DELETE']){if(api.Hooks[hook])try{api.registerHook(api.Hooks[hook],()=>void refresh())}catch(err){console.warn('Today+ hook unavailable',err)}}}}

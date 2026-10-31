@@ -12,12 +12,12 @@
 
 Today+ uses one consistent calendar-and-check icon in both the Super Productivity plugin menu and the dashboard header.
 
-![Today+ desktop view: tasks and habits side by side](docs/screenshots/desktop-logo.webp)
+![Today+ desktop view with tasks, subtasks and habits](docs/screenshots/today-plus-tasks-desktop-v1.1.0.webp)
 
 <details>
 <summary>Mobile layout and manual time entry</summary>
 
-![Today+ mobile view: tasks followed by habits](docs/screenshots/phone-logo.webp)
+![Today+ mobile view with subtasks beneath the parent](docs/screenshots/today-plus-tasks-phone-v1.1.0.webp)
 
 ![Today+ manual time entry for stopwatch habits](docs/screenshots/log-time.webp)
 
@@ -31,7 +31,8 @@ Super Productivity organizes tasks and habits in different views. Today+ brings 
 
 ## Features
 
-- **Tasks:** See Super Productivity tasks due today and overdue. Toggle overdue tasks and completed tasks, mark a task complete or return it to To Do, and open its details.
+- **Today’s tasks:** See tasks due today, with subtasks nested beneath their parents. Overdue and completed tasks are hidden at first; you can show either when needed.
+- **Clear daily actions:** Complete a task, or choose **Not today** to remove its due date without marking it completed. The task stays in its project until you schedule it again.
 - **Scheduled habits:** Read existing enabled habits from Super Productivity. Follow weekday schedules; show weekly-frequency habits during the week.
 - **Single-completion habits:** Tap once to complete; tap again to undo.
 - **Count or goal-based habits:** Increase or decrease today's value and see progress toward the configured goal.
@@ -43,11 +44,10 @@ No separate login, external service, duplicate tasks, or additional local data s
 
 ## Install
 
-1. [Download the logo-aligned Today+ v1.0.1 ZIP](https://github.com/phuongtt2a/super-productivity-today-plus/raw/refs/heads/main/dist/today-plus-super-productivity.zip) directly from this repository's main branch.
+1. [Download the latest Today+ ZIP](https://github.com/phuongtt2a/super-productivity-today-plus/releases/latest) from **Assets** on the GitHub Release page (do not use GitHub’s auto-generated source ZIP).
 2. In [Super Productivity](https://app.super-productivity.com/), go to **Settings → Plugins** and choose **Choose Plugin File**.
 3. Import the downloaded ZIP **without unpacking it**. Then open **Today+** from the plugin menu.
 
-**Version note:** This logo-only correction keeps the plugin at **v1.0.1**, as requested. The existing [v1.0.1 GitHub Release](https://github.com/phuongtt2a/super-productivity-today-plus/releases/tag/v1.0.1) retains its originally published ZIP; the download above contains the unified logo. No published tag or historical release asset has been rewritten.
 
 The installable ZIP contains exactly four root files:
 
@@ -59,13 +59,15 @@ today-plus-super-productivity.zip
 └── icon.svg
 ```
 
-## How Today+ decides what appears
+## How the daily view works
 
-**Tasks:** Today+ reads active tasks using `PluginAPI.getTasks()`. It shows tasks due on or before the local calendar date (`dueDay` or `dueWithTime`). Tasks without a due date are not included. Completed tasks are hidden by default; **Finished** makes them visible. **Overdue** controls whether earlier dates appear. This is a *due-date dashboard*, not an exact copy of Super Productivity's Today work-context ordering.
+Today+ starts with tasks due **today** and habits scheduled for **today**. Subtasks appear directly beneath their parent task. **Overdue** and **Finished** are hidden by default; turn on either filter to see more.
 
-**Habits:** In Super Productivity, the habit tracker is backed by *Simple Counters*. Today+ reads enabled counters using `PluginAPI.getAllSimpleCounters()`. For streaks scheduled on specific weekdays, only the matching weekdays appear. Weekly-frequency habits are eligible throughout the week; their progress is shown separately. General daily counters are also shown.
+Habits follow your existing Super Productivity schedule. Daily habits show today's progress, while flexible weekly habits show progress toward their weekly goal. Nothing needs to be configured a second time inside Today+.
 
-**Progress:** Click-counter goals are counts. Stopwatch goal and stored progress values are in **milliseconds** and are displayed in minutes/hours. Completing a task or incrementing a counter writes to Super Productivity through its plugin APIs.
+## What “Not today” means
+
+Choosing **Not today** clears the task’s scheduled date and removes it from the daily list. It does **not** complete, delete, postpone until tomorrow, or mark the task as Super Productivity’s native “Won’t do.” To work on it another day, schedule it again in Super Productivity. For repeating tasks, Today+ asks for confirmation because changing an occurrence’s due date can affect its repetition schedule.
 
 ## Safety and limitations
 
@@ -93,7 +95,7 @@ Run from the repository root:
 
 ```bash
 python -m unittest discover -s tests -p 'test_*.py' -v
-python scripts/package.py --tag v1.0.1
+python scripts/package.py --tag v1.1.0
 ```
 
 For browser tests, install Python Playwright and Chromium, then run `python tests/integration_check.py` and `python tests/browser_check.py`. See [development notes](docs/DEVELOPMENT.md) and [release instructions](docs/RELEASING.md).

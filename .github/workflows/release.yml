@@ -51,5 +51,5 @@ jobs:
             dist/today-plus-super-productivity.zip \
             --target "$GITHUB_SHA" \
             --title "Today+ $TAG" \
-            --notes "Today+ v1.0.1 is the stable release of your tasks and habits in one calm Super Productivity dashboard. Complete tasks, track habit goals and log time for paused stopwatch habits. Download the installable ZIP from Assets." \
+            --notes "Today+ shows tasks with nested subtasks and today’s habits in one calm dashboard. Overdue and completed tasks start hidden. Complete work or choose Not today to clear its due date, track habit goals and log time for paused stopwatch habits. Download the installable ZIP from Assets." \
             --latest

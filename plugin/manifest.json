@@ -1,8 +1,8 @@
 {
   "id": "sp-today-tasks-habits",
   "name": "Today+",
-  "version": "1.0.1",
-  "description": "Today+ brings tasks due today and scheduled habits into one calm Super Productivity dashboard, with task completion, habit progress and manual time logging.",
+  "version": "1.1.0",
+  "description": "Today+ brings tasks due today and scheduled habits into one calm view, with subtasks and optional overdue and finished tasks.",
   "manifestVersion": 1,
   "minSupVersion": "14.0.0",
   "author": "phuongtt2a",
