@@ -114,6 +114,94 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--today-accent);o
 @media(max-width:740px){.app{padding:18px 18px 28px}.topbar{margin-bottom:25px}.workspace{grid-template-columns:1fr;gap:35px}.hero{margin-bottom:22px}.hero h1{font-size:clamp(26px,7.6vw,36px)}.overall{min-width:110px}.item-name{font-size:15px}.item{min-height:70px}.section-head h2{font-size:20px}}
 @media(max-width:380px){.item .action-btn{padding:7px 9px;font-size:11px}.item-meta{flex-wrap:wrap}.time-actions .action-btn{min-height:40px}.app{padding-left:13px;padding-right:13px}.top-right{gap:8px}.today-date{font-size:10px;letter-spacing:.02em}.brand-name{font-size:16px}.hero{align-items:start}.hero h1{font-size:27px}.overall{min-width:88px;font-size:10px}.overall strong{font-size:18px}.item{grid-template-columns:26px minmax(0,1fr) auto;column-gap:8px}.status{font-size:10px;max-width:66px}.task-skip{width:40px;min-width:40px;max-width:40px;height:40px;min-height:40px}.task-children{margin-left:27px;padding-left:9px}.task-children .item{column-gap:6px}.item-name{font-size:14px}.item-meta{font-size:10px}.section-actions{gap:5px}.chip{padding:6px 8px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+
+/* NEO-Zen v1: host typography and wallpaper stay authoritative.
+   Zero-blur outlines/shadows give emphasis without opaque fullscreen panels.
+   Small-screen grid, task state and focus protection remain unchanged. */
+:root{
+ --neo-ink:var(--today-text);
+ --neo-stroke:color-mix(in srgb,var(--today-text) 69%,transparent);
+ --neo-card:color-mix(in srgb,var(--card-bg,#fff) 70%,transparent);
+ --neo-mint:color-mix(in srgb,color-mix(in srgb,var(--today-accent) 17%,var(--card-bg,#fff) 83%) 74%,transparent);
+ --neo-gold:color-mix(in srgb,color-mix(in srgb,#e8b34e 24%,var(--card-bg,#fff) 76%) 75%,transparent);
+ --neo-coral:color-mix(in srgb,color-mix(in srgb,#df8a78 24%,var(--card-bg,#fff) 76%) 75%,transparent);
+ --neo-lilac:color-mix(in srgb,color-mix(in srgb,#aa8fd5 16%,var(--card-bg,#fff) 84%) 75%,transparent);
+}
+html,body,.app{background:transparent!important}
+.app{font-family:var(--font-primary-stack,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif)}
+.topbar{margin-bottom:clamp(22px,3vw,34px)}
+.refresh{border:2px solid var(--neo-stroke);border-radius:5px;background:var(--neo-gold);box-shadow:3px 3px 0 var(--neo-stroke);transition:transform .12s,box-shadow .12s}
+.refresh:hover{background:var(--neo-gold);transform:translate(1px,1px);box-shadow:2px 2px 0 var(--neo-stroke)}
+.refresh:active{transform:translate(3px,3px);box-shadow:none}
+.hero h1{font-weight:760}
+.overall{padding:10px 13px;border:2px solid var(--neo-stroke);border-radius:5px;background:var(--neo-gold);box-shadow:3px 3px 0 var(--neo-stroke)}
+.overall-bar{height:5px;border-radius:0}
+.overall-bar span{border-radius:0}
+.section-head{border-bottom:2px solid var(--neo-stroke);padding-bottom:12px}
+.section-head h2{font-weight:760}
+.count{border:2px solid var(--neo-stroke);border-radius:4px;background:var(--neo-mint);color:var(--today-text);font-weight:800;padding:3px 7px}
+.chip{border:2px solid var(--neo-stroke);border-radius:4px;background:var(--neo-card);color:var(--today-text);font-weight:680;padding:6px 10px}
+.chip[aria-pressed=true]{background:var(--neo-gold);border-color:var(--neo-stroke);color:var(--today-text);box-shadow:2px 2px 0 var(--neo-stroke)}
+.task-group{
+ border:2px solid var(--neo-stroke);
+ border-radius:5px;
+ margin:10px 5px 13px 0;
+ padding:0 10px;
+ background:var(--neo-mint);
+ box-shadow:3px 3px 0 var(--neo-stroke);
+}
+.task-group>.item{border-bottom:0}
+.task-group:has(.item.is-done){background:var(--neo-card)}
+.task-children{border-left:2px solid var(--neo-stroke)}
+.task-children>.item{border-top-color:var(--today-line)}
+#habits .item{
+ border:2px solid var(--neo-stroke);
+ border-radius:5px;
+ margin:10px 5px 13px 0;
+ padding:11px 12px;
+ min-height:77px;
+ background:var(--neo-lilac);
+ box-shadow:3px 3px 0 var(--neo-stroke);
+}
+#habits .item:nth-child(even){background:var(--neo-mint)}
+.item-name{font-weight:700}
+.item-meta,.status{color:var(--today-muted)}
+.status.overdue{color:var(--c-warn,#b36c45);font-weight:800}
+.check{border:2px solid var(--neo-stroke);background:var(--neo-card);color:var(--today-text)}
+.check.is-done{background:var(--today-accent);color:#fff;border-color:var(--neo-stroke)}
+.mini-btn{border:2px solid var(--neo-stroke);border-radius:4px;background:var(--neo-card);font-weight:800}
+.action-btn{
+ border:2px solid var(--neo-stroke);
+ border-radius:4px;
+ background:var(--neo-card);
+ color:var(--today-text);
+ box-shadow:2px 2px 0 var(--neo-stroke);
+}
+.action-btn.filled{background:var(--neo-mint);border-color:var(--neo-stroke);color:var(--today-text)}
+.action-btn:not(:disabled):active{transform:translate(2px,2px);box-shadow:none}
+.task-skip{border-radius:5px;background:var(--neo-card)}
+.habit-progress{height:5px;border-radius:0;background:var(--today-line)}
+.habit-progress span{border-radius:0}
+.group-caption{font-weight:800}
+.task-note,.demo-note,.error-note{border:2px solid var(--neo-stroke);border-radius:5px;background:var(--neo-gold)}
+.time-dialog{border:2px solid var(--neo-stroke);border-radius:6px;box-shadow:6px 6px 0 var(--neo-stroke);background:var(--card-bg,#fff)}
+.time-field{border:2px solid var(--neo-stroke);border-radius:5px}
+.time-close{border:2px solid var(--neo-stroke);border-radius:5px;background:var(--neo-card)}
+@media(max-width:740px){
+ .workspace{gap:27px}
+ .task-group,#habits .item{margin-right:5px}
+ .hero{gap:10px}
+}
+@media(max-width:380px){
+ .overall{min-width:78px;padding:8px}
+ .task-group{padding:0 7px}
+ #habits .item{padding:10px 8px}
+ .section-actions{gap:4px}
+ .chip{padding:6px 6px}
+ .item{column-gap:7px}
+}
+@media(prefers-reduced-motion:reduce){.refresh,.action-btn{transition:none}}
+
 </style>
 </head>
 <body>
