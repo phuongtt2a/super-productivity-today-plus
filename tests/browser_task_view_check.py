@@ -29,7 +29,9 @@ window.PluginAPI={
   updateTask:async(id,updates)=>{window.__actions.push({kind:'update',id,updates});Object.assign(window.__tasks.find(t=>t.id===id),updates);},
   selectTask:async(id)=>{window.__actions.push({kind:'select',id});}
 };
-window.addEventListener('message',event=>{
+
+""".replace('__DATA__', json.dumps(TASKS))
+BRIDGE = """\nwindow.addEventListener('message',event=>{
   if(event.data?.type!=='PLUGIN_MESSAGE')return;
   const id=event.data.message.taskId;
   window.__actions.push({kind:'native-request',id});
@@ -41,8 +43,7 @@ window.addEventListener('message',event=>{
   }
   window.postMessage({type:'PLUGIN_MESSAGE_RESPONSE',messageId:event.data.messageId,
     result:{status:mode}},'*');
-});
-""".replace('__DATA__', json.dumps(TASKS))
+});\n"""
 
 with sync_playwright() as playwright:
     browser = playwright.chromium.launch(headless=True,args=['--no-sandbox'])
@@ -52,6 +53,7 @@ with sync_playwright() as playwright:
             page.goto('about:blank')
             page.evaluate(API)
             page.set_content((ROOT/'plugin/index.html').read_text(encoding='utf8'))
+        page.evaluate(BRIDGE)
             page.wait_for_selector('[data-wont-do="p1"]')
             assert page.locator('.task-group').count()==1
             assert page.locator('.task-children .item-task').count()==2
@@ -102,6 +104,7 @@ with sync_playwright() as playwright:
         page.goto('about:blank')
         page.evaluate(API)
         page.set_content((ROOT/'plugin/index.html').read_text(encoding='utf8'))
+            page.evaluate(BRIDGE)
         page.wait_for_selector('[data-wont-do="timed"]')
         page.evaluate("window.__simulateFocus=()=>window.dispatchEvent(new Event('focus'));document.addEventListener('pointerdown',window.__simulateFocus,true)")
         page.locator('[data-wont-do="timed"]').tap()
