@@ -28,7 +28,7 @@ Super Productivity organizes tasks and habits in different views. Today+ brings 
 ## Features
 
 - **Today’s tasks:** See tasks due today, with subtasks nested beneath their parents. Overdue and completed tasks are hidden at first; you can show either when needed.
-- **Clear daily actions:** Complete a task, or tap the small **calendar-with-X icon** ("Not Today") to remove its due date without marking it completed. The task remains in its project until you schedule it again.
+- **Intentional skipping (experimental):** Use **Won’t Do** to request Super Productivity’s native skip action for this occurrence. When the native row is unavailable, Today+ opens the task and asks you to choose **Won’t Do** in the host menu. Today+ never clears the due date or pretends ordinary completion is a skip.
 - **Scheduled habits:** Read existing enabled habits from Super Productivity. Follow weekday schedules; show weekly-frequency habits during the week.
 - **Single-completion habits:** Tap once to complete; tap again to undo.
 - **Count or goal-based habits:** Increase or decrease today's value and see progress toward the configured goal.
@@ -37,6 +37,8 @@ Super Productivity organizes tasks and habits in different views. Today+ brings 
 - **Theme and mobile:** Uses Super Productivity's font and theme variables, keeps the host wallpaper visible, supports light/dark mode and small phone screens.
 
 No separate login, external service, duplicate tasks, or additional local data store is required.
+
+> **Preview branch note:** This native-menu bridge is experimental and not part of the released plugin. The one-click path depends on a visible host task row; Today+ commonly occupies that view, so the fallback requires a second action in Super Productivity. Only the host’s native Won’t Do operation can reliably preserve skip-specific metrics and recurring behavior. See [Won’t Do verification plan](docs/WONT-DO-VERIFICATION.md) before considering release.
 
 ## Install
 
