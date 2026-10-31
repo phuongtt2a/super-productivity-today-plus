@@ -28,7 +28,7 @@ Super Productivity organizes tasks and habits in different views. Today+ brings 
 ## Features
 
 - **Today’s tasks:** See tasks due today, with subtasks nested beneath their parents. Overdue and completed tasks are hidden at first; you can show either when needed.
-- **Intentional skipping (experimental):** Tap **Won’t Do** to invoke Super Productivity’s native skip action. The plugin uses native task-row menus (on touch and desktop), briefly switching to the regular task list when needed and returning to Today+ afterward. It never automatically opens task details. If the host UI is unavailable, it keeps the task unchanged and shows guidance without opening any popup. No scheduling change or fake completion is made.
+- **Intentional skipping (experimental):** Tap **Won’t Do** to invoke Super Productivity’s native skip using its task-row menu. Today+ briefly visits the native task list if needed, visually conceals only the temporary task menu, and returns to Today+. Task details do not open. If the native menu cannot be reached, it leaves the task unchanged and shows guidance. Native recurrence and completion semantics are preserved.
 - **Scheduled habits:** Read existing enabled habits from Super Productivity. Follow weekday schedules; show weekly-frequency habits during the week.
 - **Single-completion habits:** Tap once to complete; tap again to undo.
 - **Count or goal-based habits:** Increase or decrease today's value and see progress toward the configured goal.
@@ -38,7 +38,7 @@ Super Productivity organizes tasks and habits in different views. Today+ brings 
 
 No separate login, external service, duplicate tasks, or additional local data store is required.
 
-> **Preview branch note:** This is the **v1.1.1-beta.2 experimental preview**, not the public release. Native Won't Do is invoked through Super Productivity's rendered UI and may briefly show its task list before returning to Today+. It remains unverified in a real installed app; test with disposable tasks and check [the verification checklist](docs/WONT-DO-VERIFICATION.md). The plugin does not change host task data when it cannot safely reach the native command.
+> **Preview branch note:** This is the **v1.1.1-beta.3 experimental preview**, not the public release. Native Won't Do is invoked through Super Productivity's rendered UI and may briefly show its task list before returning to Today+. It remains unverified in a real installed app; test with disposable tasks and check [the verification checklist](docs/WONT-DO-VERIFICATION.md). The plugin does not change host task data when it cannot safely reach the native command.
 
 ## Install
 
