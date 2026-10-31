@@ -3,13 +3,13 @@
 ## 1.2.0 — Native Won't Do and clear task actions
 
 - Replace **Not Today** (which cleared due dates) with Super Productivity's genuine **Won't Do** task operation; recurring tasks retain the host's scheduling behavior.
-- Use a clearly labelled **Won't Do** button with a **task-with-X** icon instead of the ambiguous circle-with-slash symbol. Keep the tooltip and accessible label exactly “Won't Do.”
+- Use a compact, icon-only **task-with-X** button instead of the ambiguous circle-with-slash symbol. Keep the tooltip and accessible label exactly “Won't Do.”
 - Allow skipping regular tasks and subtasks, including subtasks without their own due date.
 - Keep the temporary task context menu and detail panel from appearing during automated skipping. Do not change due dates or emulate Done.
 - **Known UX limitation:** temporarily switching to the host task list and back can briefly blink the screen. A seamless transition is deferred to a future improvement.
 - Preserve Today+'s NEO-Zen styling, host font/transparency, responsive task hierarchy and habit actions.
 
-## Unreleased — interface refinements incorporated into v1.2.0
+## Interface refinements incorporated into v1.2.0
 
 - Prevent focus-triggered refreshes from replacing task actions during taps.
 - Keep “Focus on what matters.” and “Not another endless checklist.” on the dashboard.
