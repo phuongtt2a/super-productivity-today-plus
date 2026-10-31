@@ -1,6 +1,6 @@
 # Today+ native Won't Do — beta verification checklist
 
-Status: **v1.1.1-beta.1 / experimental draft PR**. Super Productivity is unchanged; this is plugin-side UI integration. Do not merge to the release branch until the live-app checks pass.
+Status: **v1.1.1-beta.2 / experimental draft PR**. Super Productivity is unchanged; this is plugin-side UI integration. Do not merge to the release branch until the live-app checks pass.
 
 ## Intended native semantics
 
@@ -11,10 +11,10 @@ Won't Do closes **one occurrence** without changing the recurring series. It is 
 - The Today+ iframe sends a message through the existing Super Productivity plugin bridge.
 - The host-side plugin.js checks the task ID and state through PluginAPI.getTasks().
 - If the task's native row is visible, the adapter opens its context menu via the keyboard menu shortcut or a desktop context-menu event.
-- Otherwise, the adapter selects the task. On a touch/small-screen layout, Super Productivity renders a native More menu in its task detail panel; Today+ invokes the genuine "Won't Do" item there.
-- On desktop, where that detail-panel menu may be absent, the adapter temporarily switches from the Today+ route to the app's native Today task list, then (if needed) the task's project list. It opens that task's native context menu and restores Today+ afterward.
+- On touch/small-screen layouts, the adapter opens the native task-list row using its keyboard context-menu shortcut. It never calls selectTask() or opens task details.
+- When Today+ hides the task row, the adapter temporarily switches to the app's native Today task list, then (if needed) the project's task list. It opens that task's native row menu and returns to Today+. This route can briefly flash, but never opens a task-detail popup.
 - The adapter searches for the icon named "block" instead of translated text, checks for exactly one matching task/menu action, and checks for native wontDoOn/doneOn status afterward.
-- If UI elements are missing or ambiguous, it refuses to click and falls back to manual Won't Do. It never calls updateTask to fake completion or clear scheduling.
+- If UI elements are missing or ambiguous, it refuses to click, leaves task data unchanged, and shows guidance without opening task details. It never calls updateTask to fake completion or clear scheduling.
 
 This is a deliberately **fragile integration point**: Angular Material's rendered DOM is not a supported plugin API. A Super Productivity update could change it.
 
@@ -22,7 +22,7 @@ This is a deliberately **fragile integration point**: Angular Material's rendere
 
 1. Install the beta ZIP using a **test profile** in Super Productivity 19.3+; back up any existing test data.
 2. On desktop, create a one-off task due today. Tap Won't Do in Today+. Confirm it briefly switches to the host task list, returns to Today+, shows a native skipped state, and is excluded from completed statistics.
-3. On mobile/touch, create a one-off task and test the task detail-panel More action without manually clicking a second time.
+3. On mobile/touch, create a one-off task and ensure the action skips it without displaying a task-detail panel.
 4. Create a **fixed-schedule daily/weekly repeated task**. Skip only the current occurrence. The repeat rule and next scheduled occurrence must remain intact.
 5. Test an **after-completion** repeat. Check the next occurrence follows the host's native skip behavior.
 6. Test parent/subtasks and a task with a linked issue. Confirm no unintended updates or issue closure.
@@ -35,7 +35,7 @@ This is a deliberately **fragile integration point**: Angular Material's rendere
 
 ## Automated test limits
 
-CI validates JavaScript syntax, manifest, packaging, simulated plugin message bridge, a DOM mock for the native task row and detail menu, temporary hash-route navigation/restoration, touch, and responsive behavior.
+CI validates JavaScript syntax, manifest, packaging, simulated plugin message bridge, a DOM mock for the native task-row menu (no detail selection), temporary hash-route navigation/restoration, touch, and responsive behavior.
 
 **CI cannot prove that a real installed Super Productivity version exposes the same task menu markup and performs the correct recurrence operations.** That must be confirmed manually before release.
 
@@ -44,7 +44,7 @@ CI validates JavaScript syntax, manifest, packaging, simulated plugin message br
 - Never simulate Won't Do using isDone=true or dueDay=null.
 - Never click when the native task or menu is ambiguous.
 - Never report success unless native wontDoOn === doneOn is observed on the target task.
-- If the native UI cannot be invoked safely, open the task for the user's manual Won't Do action.
+- If the native UI cannot be invoked safely, leave the task untouched and show guidance; do not auto-open task details.
 
 Upstream references:
 - https://github.com/super-productivity/super-productivity/blob/master/src/app/features/tasks/util/is-wont-do-task.ts
