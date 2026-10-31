@@ -91,13 +91,16 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--today-accent);o
 .empty strong{font-size:16px;color:var(--today-text);font-weight:600;display:block;margin-bottom:6px}
 .foot{font-size:11px;line-height:1.5;color:var(--today-muted);margin-top:24px;padding-top:14px;border-top:1px solid var(--today-line)}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
-/* Icon-only secondary action. Keep a full touch target and a descriptive accessible name. */
-.task-skip{justify-self:end;display:grid;place-items:center;width:40px;height:40px;
-  min-width:40px;max-width:40px;min-height:40px;padding:0;
+/* Text + task-with-X icon: distinguish intentionally skipped tasks from Done.
+   Keep a 40px minimum touch target, host font and translucent background. */
+.task-skip{justify-self:end;display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  min-width:96px;min-height:40px;padding:8px 10px;
   border:1px solid var(--today-line);border-radius:12px;
   background:var(--today-bg);color:var(--today-text);
+  font-size:11.5px;font-weight:650;line-height:1.2;white-space:nowrap;
   transition:background .15s ease,border-color .15s ease}
-.task-skip svg{display:block;width:20px;height:20px;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;fill:none;pointer-events:none}
+.task-skip svg{display:block;flex:none;width:19px;height:19px;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;fill:none;pointer-events:none}
+.task-skip-label{pointer-events:none}
 .task-skip:hover,.task-skip:focus-visible{background:var(--today-hover);border-color:var(--today-accent)}
 .task-skip:focus-visible{outline:2px solid var(--today-accent);outline-offset:2px}
 .task-skip:active{background:var(--today-hover)}
@@ -112,7 +115,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--today-accent);o
 .task-note{font-size:12px;line-height:1.5;color:var(--today-muted);margin:9px 0 0;padding:9px 12px;border:1px solid var(--today-line);border-radius:11px;background:var(--today-bg)}
 .item .action-btn{justify-self:end}
 @media(max-width:740px){.app{padding:18px 18px 28px}.topbar{margin-bottom:25px}.workspace{grid-template-columns:1fr;gap:35px}.hero{margin-bottom:22px}.hero h1{font-size:clamp(26px,7.6vw,36px)}.overall{min-width:110px}.item-name{font-size:15px}.item{min-height:70px}.section-head h2{font-size:20px}}
-@media(max-width:380px){.item .action-btn{padding:7px 9px;font-size:11px}.item-meta{flex-wrap:wrap}.time-actions .action-btn{min-height:40px}.app{padding-left:13px;padding-right:13px}.top-right{gap:8px}.today-date{font-size:10px;letter-spacing:.02em}.brand-name{font-size:16px}.hero{align-items:start}.hero h1{font-size:27px}.overall{min-width:88px;font-size:10px}.overall strong{font-size:18px}.item{grid-template-columns:26px minmax(0,1fr) auto;column-gap:8px}.status{font-size:10px;max-width:66px}.task-skip{width:40px;min-width:40px;max-width:40px;height:40px;min-height:40px}.task-children{margin-left:27px;padding-left:9px}.task-children .item{column-gap:6px}.item-name{font-size:14px}.item-meta{font-size:10px}.section-actions{gap:5px}.chip{padding:6px 8px}}
+@media(max-width:380px){.item .action-btn{padding:7px 9px;font-size:11px}.item-meta{flex-wrap:wrap}.time-actions .action-btn{min-height:40px}.app{padding-left:13px;padding-right:13px}.top-right{gap:8px}.today-date{font-size:10px;letter-spacing:.02em}.brand-name{font-size:16px}.hero{align-items:start}.hero h1{font-size:27px}.overall{min-width:88px;font-size:10px}.overall strong{font-size:18px}.item{grid-template-columns:26px minmax(0,1fr) auto;column-gap:8px}.status{font-size:10px;max-width:66px}.task-skip{min-width:88px;min-height:40px;padding:7px 6px;gap:4px;font-size:10.5px}.task-skip svg{width:17px;height:17px}.task-children{margin-left:27px;padding-left:9px}.task-children .item{column-gap:6px}.item-name{font-size:14px}.item-meta{font-size:10px}.section-actions{gap:5px}.chip{padding:6px 8px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 
 /* NEO-Zen v1: host typography and wallpaper stay authoritative.
@@ -329,7 +332,7 @@ function taskRow(t,level=0,context=false){
   const status=context?'Parent task':isWontDo(t)?"Won't Do":t.isDone?'Finished':isOverdue?'Overdue':d===state.today?'Due today':'Subtask';
   const marker=context?'<span class="check" aria-hidden="true"></span>':`<button class="check ${t.isDone?'is-done':''}" data-task="${id}" aria-label="${t.isDone?'Return to do':'Mark as completed'}: ${safe(t.title)}" type="button">${t.isDone?(isWontDo(t)?'×':'✓'):''}</button>`;
   // Even an unscheduled subtask can be intentionally skipped.
-  const action=context||t.isDone?'':`<button type="button" class="task-skip" data-wont-do="${id}" aria-label="Won’t Do: ${safe(t.title)}" title="Won’t Do — skip this occurrence"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M6 6l12 12"/></svg></button>`;
+  const action=context||t.isDone?'':`<button type="button" class="task-skip" data-wont-do="${id}" aria-label="Won't Do" title="Won't Do"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4.5" y="2.5" width="15" height="19" rx="2"/><path d="M8 7h8M9 12l6 6m0-6-6 6"/></svg><span class="task-skip-label">Won't Do</span></button>`;
   return `<article class="item item-task ${t.isDone?'is-done':''} ${context?'task-context':''} ${level?'subtask':''}">${marker}<div class="item-copy" data-open="${id}" tabindex="0" role="button" aria-label="Open ${level?'subtask':'task'}: ${safe(t.title)}"><p class="item-name">${safe(t.title)}</p><p class="item-meta"><span>${safe(project)}</span><span class="dot">·</span><span>${safe(status)}${d&&d!==state.today?' · '+safe(fmtDate(d)):''}</span></p></div>${action}</article>`;
 }
 function taskGroupRow(group){
