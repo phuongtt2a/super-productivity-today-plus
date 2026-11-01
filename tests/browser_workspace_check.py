@@ -34,6 +34,7 @@ window.PluginAPI = {
     TASK_CREATED:'taskCreated', TASK_UPDATE:'taskUpdate',
     TASK_COMPLETE:'taskComplete', TASK_DELETE:'taskDelete',
     CURRENT_TASK_CHANGE:'currentTaskChange',
+    PERSISTED_DATA_CHANGED:'persistedDataChanged',
     DATA_CHANGED:'dataChanged', DAY_CHANGE:'dayChange'
   },
   registerHook:(name,fn)=>{window.__hooks[name]=fn},
@@ -138,7 +139,18 @@ with sync_playwright() as p:
         restored.locator('#working-card [data-work-clear]').click()
         assert restored.locator('#working-card .working-empty').count()==1
         assert restored.locator('#tasks [data-sort-id="t3"]').count()==1
-        print('persistence, rehydrate and remove from Working Now: PASS')
+        restored.wait_for_function("JSON.parse(window.__saved['todayplus.workspace.v1']).workingId===null")
+        before=restored.evaluate("window.__events.filter(e=>e.type==='persist').length")
+        restored.evaluate("""() => {
+          const key='todayplus.workspace.v1';
+          const prefs=JSON.parse(window.__saved[key]);
+          prefs.habitOrder=['h2','h1','h3'];
+          window.__saved[key]=JSON.stringify(prefs);
+          window.__hooks.persistedDataChanged?.({key});
+        }""")
+        restored.wait_for_function("document.querySelector('#habits [data-sort-kind=habit]').dataset.sortId==='h2'")
+        assert restored.evaluate("window.__events.filter(e=>e.type==='persist').length")==before
+        print('persistence, rehydrate and remote-sync refresh without write loop: PASS')
 
         # Drag-and-drop is a convenience in addition to tap targets and
         # keyboard-accessible top/up/down buttons.
