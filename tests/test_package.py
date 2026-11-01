@@ -5,10 +5,10 @@ class TestPlugin(unittest.TestCase):
     def test_manifest(self):
         data=json.loads((ROOT/'plugin/manifest.json').read_text())
         self.assertEqual(data['id'],'sp-today-tasks-habits')
-        self.assertEqual(data['version'],'1.3.0-beta.3')
+        self.assertEqual(data['version'],'2.0.0')
         self.assertTrue(data['iFrame'])
         self.assertEqual(data['name'],'Today+')
-        self.assertIn('tasks due today',data['description'])
+        self.assertIn("today's tasks and habits",data['description'])
     def test_logo_consistency(self):
         import re
         icon=(ROOT/'plugin/icon.svg').read_text()
