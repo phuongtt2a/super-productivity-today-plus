@@ -28,6 +28,8 @@ Today+ uses one consistent calendar-and-check icon in both the Super Productivit
 
 ![Today+ mobile arrangement mode with Move to top and up/down controls](docs/screenshots/arrange-mode-phone.webp)
 
+![Today+ phone Working Now with a habit and its counter controls](docs/screenshots/working-habit-phone.webp)
+
 </details>
 
 ## Why Today+?
