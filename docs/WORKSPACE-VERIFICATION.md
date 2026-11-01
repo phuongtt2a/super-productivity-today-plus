@@ -1,6 +1,6 @@
-# Today+ Working Now and Order — v1.3.0-beta.1 QA
+# Today+ Working Now and Order — v1.3.0-beta.3 QA
 
-**Status:** v1.3.0-beta.2 preview branch only. Do not merge or publish as stable until real-host verification. GitHub CI runs DOM mocks and screenshots; these do not replace actual installed testing.
+**Status:** v1.3.0-beta.3 preview branch only. Do not merge or publish as stable until real-host verification. GitHub CI runs DOM mocks and screenshots; these do not replace actual installed testing.
 
 ## Core order behavior
 
@@ -21,9 +21,11 @@
 4. Test selecting a subtask. Verify the parent remains in Tasks while the selected subtask moves to Working Now.
 5. Remove the selected task. Verify it returns to Tasks **without stopping native tracking**.
 6. Complete the task or choose **Won't Do** from Working Now. Verify the native record is correct, the Working Zone becomes empty and overall progress is counted only once.
-7. Select a **habit** from Habits. Confirm it appears in Working Now, disappears from Habits without duplicating progress, and retains its Complete, +/−, or Log time control as appropriate. Completing it should empty Working Now.
+7. Select a **habit** from Habits. Confirm it appears in Working Now, disappears from Habits without duplicating progress, and retains its Complete, +/−, or Log time control as appropriate. Completing it **must not empty Working Now**; the user chooses when to remove or replace it.
+7a. Test a **completed 60-minute stopwatch habit**: select it despite already meeting the goal, log another 30 minutes, verify the native total is 90 minutes, daily Done totals do not increase a second time, and the habit remains in Working Now until explicitly removed.
 8. Replace a Working Now task with a habit and vice versa. Confirm the previous item returns to its original list.
 9. Ensure habits do not show native task-tracking or Focus-mode buttons.
+10. Confirm Arrange appears at the far right of Tasks and Habits and is visually distinct from the Overdue/Finished filters.
 7. Test unfinished overdue, completed, deleted and rescheduled tasks after a restart. Invalid Working Now references must not surface ghost tasks.
 
 ## Native tracking and Focus
