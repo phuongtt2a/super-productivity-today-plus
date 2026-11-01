@@ -27,7 +27,10 @@ API="""window.PluginAPI={
   {id:'water',title:'Uống đủ nước',isEnabled:true,type:'ClickCounter',isTrackStreaks:true,streakMinValue:6,countOnDay:{}},
   {id:'exercise',title:'Tập thể dục 30 phút',isEnabled:true,type:'StopWatch',isOn:false,isTrackStreaks:true,streakMinValue:1800000,countOnDay:{[__DATE__]:600000}}
  ],
- updateTask:async()=>{},selectTask:async()=>{},setCounter:async()=>{}
+ updateTask:async()=>{},selectTask:async()=>{},setCounter:async()=>{},
+ loadSyncedData:async()=>null,persistDataSynced:async()=>{},
+ getDayContext:async()=>({todayStr:__DATE__}),
+ startTracking:async()=>{},stopTracking:async()=>{},dispatchAction:()=>{}
 };""".replace("__TASKS__",json.dumps(TASKS,ensure_ascii=False)).replace("__DATE__",json.dumps(TODAY))
 WALLPAPER="""html::before{
  content:'';position:fixed;pointer-events:none;inset:0;z-index:-1;
@@ -64,6 +67,19 @@ with sync_playwright() as playwright:
    page.wait_for_selector('#time-overlay:not(.hidden)')
    pic=page.screenshot(type="png",full_page=False,animations="disabled")
    Image.open(BytesIO(pic)).convert("RGB").save(OUT/"log-time.webp",format="WEBP",quality=86,method=6)
+   page.locator('#time-close').click()
+   page.locator('[data-work="report"]').click()
+   page.wait_for_selector('#working-card [data-sort-id="report"]')
+   assert page.locator('#tasks [data-sort-id="report"]').count()==0
+   shot=page.screenshot(type="png",full_page=True,animations="disabled")
+   Image.open(BytesIO(shot)).convert("RGB").save(OUT/"working-now-active.webp",format="WEBP",quality=86,method=6)
+  if width==390:
+   page.locator('#arrange-tasks').click()
+   page.locator('#arrange-habits').click()
+   assert page.locator('#tasks [data-move="top"]').count()>0
+   assert page.evaluate("document.documentElement.scrollWidth<=innerWidth+1")
+   shot=page.screenshot(type="png",full_page=True,animations="disabled")
+   Image.open(BytesIO(shot)).convert("RGB").save(OUT/"arrange-mode-phone.webp",format="WEBP",quality=86,method=6)
   print("captured",filename)
   page.close()
  browser.close()
