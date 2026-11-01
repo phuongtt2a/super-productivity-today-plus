@@ -9,6 +9,12 @@ on:
 permissions:
   contents: write
 
+# Keep the newest PR screenshot job; overlapping runs can race to commit the
+# same rendered files and cause avoidable non-fast-forward push failures.
+concurrency:
+  group: today-plus-check-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   check:
     runs-on: ubuntu-latest
