@@ -320,7 +320,7 @@ html,body,.app{background:transparent!important}
   <section class="working-zone" aria-labelledby="working-heading">
     <div class="section-head working-heading">
       <div class="section-title"><h2 id="working-heading">Working Now</h2></div>
-      <span class="working-caption">One task at a time</span>
+      <span class="working-caption">One priority at a time</span>
     </div>
     <div class="working-surface" id="working-card" aria-live="polite"></div>
     <p class="workspace-note hidden" id="workspace-note" role="status" aria-live="polite"></p>
@@ -599,24 +599,34 @@ function taskSummary(){
   }
   return state.tasks.filter(t=>ids.has(t.id));
 }
-function renderWorking(working,groups){
-  if(!working){
-    $('working-card').innerHTML='<div class="working-empty"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg><span>Choose the target icon next to a task to bring it here. Selecting a task does not start a timer.</span></div>';
+function renderWorking(workingTask,workingHabit,groups){
+  const hasSelection=!!(workingTask||workingHabit);
+  $('working-card').classList.toggle('has-priority',hasSelection);
+  if(!hasSelection){
+    $('working-card').innerHTML='<div class="working-empty"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg><span>Tap the target icon beside a task or habit to make it your current priority. This does not start tracking.</span></div>';
     return;
   }
-  const group=groups.find(g=>g.task.id===working.id);
-  const row=group?taskGroupRow(group,true):taskRow(working,working.parentId?1:0,false,working.parentId||'',true);
+  if(workingHabit){
+    $('working-card').innerHTML=
+      '<div class="working-eyebrow">Current priority · Daily habit</div>'+
+      habitRow(workingHabit,true)+
+      '<p class="working-habit-note">Complete or log progress using the habit controls. Native Focus sessions and task tracking apply to tasks, not habits.</p>'+
+      '<div class="working-actions"><button type="button" class="action-btn" data-work-clear>Remove</button><span class="working-state">Habit in progress</span></div>';
+    return;
+  }
+  const group=groups.find(g=>g.task.id===workingTask.id);
+  const row=group?taskGroupRow(group,true):taskRow(workingTask,workingTask.parentId?1:0,false,workingTask.parentId||'',true);
   const tracked=state.trackingKnown&&state.trackedTaskId&&
-    (state.trackedTaskId===working.id||state.tasks.some(t=>t.id===state.trackedTaskId&&t.parentId===working.id));
-  const hasTracking=!!state.api&&typeof state.api.startTracking==='function';
-  const hasFocus=!!state.api&&typeof state.api.dispatchAction==='function';
+    (state.trackedTaskId===workingTask.id||state.tasks.some(t=>t.id===state.trackedTaskId&&t.parentId===workingTask.id));
+  const canTrack=!!state.api&&(typeof state.api.startTracking==='function'||typeof state.api.dispatchAction==='function');
+  const canFocus=canTrack&&typeof state.api.dispatchAction==='function';
   const trackButton=tracked
-    ?'<button type="button" class="action-btn" data-track-stop>Stop tracking</button>'
-    :`<button type="button" class="action-btn filled" data-track-start ${hasTracking?'':'disabled'}>Start tracking</button>`;
+    ?'<button type="button" class="action-btn" data-track-stop title="Stop the native task timer">Stop tracking</button>'
+    :`<button type="button" class="action-btn filled" data-track-start title="Start Super Productivity's time tracker" ${canTrack?'':'disabled'}>Start tracking</button>`;
   $('working-card').innerHTML=
-    '<div class="working-eyebrow">Your current priority · Selecting does not start time tracking</div>'+
+    '<div class="working-eyebrow">Current priority · Task</div>'+
     row+
-    `<div class="working-actions">${trackButton}<button type="button" class="action-btn" data-focus-open ${hasFocus?'':'disabled'}>Focus mode</button><button type="button" class="action-btn" data-work-clear>Remove</button><span class="working-state">${tracked?'Time tracking is active':'Ready when you are'}</span></div>`;
+    `<div class="working-actions">${trackButton}<button type="button" class="action-btn" data-focus-open title="Focus on this task in Super Productivity" ${canFocus?'':'disabled'}>Focus on task</button><button type="button" class="action-btn" data-work-clear>Remove</button><span class="working-state">${tracked?'Native timer running':canTrack?'Ready · Native task timer':'Tracking requires a newer host'}</span></div>`;
 }
 function render(){
   state.today=state.logicalDay||localDay();
@@ -626,17 +636,19 @@ function render(){
   const taskDone=summary.filter(t=>t.isDone&&!isWontDo(t)).length;
   const habitDone=habits.filter(h=>dailyDone(h)).length;
   const working=validWorkingTask();
-  renderWorking(working,groups);
+  const workingHabit=validWorkingHabit();
+  renderWorking(working,workingHabit,groups);
   const visibleGroups=working
     ?groups.filter(group=>group.task.id!==working.id).map(group=>
       ({...group,children:group.children.filter(child=>child.id!==working.id)}))
     :groups;
+  const visibleHabits=workingHabit?habits.filter(h=>h.id!==workingHabit.id):habits;
   $('tasks').innerHTML=visibleGroups.length?visibleGroups.map(group=>taskGroupRow(group)).join(''):
     sectionEmpty('All clear','No other tasks due today in this view.');
-  $('habits').innerHTML=habits.length?habits.map(habitRow).join(''):
-    sectionEmpty('No habits scheduled','Enabled habits will show here on their scheduled days.');
+  $('habits').innerHTML=visibleHabits.length?visibleHabits.map(h=>habitRow(h)).join(''):
+    sectionEmpty('No other habits','Your current habit is in Working Now, or none is scheduled today.');
   $('task-count').textContent=String(visibleGroups.reduce((n,g)=>n+Number(!g.context)+g.children.length,0));
-  $('habit-count').textContent=String(habits.length);
+  $('habit-count').textContent=String(visibleHabits.length);
   $('done-count').textContent=`${taskDone+habitDone} of ${totalTasks+habits.length}`;
   $('done-bar').style.width=((totalTasks+habits.length)?
     Math.round(100*(taskDone+habitDone)/(totalTasks+habits.length)):0)+'%';
