@@ -824,33 +824,47 @@ async function wontDo(id){
   }
 }
 
-function chooseWorking(id){
-  const task=state.tasks.find(t=>t.id===id);
-  if(!task||task.isDone)return;
+function chooseWorking(id,kind='task'){
+  const item=kind==='habit'
+    ?state.habits.find(h=>h.id===id&&habitDue(h)&&!dailyDone(h))
+    :state.tasks.find(t=>t.id===id&&!t.isDone);
+  if(!item)return;
   state.prefs.workingId=id;
+  state.prefs.workingKind=kind==='habit'?'habit':'task';
   savePrefs();noteWorkspace('');
   render();
 }
 function removeWorking(){
   state.prefs.workingId=null;
-  savePrefs();noteWorkspace('Removed from Working Now. Any native time tracking continues until stopped.');
+  state.prefs.workingKind='task';
+  savePrefs();
+  noteWorkspace('Removed from Working Now. Native task tracking, if active, continues until stopped.');
   render();
+}
+// Older Super Productivity hosts expose the approved NgRx task tracking action
+// even when the newer optional PluginAPI.startTracking() is absent.
+async function selectNativeTrackedTask(task){
+  if(!state.api)throw new Error('Super Productivity is not connected.');
+  if(typeof state.api.startTracking==='function'){
+    await state.api.startTracking(task.id);
+  }else if(typeof state.api.dispatchAction==='function'){
+    state.api.dispatchAction({type:'[Task] SetCurrentTask',id:task.id});
+  }else{
+    throw new Error('Native time tracking is unavailable in this host version.');
+  }
+  state.trackedTaskId=task.id;
+  state.trackingKnown=true;
 }
 async function startWorkingTracking(){
   const task=validWorkingTask();
   if(!task)return;
-  if(!state.api||typeof state.api.startTracking!=='function'){
-    noteWorkspace('Time tracking is unavailable in this version of Super Productivity.');return;
-  }
   if(state.busy.has('tracking'))return;
   state.busy.add('tracking');
   try{
-    await state.api.startTracking(task.id);
-    // The host's currentTaskChange hook is authoritative when it arrives.
-    if(!state.trackingKnown||!state.trackedTaskId){state.trackedTaskId=task.id;state.trackingKnown=true;}
-    noteWorkspace('Native time tracking started. Super Productivity owns the timer.');
+    await selectNativeTrackedTask(task);
+    noteWorkspace('Super Productivity is tracking this task. The app owns the timer.');
     render();
-  }catch(err){noteWorkspace('Could not start time tracking: '+String(err?.message||err));}
+  }catch(err){noteWorkspace('Could not start tracking: '+String(err?.message||err));}
   finally{state.busy.delete('tracking');flushDeferredRefresh();}
 }
 async function stopWorkingTracking(){
@@ -858,30 +872,40 @@ async function stopWorkingTracking(){
   if(!task||!state.trackingKnown||!state.trackedTaskId)return;
   const current=state.tasks.find(t=>t.id===state.trackedTaskId);
   if(state.trackedTaskId!==task.id&&current?.parentId!==task.id)return;
-  if(!state.api||typeof state.api.stopTracking!=='function'){
-    noteWorkspace('Stopping time tracking is unavailable in this version.');return;
+  if(state.busy.has('tracking'))return;
+  state.busy.add('tracking');
+  try{
+    if(typeof state.api?.stopTracking==='function')await state.api.stopTracking();
+    else if(typeof state.api?.dispatchAction==='function')
+      state.api.dispatchAction({type:'[Task] SetCurrentTask',id:null});
+    else throw new Error('Native stop tracking is unavailable in this host version.');
+    state.trackedTaskId=null;state.trackingKnown=true;
+    noteWorkspace('Native time tracking stopped.');
+    render();
+  }catch(err){noteWorkspace('Could not stop tracking: '+String(err?.message||err));}
+  finally{state.busy.delete('tracking');flushDeferredRefresh();}
+}
+async function openNativeFocus(){
+  const task=validWorkingTask();
+  if(!task)return;
+  if(!state.api||typeof state.api.dispatchAction!=='function'){
+    noteWorkspace('Native Focus mode is unavailable in this host version.');return;
   }
   if(state.busy.has('tracking'))return;
   state.busy.add('tracking');
   try{
-    await state.api.stopTracking();
-    state.trackedTaskId=null;state.trackingKnown=true;
-    noteWorkspace('Native time tracking stopped.');
-    render();
-  }catch(err){noteWorkspace('Could not stop time tracking: '+String(err?.message||err));}
-  finally{state.busy.delete('tracking');flushDeferredRefresh();}
-}
-function openNativeFocus(){
-  if(!validWorkingTask())return;
-  if(!state.api||typeof state.api.dispatchAction!=='function'){
-    noteWorkspace('Native Focus mode is unavailable here.');return;
-  }
-  try{
-    // Opening the native overlay is allowed. Starting a session directly
-    // is intentionally NOT permitted by Super Productivity's plugin API.
+    const tracked=state.trackingKnown&&state.trackedTaskId===task.id;
+    if(!tracked){
+      // Focus on this task is an explicit user request to activate it.
+      // Do not trigger the unsupported Start Session action; the native
+      // Focus interface still owns duration/mode/session confirmation.
+      await selectNativeTrackedTask(task);
+    }
     state.api.dispatchAction({type:'[FocusMode] Show Overlay'});
-    noteWorkspace('Opened Super Productivity Focus mode. Choose a session in the native interface.');
-  }catch(err){noteWorkspace('Could not open Focus mode: '+String(err?.message||err));}
+    noteWorkspace('Opened native Focus mode with this task active. Choose your session in Super Productivity.');
+    render();
+  }catch(err){noteWorkspace('Could not prepare Focus mode: '+String(err?.message||err));}
+  finally{state.busy.delete('tracking');flushDeferredRefresh();}
 }
 function clearDragMarker(){
   document.querySelectorAll('.sort-drop-target').forEach(el=>el.classList.remove('sort-drop-target'));
@@ -924,11 +948,12 @@ document.addEventListener('pointercancel',finishDrag,false);
 
 document.addEventListener('click',event=>{const target=event.target.closest('button,[data-open]');if(!target)return;const d=target.dataset;
   if(d.move)moveItem(d.orderKind,d.orderId,d.move,d.orderParent);
-  else if(d.work)chooseWorking(d.work);
+  else if(d.work)chooseWorking(d.work,'task');
+  else if(d.workHabit)chooseWorking(d.workHabit,'habit');
   else if('workClear' in d)removeWorking();
   else if('trackStart' in d)void startWorkingTracking();
   else if('trackStop' in d)void stopWorkingTracking();
-  else if('focusOpen' in d)openNativeFocus();
+  else if('focusOpen' in d)void openNativeFocus();
   else if(d.task)void updateTask(d.task);
   else if(d.wontDo)void wontDo(d.wontDo);
   else if(d.habit)void updateHabit(d.habit,'toggle');
