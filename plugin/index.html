@@ -266,6 +266,41 @@ html,body,.app{background:transparent!important}
   .arrange-label{flex-basis:100%;margin-right:0}
 }
 
+
+/* Workspace emphasis: warm green priority area, small amber accent, translucent to host wallpaper. */
+.working-surface{position:relative;isolation:isolate;
+  border:2px solid var(--today-accent);
+  background:color-mix(in srgb,var(--neo-mint) 86%,var(--today-accent) 14%);
+  box-shadow:4px 4px 0 var(--neo-stroke);
+  padding:clamp(13px,2vw,19px);
+}
+.working-surface.has-priority{border-width:3px;
+  background:color-mix(in srgb,var(--today-accent) 21%,var(--neo-card) 79%);
+  box-shadow:4px 4px 0 var(--neo-stroke),inset 5px 0 0 var(--neo-gold);
+}
+.working-surface.has-priority .working-eyebrow{font-weight:900;color:var(--today-text)}
+.working-heading h2{color:var(--today-accent);font-weight:850}
+.working-caption{padding:5px 8px;border:1px solid var(--today-accent);
+  border-radius:5px;background:var(--neo-gold);font-weight:800;color:var(--today-text)}
+/* Arrange is an action, not a data filter. Preserve the smaller filter chips. */
+.section-actions .arrange-toggle{
+  display:inline-flex;align-items:center;gap:5px;min-height:36px;
+  border:2px solid var(--neo-stroke);border-radius:5px;
+  background:var(--neo-mint);color:var(--today-text);font-weight:800;
+  box-shadow:2px 2px 0 var(--neo-stroke);margin-right:7px;
+}
+.section-actions .arrange-toggle[aria-pressed=true]{
+  background:var(--neo-gold);box-shadow:1px 1px 0 var(--neo-stroke);
+}
+.section-actions .arrange-toggle:hover{background:var(--neo-gold)}
+.section-actions .arrange-toggle span{font-size:16px;line-height:1}
+.working-habit-note{font-size:12px;line-height:1.4;color:var(--today-muted);
+  margin:10px 0 0}
+@media(max-width:380px){
+  .section-actions .arrange-toggle{margin-right:4px;padding:6px 8px}
+  .working-caption{font-size:10px}
+  .working-surface{padding:12px}
+}
 </style>
 </head>
 <body>
@@ -292,11 +327,11 @@ html,body,.app{background:transparent!important}
   </section>
   <div class="workspace">
     <section class="section" aria-labelledby="task-heading">
-      <div class="section-head"><div class="section-title"><h2 id="task-heading">Tasks</h2><span class="count" id="task-count">0</span></div><div class="section-actions"><button class="chip" id="arrange-tasks" data-arrange="task" type="button" aria-pressed="false">Arrange</button><button class="chip" id="overdue-filter" type="button" aria-pressed="false">Overdue</button><button class="chip" id="completed-filter" type="button" aria-pressed="false">Finished</button></div></div>
+      <div class="section-head"><div class="section-title"><h2 id="task-heading">Tasks</h2><span class="count" id="task-count">0</span></div><div class="section-actions"><button class="chip arrange-toggle" id="arrange-tasks" data-arrange="task" type="button" aria-pressed="false" title="Reorder tasks"><span aria-hidden="true">↕</span> Arrange</button><button class="chip" id="overdue-filter" type="button" aria-pressed="false">Overdue</button><button class="chip" id="completed-filter" type="button" aria-pressed="false">Finished</button></div></div>
       <div id="tasks"></div><p id="task-action-note" class="task-note hidden" role="status" aria-live="polite"></p>
     </section>
     <section class="section" aria-labelledby="habit-heading">
-      <div class="section-head"><div class="section-title"><h2 id="habit-heading">Habits</h2><span class="count" id="habit-count">0</span></div><div class="section-actions"><span class="today-date" id="habit-caption">TODAY</span><button class="chip" id="arrange-habits" data-arrange="habit" type="button" aria-pressed="false">Arrange</button></div></div>
+      <div class="section-head"><div class="section-title"><h2 id="habit-heading">Habits</h2><span class="count" id="habit-count">0</span></div><div class="section-actions"><span class="today-date" id="habit-caption">TODAY</span><button class="chip arrange-toggle" id="arrange-habits" data-arrange="habit" type="button" aria-pressed="false" title="Reorder habits"><span aria-hidden="true">↕</span> Arrange</button></div></div>
       <div id="habits"></div>
     </section>
   </div>
