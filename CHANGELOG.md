@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.3.0-beta.2 — Working Now usability improvements (preview only)
+
+- Add **habits** to Working Now, including native Complete, Increase/Decrease and Log time controls. Selecting or completing a habit never starts a task timer.
+- Activate the chosen task before opening the native Focus overlay, without dispatching the restricted Start Session action.
+- Support the approved task tracking action when the optional time-tracking methods are absent on older installed hosts.
+- Distinguish Arrange actions from Overdue/Finished filters, and give Working Now a stronger translucent green-and-gold treatment.
+- Preserve previously saved task selections and habit order. Keep the public 1.2.0 release unchanged.
+
 ## 1.3.0-beta.1 — Working Now and personal daily ordering (preview only)
 
 - Add independent user-defined ordering of task groups, nested subtasks and daily habits, with drag handles and accessible Move to top/up/down buttons.
