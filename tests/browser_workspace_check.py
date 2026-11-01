@@ -222,6 +222,7 @@ with sync_playwright() as p:
         assert ui.locator('#habits [data-sort-id="h4"]').count()==0
         assert 'Goal reached' in ui.locator('#working-card .working-habit-note').inner_text()
         assert ui.locator('#working-card [data-log-time="h4"]').is_enabled()
+        completed_before=ui.locator('#done-count').inner_text()
         ui.locator('#working-card [data-log-time="h4"]').click()
         ui.wait_for_selector('#time-overlay:not(.hidden)')
         ui.locator('#time-minutes').fill('30')
@@ -231,7 +232,7 @@ with sync_playwright() as p:
         assert ui.locator('#working-card [data-sort-id="h4"].is-done').count()==1
         assert ui.locator('#habits [data-sort-id="h4"]').count()==0
         assert ui.evaluate("window.__dataHabits.find(h=>h.id==='h4').countOnDay[window.__today]") == 5400000
-        assert ui.locator('#done-count').inner_text().strip().split(' of ')[0]=='1'
+        assert ui.locator('#done-count').inner_text()==completed_before
         ui.locator('#working-card [data-work-clear]').click()
         assert ui.locator('#habits [data-sort-id="h4"]').count()==1
         print('met-goal stopwatch habit can be selected, extended and removed: PASS')
