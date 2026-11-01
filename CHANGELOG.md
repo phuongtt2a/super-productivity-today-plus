@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.0.0 — Working Now and personalized daily priorities (major release)
+
+**Today+ is now a daily workspace, not just a combined checklist.** This version has been verified in the installed Super Productivity app by the user after three beta iterations.
+
+- **Working Now:** Select one task or habit using its target icon. Keep one visible priority without cloning records or distorting daily progress; replace or remove the selection whenever you want.
+- **Task and subtask ordering:** Drag parent task groups or use accessible Move to top / Up / Down controls. Arrange subtasks inside their own parent; reset the task order each logical day without modifying Super Productivity's project task order.
+- **Habit routine ordering:** Arrange habits independently and retain their preferred order across days. Persist Today+ preferences through Super Productivity's synced plugin storage where available.
+- **Native task tracking and Focus:** Start/Stop through the native tracker, including an allowed-action fallback for older hosts. **Focus on task** activates the selected task before opening Super Productivity's native Focus interface; no duplicate timer or unsupported session-start action.
+- **Continue after a habit goal:** Already-completed habits remain selectable for Working Now and can accumulate additional minutes/counts (for example, 90 minutes against a 60-minute goal). Only the user can remove or replace a completed habit from Working Now; completion is counted once.
+- **Clear controls and status:** Arrange is right-aligned and visually distinct from Overdue/Finished filters; task tracking reads **Not tracking** or **Tracking in Super Productivity**.
+- **Consistent NEO-Zen design:** Highlight the active zone in translucent green-and-gold, use the application's Vietnamese-compatible font, retain wallpaper transparency, and support narrow screens, touch, and keyboard.
+- **Preserved behavior:** Native Won't Do, recurrence, scheduled habits, stopwatch logging, task hierarchy, and existing filters are retained. A brief view blink can still occur when native Won't Do temporarily visits the host task list.
+
+**Quality:** Existing regression tests and new browser tests cover ordering, saved preferences, task/habit focus, goal-met extra habit time, Focus/tracking action order, mobile drag, 320px layout, and plugin packaging. Screenshots and installation instructions are refreshed.
+
 ## 1.3.0-beta.3 — Completed habits stay focusable (preview only)
 
 - Keep goal-met habits eligible for Working Now; completed stopwatch habits can continue logging time beyond their daily targets.
