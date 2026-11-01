@@ -491,7 +491,7 @@ function taskGroups(){
     });
   }
   const sorted=orderedBy([...roots.values()].map(g=>({id:g.task.id,group:g})),state.prefs.taskOrder,(a,b)=>taskOrder(a.group.task,b.group.task));
-  return sorted.map(x=>({...x.group,children:orderedBy(x.group.children,state.prefs.childOrder[x.id]||[],taskOrder)}));
+  return sorted.map(x=>({...x.group,children:orderedBy(x.group.children,state.prefs.childOrder[x.id]||[])}));
 }
 function todayHabits(){return orderedBy(state.habits.filter(h=>habitDue(h)),state.prefs.habitOrder);}
 function sectionEmpty(name,caption){return `<div class="empty"><strong>${safe(name)}</strong>${safe(caption)}</div>`;}
