@@ -61,7 +61,8 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/screenshots/today-plus-tasks-desktop-v1.1.0.webp \
                   docs/screenshots/today-plus-tasks-phone-v1.1.0.webp \
-                  docs/screenshots/small-phone.webp docs/screenshots/log-time.webp
+                  docs/screenshots/small-phone.webp docs/screenshots/log-time.webp \
+                  docs/screenshots/working-now-active.webp docs/screenshots/arrange-mode-phone.webp
           if ! git diff --cached --quiet; then
             git commit -m "docs: refresh NEO-Zen Today+ screenshots"
             git push origin "HEAD:$HEAD_REF"
