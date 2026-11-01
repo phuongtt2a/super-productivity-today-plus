@@ -227,7 +227,7 @@ with sync_playwright() as p:
         ui.wait_for_selector('#time-overlay:not(.hidden)')
         ui.locator('#time-minutes').fill('30')
         ui.locator('#time-save').click()
-        ui.wait_for_selector('#time-overlay.hidden')
+        ui.wait_for_function("document.querySelector('#time-overlay').classList.contains('hidden')")
         ui.wait_for_function("document.querySelector('#working-card [data-sort-id=h4] .item-meta').textContent.includes('1h 30m')")
         assert ui.locator('#working-card [data-sort-id="h4"].is-done').count()==1
         assert ui.locator('#habits [data-sort-id="h4"]').count()==0
