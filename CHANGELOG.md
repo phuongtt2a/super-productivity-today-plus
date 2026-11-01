@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.3.0-beta.3 — Completed habits stay focusable (preview only)
+
+- Keep goal-met habits eligible for Working Now; completed stopwatch habits can continue logging time beyond their daily targets.
+- Do not automatically remove a habit from Working Now on completion. Removing or replacing the priority is a deliberate user action.
+- Simplify status language to **Not tracking** / **Tracking in Super Productivity**, without adding a second timer.
+- Put Arrange at the far right of Tasks and Habits, separate from Overdue/Finished filters.
+- Extend browser tests and mobile preview screenshots for the already-completed habit scenario.
+
 ## 1.3.0-beta.2 — Working Now usability improvements (preview only)
 
 - Add **habits** to Working Now, including native Complete, Increase/Decrease and Log time controls. Selecting or completing a habit never starts a task timer.
