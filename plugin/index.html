@@ -318,7 +318,7 @@ html,body,.app{background:transparent!important}
 <script>
 'use strict';
 const $ = id => document.getElementById(id);
-const state = {api:null, tasks:[], habits:[], projects:new Map(), today:'', logicalDay:null, showOverdue:false, showFinished:false, demo:false, refreshing:false, busy:new Set(), pointerActive:false, refreshDeferred:false, timeHabitId:null, previousFocus:null, arrange:{task:false,habit:false}, prefs:{version:1,day:'',taskOrder:[],childOrder:{},habitOrder:[],workingId:null}, preferenceWrite:Promise.resolve(), dragging:null, trackedTaskId:null, trackingKnown:false};
+const state = {api:null, tasks:[], habits:[], projects:new Map(), today:'', logicalDay:null, showOverdue:false, showFinished:false, demo:false, refreshing:false, busy:new Set(), pointerActive:false, refreshDeferred:false, timeHabitId:null, previousFocus:null, arrange:{task:false,habit:false}, prefs:{version:1,day:'',taskOrder:[],childOrder:{},habitOrder:[],workingId:null}, preferenceWrite:Promise.resolve(), preferenceRevision:0, dragging:null, trackedTaskId:null, trackingKnown:false};
 const safe = str => String(str ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const localDay = (date=new Date()) => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
 const dueKey = t => t.dueDay || (Number.isFinite(t.dueWithTime)?localDay(new Date(t.dueWithTime)):null);
@@ -374,9 +374,13 @@ function ensureDayPrefs(){
 }
 async function loadPrefs(){
   if(!state.api||typeof state.api.loadSyncedData!=='function')return;
+  const startedAtRevision=state.preferenceRevision;
   try{
     const raw=await state.api.loadSyncedData(PREF_KEY);
-    if(raw)state.prefs=normalizePrefs(JSON.parse(raw));
+    // A slow remote read must never overwrite an interaction made since the
+    // read began. Hook refreshes never write back to synced state.
+    if(raw&&startedAtRevision===state.preferenceRevision)
+      state.prefs=normalizePrefs(JSON.parse(raw));
   }catch(err){noteWorkspace('Could not load your saved arrangement. Changes will remain on this screen until storage is available.');}
 }
 function noteWorkspace(message){
@@ -388,6 +392,7 @@ function savePrefs(){
   // Copy now: queued asynchronous writes must not accidentally all save the
   // newest state or race and overwrite an earlier user command.
   const data=JSON.stringify(state.prefs);
+  state.preferenceRevision++;
   state.preferenceWrite=state.preferenceWrite.catch(()=>{}).then(()=>
     state.api.persistDataSynced(data,PREF_KEY)
   );
@@ -870,6 +875,15 @@ if(api){
       if(api.Hooks[hook])try{api.registerHook(api.Hooks[hook],()=>void refresh())}
       catch(err){console.warn('Today+ hook unavailable',err);}
     }
+    if(api.Hooks.PERSISTED_DATA_CHANGED)try{
+      api.registerHook(api.Hooks.PERSISTED_DATA_CHANGED,payload=>{
+        // External sync may update this plugin's preferences. Read only:
+        // never persist from a sync hook or it would cause write loops.
+        if(payload?.key&&payload.key!==PREF_KEY)return;
+        if(state.pointerActive||state.busy.size)return;
+        void loadPrefs().then(()=>{if(!state.pointerActive&&!state.busy.size)render();});
+      });
+    }catch(err){console.warn('Today+ persistence hook unavailable',err);}
     if(api.Hooks.CURRENT_TASK_CHANGE)try{
       api.registerHook(api.Hooks.CURRENT_TASK_CHANGE,payload=>{
         state.trackedTaskId=payload?.current?.id||null;
