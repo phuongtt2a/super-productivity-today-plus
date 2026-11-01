@@ -217,6 +217,55 @@ html,body,.app{background:transparent!important}
 #tasks>.item-task.is-done{background:var(--neo-card)}
 @media(max-width:380px){#tasks>.item-task{padding:10px 7px}}
 
+
+/* Working Now and arrange mode: compact NEO-Zen surfaces, no forced page opacity. */
+.working-zone{margin:0 0 clamp(23px,3.5vw,39px);min-width:0}
+.working-heading{margin-bottom:10px}
+.working-caption{font-size:11px;color:var(--today-muted)}
+.working-surface{border:2px solid var(--neo-stroke);border-radius:5px;
+  box-shadow:3px 3px 0 var(--neo-stroke);background:var(--neo-gold);
+  padding:clamp(12px,2vw,18px);min-width:0}
+.working-empty{display:flex;gap:12px;align-items:center;min-height:54px;color:var(--today-muted);font-size:13px;line-height:1.5}
+.working-empty svg{flex:none;width:23px;height:23px;stroke:var(--today-text);stroke-width:1.8;fill:none}
+.working-surface .task-group{background:var(--neo-card);margin:9px 3px 14px 0}
+.working-surface>.item{background:var(--neo-card);border:2px solid var(--neo-stroke);border-radius:5px;
+  padding:8px 10px;margin:9px 3px 14px 0}
+.working-actions{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin-top:12px}
+.working-actions .action-btn{min-height:40px}
+.working-actions .action-btn:disabled{opacity:.48}
+.working-state{font-size:12px;color:var(--today-muted);font-weight:600}
+.working-eyebrow{color:var(--today-muted);font-weight:800;font-size:10px;letter-spacing:.085em;text-transform:uppercase}
+.working-title{font-size:14px;line-height:1.45;margin:8px 0 4px;overflow-wrap:anywhere}
+.workspace-note{font-size:12px;line-height:1.45;margin:11px 0 0;color:var(--today-text)}
+.task-controls{justify-self:end;display:inline-flex;align-items:center;gap:5px;min-width:0}
+.work-pick{display:grid;place-items:center;width:40px;height:40px;min-width:40px;
+  border:1px solid var(--today-line);border-radius:12px;padding:0;
+  color:var(--today-text);background:var(--today-bg)}
+.work-pick:hover,.work-pick:focus-visible{border-color:var(--today-accent);background:var(--today-hover)}
+.work-pick svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;pointer-events:none}
+.work-pick[aria-pressed=true]{background:var(--neo-gold);border-color:var(--neo-stroke)}
+.arrange-tools{grid-column:1 / -1;display:flex;align-items:center;justify-content:flex-end;
+  gap:5px;flex-wrap:wrap;min-width:0;margin-top:7px;padding-top:6px;
+  border-top:1px dashed var(--today-line)}
+.arrange-label{font-size:10px;color:var(--today-muted);margin-right:auto}
+.arrange-control{display:grid;place-items:center;min-width:40px;min-height:40px;
+  border:1px solid var(--neo-stroke);border-radius:5px;background:var(--neo-card);
+  color:var(--today-text);padding:0 7px;font-weight:700;font-size:15px}
+.arrange-control:hover,.arrange-control:focus-visible{background:var(--neo-gold)}
+.arrange-control:disabled{opacity:.38}
+.drag-handle{cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.drag-handle:active{cursor:grabbing}
+.sort-drop-target{outline:2px dashed var(--today-accent);outline-offset:-3px}
+#tasks .task-group>.item:has(.arrange-tools){border-bottom:0}
+.section-head:has(.chip[data-arrange]){flex-wrap:wrap}
+@media(max-width:380px){
+  .task-controls{gap:3px}.working-actions{gap:7px}
+  .working-actions .action-btn{padding:9px 10px;white-space:normal}
+  .section-actions{flex-wrap:wrap}
+  .arrange-tools{justify-content:flex-end}
+  .arrange-label{flex-basis:100%;margin-right:0}
+}
+
 </style>
 </head>
 <body>
@@ -232,17 +281,26 @@ html,body,.app{background:transparent!important}
   <div class="hero"><div><h1>Focus on what matters.</h1><p>Not another endless checklist.</p></div><div class="overall" aria-live="polite"><strong id="done-count">0 of 0</strong>complete<div class="overall-bar"><span id="done-bar"></span></div></div></div>
   <p class="demo-note hidden" id="demo-note">Preview data only. Install this plugin in Super Productivity to see your real tasks and habits.</p>
   <p class="error-note hidden" id="error-note" role="alert"></p>
+
+  <section class="working-zone" aria-labelledby="working-heading">
+    <div class="section-head working-heading">
+      <div class="section-title"><h2 id="working-heading">Working Now</h2></div>
+      <span class="working-caption">One task at a time</span>
+    </div>
+    <div class="working-surface" id="working-card" aria-live="polite"></div>
+    <p class="workspace-note hidden" id="workspace-note" role="status" aria-live="polite"></p>
+  </section>
   <div class="workspace">
     <section class="section" aria-labelledby="task-heading">
-      <div class="section-head"><div class="section-title"><h2 id="task-heading">Tasks</h2><span class="count" id="task-count">0</span></div><div class="section-actions"><button class="chip" id="overdue-filter" type="button" aria-pressed="false">Overdue</button><button class="chip" id="completed-filter" type="button" aria-pressed="false">Finished</button></div></div>
+      <div class="section-head"><div class="section-title"><h2 id="task-heading">Tasks</h2><span class="count" id="task-count">0</span></div><div class="section-actions"><button class="chip" id="arrange-tasks" data-arrange="task" type="button" aria-pressed="false">Arrange</button><button class="chip" id="overdue-filter" type="button" aria-pressed="false">Overdue</button><button class="chip" id="completed-filter" type="button" aria-pressed="false">Finished</button></div></div>
       <div id="tasks"></div><p id="task-action-note" class="task-note hidden" role="status" aria-live="polite"></p>
     </section>
     <section class="section" aria-labelledby="habit-heading">
-      <div class="section-head"><div class="section-title"><h2 id="habit-heading">Habits</h2><span class="count" id="habit-count">0</span></div><span class="today-date" id="habit-caption">TODAY</span></div>
+      <div class="section-head"><div class="section-title"><h2 id="habit-heading">Habits</h2><span class="count" id="habit-count">0</span></div><div class="section-actions"><span class="today-date" id="habit-caption">TODAY</span><button class="chip" id="arrange-habits" data-arrange="habit" type="button" aria-pressed="false">Arrange</button></div></div>
       <div id="habits"></div>
     </section>
   </div>
-  <footer class="foot">Tasks and habits stay in sync with Super Productivity. Today+ does not change your existing routines or timers.</footer>
+  <footer class="foot">Tasks and habits stay in sync with Super Productivity. Your order and Working Now selection are Today+ preferences; time tracking and Focus mode use the app.</footer>
 </main>
 <div id="time-overlay" class="time-overlay hidden" role="presentation">
   <section class="time-dialog" role="dialog" aria-modal="true" aria-labelledby="time-title" aria-describedby="time-help">
