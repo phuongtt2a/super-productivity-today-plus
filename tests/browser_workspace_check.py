@@ -68,13 +68,15 @@ window.PluginAPI = {
 };
 void 0;
 """
-def install(page,saved=None):
+def install(page,saved=None,without_tracking=False):
     page.goto('about:blank')
     data = (API.replace('__TASKS__',json.dumps(tasks,ensure_ascii=False))
         .replace('__HABITS__',json.dumps(habits,ensure_ascii=False))
         .replace('__TODAY__',TODAY)
         .replace('__SAVED__',json.dumps(saved or {})))
     page.evaluate(data)
+    if without_tracking:
+        page.evaluate('delete window.PluginAPI.startTracking; delete window.PluginAPI.stopTracking')
     page.set_content(HTML)
     page.wait_for_selector('#tasks [data-sort-id="t1"]')
     page.wait_for_selector('#habits [data-sort-id="h3"]')
@@ -180,5 +182,59 @@ with sync_playwright() as p:
         assert tiny.evaluate('document.documentElement.scrollWidth<=window.innerWidth')
         tiny.close()
         print('320px keyboard-accessible reorder controls: PASS')
+
+        # Arrange is a deliberately different action from the two filter chips.
+        ui=browser.new_page(viewport={'width':320,'height':640},has_touch=True,is_mobile=True)
+        install(ui)
+        assert ui.locator('#arrange-tasks.arrange-toggle').count()==1
+        assert ui.locator('#arrange-habits.arrange-toggle').count()==1
+        assert ui.locator('#overdue-filter.arrange-toggle').count()==0
+        assert ui.evaluate('document.documentElement.scrollWidth<=innerWidth')
+        ui.locator('#habits [data-work-habit="h3"]').click()
+        assert ui.locator('#working-card [data-sort-id="h3"]').count()==1
+        assert ui.locator('#working-card.has-priority').count()==1
+        assert ui.locator('#habits [data-sort-id="h3"]').count()==0
+        assert ui.locator('#working-card [data-track-start]').count()==0
+        assert ui.locator('#working-card [data-focus-open]').count()==0
+        assert ui.evaluate("window.__events.filter(e=>e.type==='startTracking').length")==0
+        prefs=ui.evaluate("JSON.parse(window.__saved['todayplus.workspace.v1'])")
+        assert prefs['workingKind']=='habit' and prefs['workingId']=='h3',prefs
+        ui.locator('#working-card [data-habit="h3"]').click()
+        ui.wait_for_selector('#working-card .working-empty')
+        assert ui.locator('#habits [data-sort-id="h3"] .check.is-done').count()==1
+        assert ui.evaluate('document.documentElement.scrollWidth<=innerWidth')
+        print('habit in Working Now, native completion, no second timer: PASS')
+
+        ui.locator('#habits [data-work-habit="h1"]').click()
+        assert ui.locator('#working-card [data-more="h1"]').count()==1
+        ui.locator('#working-card [data-more="h1"]').click()
+        ui.wait_for_function("document.querySelector('#working-card .counter-value')?.textContent==='1'")
+        ui.locator('#working-card [data-work-clear]').click()
+        assert ui.locator('#habits [data-sort-id="h1"]').count()==1
+        ui.close()
+        print('counter habit progress and remove: PASS')
+
+        # Some installed hosts expose the approved task action but not the
+        # newer startTracking/stopTracking API. No disabled dead-end controls.
+        older=browser.new_page(viewport={'width':390,'height':800})
+        install(older,without_tracking=True)
+        older.locator('#tasks [data-work="t3"]').click()
+        assert older.locator('#working-card [data-track-start]').is_enabled()
+        older.locator('#working-card [data-track-start]').click()
+        older.wait_for_selector('#working-card [data-track-stop]')
+        assert older.evaluate("window.__events.some(e=>e.action?.type==='[Task] SetCurrentTask'&&e.action.id==='t3')")
+        older.locator('#working-card [data-track-stop]').click()
+        older.wait_for_selector('#working-card [data-track-start]')
+        assert older.evaluate("window.__events.some(e=>e.action?.type==='[Task] SetCurrentTask'&&e.action.id===null)")
+        older.locator('#working-card [data-focus-open]').click()
+        older.wait_for_function("window.__events.some(e=>e.action?.type==='[FocusMode] Show Overlay')")
+        actions=older.evaluate("window.__events.filter(e=>e.action).map(e=>e.action)")
+        assert actions[-2:]==[
+            {'type':'[Task] SetCurrentTask','id':'t3'},
+            {'type':'[FocusMode] Show Overlay'}
+        ],actions
+        assert older.evaluate("window.__events.some(e=>e.type==='select')") is False
+        older.close()
+        print('older host fallback and selected task activated before Focus: PASS')
     finally:
         browser.close()
