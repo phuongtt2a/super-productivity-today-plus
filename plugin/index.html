@@ -575,7 +575,7 @@ function render(){
     ?groups.filter(group=>group.task.id!==working.id).map(group=>
       ({...group,children:group.children.filter(child=>child.id!==working.id)}))
     :groups;
-  $('tasks').innerHTML=visibleGroups.length?visibleGroups.map(taskGroupRow).join(''):
+  $('tasks').innerHTML=visibleGroups.length?visibleGroups.map(group=>taskGroupRow(group)).join(''):
     sectionEmpty('All clear','No other tasks due today in this view.');
   $('habits').innerHTML=habits.length?habits.map(habitRow).join(''):
     sectionEmpty('No habits scheduled','Enabled habits will show here on their scheduled days.');
@@ -618,7 +618,8 @@ async function refresh(){
     if(!state.api){
       if(!state.demo){state.demo=true;demoData();$('demo-note').classList.remove('hidden');shouldRender=true;}
     }else{
-      const [tasks,habits,projects]=await Promise.all([state.api.getTasks(),state.api.getAllSimpleCounters(),state.api.getAllProjects()]);
+      const [tasks,habits,projects,day]=await Promise.all([state.api.getTasks(),state.api.getAllSimpleCounters(),state.api.getAllProjects(),typeof state.api.getDayContext==='function'?state.api.getDayContext().catch(()=>null):null]);
+      if(day&&typeof day.todayStr==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(day.todayStr))state.logicalDay=day.todayStr;
       if(!Array.isArray(tasks)||!Array.isArray(habits))throw new Error('Unexpected tasks or habits response');
       if(state.pointerActive||state.busy.size){state.refreshDeferred=true;return;}
       state.tasks=tasks;state.habits=habits;state.projects=new Map((projects||[]).map(p=>[p.id,p.title]));
@@ -637,7 +638,7 @@ async function refresh(){
     }
   }
 }
-async function updateTask(id){if(state.busy.has('t:'+id))return;const t=state.tasks.find(x=>x.id===id);if(!t)return;if(!state.api){t.isDone=!t.isDone;render();return;}state.busy.add('t:'+id);try{await state.api.updateTask(id,{isDone:!t.isDone});t.isDone=!t.isDone;render();}catch(err){reportError(err)}finally{state.busy.delete('t:'+id);flushDeferredRefresh()}}
+async function updateTask(id){if(state.busy.has('t:'+id))return;const t=state.tasks.find(x=>x.id===id);if(!t)return;const nextDone=!t.isDone;if(!state.api){t.isDone=nextDone;if(nextDone&&state.prefs.workingId===id)state.prefs.workingId=null;render();return;}state.busy.add('t:'+id);try{await state.api.updateTask(id,{isDone:nextDone});t.isDone=nextDone;if(nextDone&&state.prefs.workingId===id){state.prefs.workingId=null;savePrefs();}render();}catch(err){reportError(err)}finally{state.busy.delete('t:'+id);flushDeferredRefresh()}}
 async function updateHabit(id,delta){if(state.busy.has('h:'+id))return;const h=state.habits.find(x=>x.id===id);if(!h)return;if(h.type==='StopWatch')return;const value=habitValue(h),next=delta==='toggle'?(value>0?0:1):Math.max(0,value+delta);if(!state.api){h.countOnDay={...h.countOnDay,[state.today]:next};render();return;}state.busy.add('h:'+id);try{await state.api.setCounter(id,next);h.countOnDay={...h.countOnDay,[state.today]:next};render();}catch(err){reportError(err)}finally{state.busy.delete('h:'+id)}}
 function openTimeEditor(id){
   const h=state.habits.find(x=>x.id===id);
@@ -742,13 +743,144 @@ async function wontDo(id){
     flushDeferredRefresh();
   }
 }
-document.addEventListener('click',event=>{const target=event.target.closest('button,[data-open]');if(!target)return;const d=target.dataset;if(d.task)void updateTask(d.task);else if(d.wontDo)void wontDo(d.wontDo);else if(d.habit)void updateHabit(d.habit,'toggle');else if(d.more)void updateHabit(d.more,1);else if(d.less)void updateHabit(d.less,-1);else if(d.logTime)openTimeEditor(d.logTime);else if(d.open)void openTask(d.open);});
+
+function chooseWorking(id){
+  const task=state.tasks.find(t=>t.id===id);
+  if(!task||task.isDone)return;
+  state.prefs.workingId=id;
+  savePrefs();noteWorkspace('');
+  render();
+}
+function removeWorking(){
+  state.prefs.workingId=null;
+  savePrefs();noteWorkspace('Removed from Working Now. Any native time tracking continues until stopped.');
+  render();
+}
+async function startWorkingTracking(){
+  const task=validWorkingTask();
+  if(!task)return;
+  if(!state.api||typeof state.api.startTracking!=='function'){
+    noteWorkspace('Time tracking is unavailable in this version of Super Productivity.');return;
+  }
+  if(state.busy.has('tracking'))return;
+  state.busy.add('tracking');
+  try{
+    await state.api.startTracking(task.id);
+    // The host's currentTaskChange hook is authoritative when it arrives.
+    if(!state.trackingKnown||!state.trackedTaskId){state.trackedTaskId=task.id;state.trackingKnown=true;}
+    noteWorkspace('Native time tracking started. Super Productivity owns the timer.');
+    render();
+  }catch(err){noteWorkspace('Could not start time tracking: '+String(err?.message||err));}
+  finally{state.busy.delete('tracking');flushDeferredRefresh();}
+}
+async function stopWorkingTracking(){
+  const task=validWorkingTask();
+  if(!task||!state.trackingKnown||!state.trackedTaskId)return;
+  const current=state.tasks.find(t=>t.id===state.trackedTaskId);
+  if(state.trackedTaskId!==task.id&&current?.parentId!==task.id)return;
+  if(!state.api||typeof state.api.stopTracking!=='function'){
+    noteWorkspace('Stopping time tracking is unavailable in this version.');return;
+  }
+  if(state.busy.has('tracking'))return;
+  state.busy.add('tracking');
+  try{
+    await state.api.stopTracking();
+    state.trackedTaskId=null;state.trackingKnown=true;
+    noteWorkspace('Native time tracking stopped.');
+    render();
+  }catch(err){noteWorkspace('Could not stop time tracking: '+String(err?.message||err));}
+  finally{state.busy.delete('tracking');flushDeferredRefresh();}
+}
+function openNativeFocus(){
+  if(!validWorkingTask())return;
+  if(!state.api||typeof state.api.dispatchAction!=='function'){
+    noteWorkspace('Native Focus mode is unavailable here.');return;
+  }
+  try{
+    // Opening the native overlay is allowed. Starting a session directly
+    // is intentionally NOT permitted by Super Productivity's plugin API.
+    state.api.dispatchAction({type:'[FocusMode] Show Overlay'});
+    noteWorkspace('Opened Super Productivity Focus mode. Choose a session in the native interface.');
+  }catch(err){noteWorkspace('Could not open Focus mode: '+String(err?.message||err));}
+}
+function clearDragMarker(){
+  document.querySelectorAll('.sort-drop-target').forEach(el=>el.classList.remove('sort-drop-target'));
+}
+document.addEventListener('pointerdown',event=>{
+  const handle=event.target.closest('[data-drag-kind]');
+  if(!handle||handle.disabled||event.button!==0)return;
+  state.pointerActive=true;
+  state.dragging={pointerId:event.pointerId,kind:handle.dataset.dragKind,
+    id:handle.dataset.dragId,parentId:handle.dataset.dragParent||'',
+    x:event.clientX,y:event.clientY,targetId:null,after:false,started:false};
+  try{handle.setPointerCapture(event.pointerId);}catch(_err){}
+},false);
+document.addEventListener('pointermove',event=>{
+  const drag=state.dragging;
+  if(!drag||drag.pointerId!==event.pointerId)return;
+  if(Math.hypot(event.clientX-drag.x,event.clientY-drag.y)<7&&!drag.started)return;
+  drag.started=true;
+  clearDragMarker();
+  const over=document.elementFromPoint(event.clientX,event.clientY)?.closest('[data-sort-kind]');
+  if(!over||over.dataset.sortKind!==drag.kind||
+    (over.dataset.sortParent||'')!==drag.parentId||over.dataset.sortId===drag.id){
+    drag.targetId=null;return;
+  }
+  drag.targetId=over.dataset.sortId;
+  const box=over.getBoundingClientRect();
+  drag.after=event.clientY>=box.top+box.height/2;
+  over.classList.add('sort-drop-target');
+},false);
+function finishDrag(event){
+  const drag=state.dragging;
+  if(!drag||drag.pointerId!==event.pointerId)return;
+  state.dragging=null;
+  clearDragMarker();
+  if(event.type==='pointerup'&&drag.started&&drag.targetId)
+    dropItem(drag.kind,drag.id,drag.targetId,drag.parentId,drag.after);
+}
+document.addEventListener('pointerup',finishDrag,false);
+document.addEventListener('pointercancel',finishDrag,false);
+
+document.addEventListener('click',event=>{const target=event.target.closest('button,[data-open]');if(!target)return;const d=target.dataset;
+  if(d.move)moveItem(d.orderKind,d.orderId,d.move,d.orderParent);
+  else if(d.work)chooseWorking(d.work);
+  else if('workClear' in d)removeWorking();
+  else if('trackStart' in d)void startWorkingTracking();
+  else if('trackStop' in d)void stopWorkingTracking();
+  else if('focusOpen' in d)openNativeFocus();
+  else if(d.task)void updateTask(d.task);
+  else if(d.wontDo)void wontDo(d.wontDo);
+  else if(d.habit)void updateHabit(d.habit,'toggle');
+  else if(d.more)void updateHabit(d.more,1);
+  else if(d.less)void updateHabit(d.less,-1);
+  else if(d.logTime)openTimeEditor(d.logTime);
+  else if(d.open)void openTask(d.open);
+});
 document.addEventListener('keydown',event=>{if((event.key==='Enter'||event.key===' ')&&event.target.matches('[data-open]')){event.preventDefault();void openTask(event.target.dataset.open)}});
+$('arrange-tasks').addEventListener('click',()=>{state.arrange.task=!state.arrange.task;render();});
+$('arrange-habits').addEventListener('click',()=>{state.arrange.habit=!state.arrange.habit;render();});
 $('refresh').addEventListener('click',()=>{ $('task-action-note').classList.add('hidden');void refresh() });$('overdue-filter').addEventListener('click',()=>{state.showOverdue=!state.showOverdue;render()});$('completed-filter').addEventListener('click',()=>{state.showFinished=!state.showFinished;render()});
 window.addEventListener('focus',()=>void refresh());document.addEventListener('visibilitychange',()=>{if(!document.hidden)void refresh()});
 const api=window.PluginAPI;
-if(api){state.api=api;if(typeof api.registerHook==='function'&&api.Hooks){for(const hook of ['TASK_CREATED','TASK_UPDATE','TASK_COMPLETE','TASK_DELETE']){if(api.Hooks[hook])try{api.registerHook(api.Hooks[hook],()=>void refresh())}catch(err){console.warn('Today+ hook unavailable',err)}}}}
-void refresh();setInterval(()=>{if(document.visibilityState!=='hidden')void refresh()},30000);
+if(api){
+  state.api=api;
+  if(typeof api.registerHook==='function'&&api.Hooks){
+    for(const hook of ['TASK_CREATED','TASK_UPDATE','TASK_COMPLETE','TASK_DELETE','DATA_CHANGED','DAY_CHANGE']){
+      if(api.Hooks[hook])try{api.registerHook(api.Hooks[hook],()=>void refresh())}
+      catch(err){console.warn('Today+ hook unavailable',err);}
+    }
+    if(api.Hooks.CURRENT_TASK_CHANGE)try{
+      api.registerHook(api.Hooks.CURRENT_TASK_CHANGE,payload=>{
+        state.trackedTaskId=payload?.current?.id||null;
+        state.trackingKnown=true;
+        render();
+      });
+    }catch(err){console.warn('Today+ tracking hook unavailable',err);}
+  }
+}
+void (async()=>{await loadPrefs();await refresh();})();
+setInterval(()=>{if(document.visibilityState!=='hidden')void refresh()},30000);
 </script>
 </body>
 </html>
