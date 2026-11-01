@@ -353,7 +353,7 @@ html,body,.app{background:transparent!important}
 <script>
 'use strict';
 const $ = id => document.getElementById(id);
-const state = {api:null, tasks:[], habits:[], projects:new Map(), today:'', logicalDay:null, showOverdue:false, showFinished:false, demo:false, refreshing:false, busy:new Set(), pointerActive:false, refreshDeferred:false, timeHabitId:null, previousFocus:null, arrange:{task:false,habit:false}, prefs:{version:1,day:'',taskOrder:[],childOrder:{},habitOrder:[],workingId:null}, preferenceWrite:Promise.resolve(), preferenceRevision:0, externalPrefsDeferred:false, dragging:null, trackedTaskId:null, trackingKnown:false};
+const state = {api:null, tasks:[], habits:[], projects:new Map(), today:'', logicalDay:null, showOverdue:false, showFinished:false, demo:false, refreshing:false, busy:new Set(), pointerActive:false, refreshDeferred:false, timeHabitId:null, previousFocus:null, arrange:{task:false,habit:false}, prefs:{version:1,day:'',taskOrder:[],childOrder:{},habitOrder:[],workingId:null,workingKind:'task'}, preferenceWrite:Promise.resolve(), preferenceRevision:0, externalPrefsDeferred:false, dragging:null, trackedTaskId:null, trackingKnown:false};
 const safe = str => String(str ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const localDay = (date=new Date()) => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
 const dueKey = t => t.dueDay || (Number.isFinite(t.dueWithTime)?localDay(new Date(t.dueWithTime)):null);
@@ -398,7 +398,9 @@ function normalizePrefs(raw) {
   return {version:1,day:typeof value.day==='string'?value.day:'',
     taskOrder:safeIds(value.taskOrder),childOrder,
     habitOrder:safeIds(value.habitOrder),
-    workingId:typeof value.workingId==='string'&&value.workingId.length<=256?value.workingId:null};
+    // Legacy v1.3.0-beta.1 preferences stored only a task ID.
+    workingId:typeof value.workingId==='string'&&value.workingId.length<=256?value.workingId:null,
+    workingKind:value.workingKind==='habit'?'habit':'task'};
 }
 function ensureDayPrefs(){
   if(state.prefs.day===state.today)return;
@@ -442,6 +444,7 @@ function orderedBy(items,ids,otherwise){
   });
 }
 function validWorkingTask(){
+  if(state.prefs.workingKind==='habit')return null;
   const id=state.prefs.workingId;
   if(!id)return null;
   const task=state.tasks.find(t=>t.id===id);
@@ -449,6 +452,18 @@ function validWorkingTask(){
   const parent=task.parentId?state.tasks.find(t=>t.id===task.parentId):null;
   const due=dueKey(task)||dueKey(parent||{});
   return due&&due<=state.today?task:null;
+}
+function validWorkingHabit(){
+  if(state.prefs.workingKind!=='habit'||!state.prefs.workingId)return null;
+  const habit=state.habits.find(h=>h.id===state.prefs.workingId);
+  return habit&&habitDue(habit)&&!dailyDone(habit)?habit:null;
+}
+function clearCompletedWorkingHabit(habit){
+  if(!habit||state.prefs.workingKind!=='habit'||state.prefs.workingId!==habit.id||!dailyDone(habit))return;
+  state.prefs.workingId=null;
+  state.prefs.workingKind='task';
+  savePrefs();
+  noteWorkspace('Habit completed for today. Choose the next priority when you are ready.');
 }
 function moveList(kind,parentId){
   if(kind==='task')return taskGroups().map(g=>g.task.id);
