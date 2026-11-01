@@ -318,7 +318,7 @@ html,body,.app{background:transparent!important}
 <script>
 'use strict';
 const $ = id => document.getElementById(id);
-const state = {api:null, tasks:[], habits:[], projects:new Map(), today:'', logicalDay:null, showOverdue:false, showFinished:false, demo:false, refreshing:false, busy:new Set(), pointerActive:false, refreshDeferred:false, timeHabitId:null, previousFocus:null, arrange:{task:false,habit:false}, prefs:{version:1,day:'',taskOrder:[],childOrder:{},habitOrder:[],workingId:null}, preferenceWrite:Promise.resolve(), preferenceRevision:0, dragging:null, trackedTaskId:null, trackingKnown:false};
+const state = {api:null, tasks:[], habits:[], projects:new Map(), today:'', logicalDay:null, showOverdue:false, showFinished:false, demo:false, refreshing:false, busy:new Set(), pointerActive:false, refreshDeferred:false, timeHabitId:null, previousFocus:null, arrange:{task:false,habit:false}, prefs:{version:1,day:'',taskOrder:[],childOrder:{},habitOrder:[],workingId:null}, preferenceWrite:Promise.resolve(), preferenceRevision:0, externalPrefsDeferred:false, dragging:null, trackedTaskId:null, trackingKnown:false};
 const safe = str => String(str ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const localDay = (date=new Date()) => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
 const dueKey = t => t.dueDay || (Number.isFinite(t.dueWithTime)?localDay(new Date(t.dueWithTime)):null);
@@ -601,8 +601,19 @@ function demoData(){const today=localDay();const yesterday=new Date();yesterday.
 function reportError(err){$('error-note').textContent=`Could not refresh from Super Productivity: ${err?.message||err}`;$('error-note').classList.remove('hidden');}
 // A focus refresh can otherwise replace a row between pointerdown and click.
 // Keep the existing DOM until a pending tap has completed, then fetch fresh data.
+function flushExternalPrefs(){
+  if(!state.externalPrefsDeferred)return;
+  if(state.pointerActive||state.refreshing||state.busy.size)return;
+  state.externalPrefsDeferred=false;
+  void loadPrefs().then(()=>{
+    if(state.pointerActive||state.busy.size){state.externalPrefsDeferred=true;return;}
+    render();
+  });
+}
 function flushDeferredRefresh(){
-  if(!state.refreshDeferred||state.pointerActive||state.refreshing||state.busy.size)return;
+  if(state.pointerActive||state.refreshing||state.busy.size)return;
+  flushExternalPrefs();
+  if(!state.refreshDeferred)return;
   state.refreshDeferred=false;
   void refresh();
 }
@@ -641,6 +652,7 @@ async function refresh(){
       state.refreshDeferred=false;
       setTimeout(()=>void refresh(),0);
     }
+    flushExternalPrefs();
   }
 }
 async function updateTask(id){if(state.busy.has('t:'+id))return;const t=state.tasks.find(x=>x.id===id);if(!t)return;const nextDone=!t.isDone;if(!state.api){t.isDone=nextDone;if(nextDone&&state.prefs.workingId===id)state.prefs.workingId=null;render();return;}state.busy.add('t:'+id);try{await state.api.updateTask(id,{isDone:nextDone});t.isDone=nextDone;if(nextDone&&state.prefs.workingId===id){state.prefs.workingId=null;savePrefs();}render();}catch(err){reportError(err)}finally{state.busy.delete('t:'+id);flushDeferredRefresh()}}
@@ -880,8 +892,8 @@ if(api){
         // External sync may update this plugin's preferences. Read only:
         // never persist from a sync hook or it would cause write loops.
         if(payload?.key&&payload.key!==PREF_KEY)return;
-        if(state.pointerActive||state.busy.size)return;
-        void loadPrefs().then(()=>{if(!state.pointerActive&&!state.busy.size)render();});
+        state.externalPrefsDeferred=true;
+        flushExternalPrefs();
       });
     }catch(err){console.warn('Today+ persistence hook unavailable',err);}
     if(api.Hooks.CURRENT_TASK_CHANGE)try{
