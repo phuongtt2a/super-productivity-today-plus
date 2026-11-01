@@ -719,7 +719,7 @@ async function refresh(){
   }
 }
 async function updateTask(id){if(state.busy.has('t:'+id))return;const t=state.tasks.find(x=>x.id===id);if(!t)return;const nextDone=!t.isDone;if(!state.api){t.isDone=nextDone;if(nextDone&&state.prefs.workingId===id)state.prefs.workingId=null;render();return;}state.busy.add('t:'+id);try{await state.api.updateTask(id,{isDone:nextDone});t.isDone=nextDone;if(nextDone&&state.prefs.workingId===id){state.prefs.workingId=null;savePrefs();}render();}catch(err){reportError(err)}finally{state.busy.delete('t:'+id);flushDeferredRefresh()}}
-async function updateHabit(id,delta){if(state.busy.has('h:'+id))return;const h=state.habits.find(x=>x.id===id);if(!h)return;if(h.type==='StopWatch')return;const value=habitValue(h),next=delta==='toggle'?(value>0?0:1):Math.max(0,value+delta);if(!state.api){h.countOnDay={...h.countOnDay,[state.today]:next};render();return;}state.busy.add('h:'+id);try{await state.api.setCounter(id,next);h.countOnDay={...h.countOnDay,[state.today]:next};render();}catch(err){reportError(err)}finally{state.busy.delete('h:'+id)}}
+async function updateHabit(id,delta){if(state.busy.has('h:'+id))return;const h=state.habits.find(x=>x.id===id);if(!h)return;if(h.type==='StopWatch')return;const value=habitValue(h),next=delta==='toggle'?(value>0?0:1):Math.max(0,value+delta);if(!state.api){h.countOnDay={...h.countOnDay,[state.today]:next};clearCompletedWorkingHabit(h);render();return;}state.busy.add('h:'+id);try{await state.api.setCounter(id,next);h.countOnDay={...h.countOnDay,[state.today]:next};clearCompletedWorkingHabit(h);render();}catch(err){reportError(err)}finally{state.busy.delete('h:'+id)}}
 function openTimeEditor(id){
   const h=state.habits.find(x=>x.id===id);
   if(!h||h.type!=='StopWatch'||h.isOn||state.busy.has('h:'+id))return;
@@ -754,7 +754,7 @@ async function saveLoggedTime(event){
     const today=localDay();
     const next=Number(current.countOnDay?.[today]||0)+Math.round(minutes*60000);
     if(state.api)await state.api.setCounter(id,next);
-    h.countOnDay={...current.countOnDay,[today]:next};state.today=today;closeTimeEditor();render();
+    h.countOnDay={...current.countOnDay,[today]:next};state.today=today;clearCompletedWorkingHabit(h);closeTimeEditor();render();
   }catch(err){reportError(err);$('time-error').textContent=String(err.message||'Could not save the time. Please try again.');$('time-error').classList.remove('hidden');}
   finally{state.busy.delete('h:'+id);$('time-save').disabled=false;}
 }
