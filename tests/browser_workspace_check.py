@@ -75,7 +75,7 @@ def install(page,saved=None):
         .replace('__SAVED__',json.dumps(saved or {})))
     page.evaluate(data)
     page.set_content(HTML)
-    page.wait_for_selector('#tasks [data-sort-id="t3"]')
+    page.wait_for_selector('#tasks [data-sort-id="t1"]')
     page.wait_for_selector('#habits [data-sort-id="h3"]')
 
 def order(page,selector):
