@@ -30,6 +30,8 @@ Today+ uses one consistent calendar-and-check icon in both the Super Productivit
 
 ![Today+ phone Working Now with a habit and its counter controls](docs/screenshots/working-habit-phone.webp)
 
+![Today+ phone Working Now with a completed habit and extra time available](docs/screenshots/goal-reached-habit-phone.webp)
+
 </details>
 
 ## Why Today+?
@@ -40,7 +42,7 @@ Super Productivity organizes tasks and habits in different views. Today+ brings 
 
 - **Arrange your day (preview):** Open **Arrange** in Tasks or Habits. Drag by the grip or use the keyboard/touch-friendly **Move to top / Move up / Move down** controls. Top-level tasks move as a group; subtasks are arranged within their parent. This changes only Today+'s display, not project order.
 - **Saved routines (preview):** Task order is saved per logical day; habit order remains your preferred recurring daily routine. Today+ saves the preferences using Super Productivity's synced plugin storage, where supported.
-- **Working Now (preview):** Tap the target icon on one task or habit to bring it into **Working Now**, without copying, completing, or automatically tracking it. Pick another task or habit to replace it; **Remove** returns it to the normal list. Habits retain their native Complete/Increase/Log time controls.
+- **Working Now (preview):** Tap the target icon on one task or habit to bring it into **Working Now**, without copying, completing, or automatically tracking it. Pick another task or habit to replace it; **Remove** returns it to the normal list. Habits retain their native Complete/Increase/Log time controls, even after meeting their daily goal.
 - **Native tracking and Focus (preview):** **Start tracking / Stop tracking** uses the application's own time tracker, with an approved action fallback for older hosts lacking the newer optional tracking methods. **Focus on task** activates your selected Working Now task before opening Super Productivity's native Focus interface. It does **not** automatically start a Pomodoro or replace its built-in timer. Native task tracking and Focus sessions do not apply to habits.
 
 - **Today’s tasks:** See tasks due today, with subtasks nested beneath their parents. Overdue and completed tasks are hidden at first; you can show either when needed.
@@ -56,7 +58,7 @@ No separate login, external service, duplicate tasks, or additional local data s
 
 > **Known limitation in v1.2.0:** Won't Do uses Super Productivity's native task menu through a plugin-side workaround. Today+ may briefly switch to the host task list and back, causing a momentary screen blink. We are retaining this behavior for now rather than faking task completion or changing recurring-task schedules. The action is verified by checking the native `wontDoOn` state; UI automation may need maintenance after host updates.
 
-> **v1.3.0-beta.2 preview:** The new ordering and Working Now features are in an unreleased branch for testing, not in the official v1.2.0 download below. Install the preview ZIP from the GitHub Actions artifact when available. See [workspace QA checklist](docs/WORKSPACE-VERIFICATION.md). The existing native Won't Do workaround and its brief screen blink are unchanged.
+> **v1.3.0-beta.3 preview:** The new ordering and Working Now features are in an unreleased branch for testing, not in the official v1.2.0 download below. Install the preview ZIP from the GitHub Actions artifact when available. See [workspace QA checklist](docs/WORKSPACE-VERIFICATION.md). The existing native Won't Do workaround and its brief screen blink are unchanged.
 
 ## Install
 
@@ -74,6 +76,12 @@ today-plus-super-productivity.zip
 ├── index.html
 └── icon.svg
 ```
+
+## What changed in beta.3
+
+**Working Now** retains completed habits that have reached their daily targets. If your stopwatch habit requires 60 minutes and you have already logged 60, you can still select it and log another 30. Meeting a goal does not remove a habit from Working Now; only **Remove** or choosing another task/habit does. Finished status and the daily completion total still come from the native habit counter.
+
+For both task and habit sections, **Arrange** now appears at the far right, separated from the data filters. The tracking status text is clearer: **Not tracking** indicates the task timer is idle, while **Tracking in Super Productivity** indicates native tracking has started. When the plugin cannot yet confirm whether an existing timer is running, the Start/Stop controls remain tied to the host rather than a second plugin timer.
 
 ## What changed in beta.2
 
