@@ -27,6 +27,11 @@ Super Productivity organizes tasks and habits in different views. Today+ brings 
 
 ## Features
 
+- **Arrange your day (preview):** Open **Arrange** in Tasks or Habits. Drag by the grip or use the keyboard/touch-friendly **Move to top / Move up / Move down** controls. Top-level tasks move as a group; subtasks are arranged within their parent. This changes only Today+'s display, not project order.
+- **Saved routines (preview):** Task order is saved per logical day; habit order remains your preferred recurring daily routine. Today+ saves the preferences using Super Productivity's synced plugin storage, where supported.
+- **Working Now (preview):** Tap the target icon on one task to bring it into **Working Now**, without copying, completing, or automatically tracking it. Pick another task to replace it; **Remove** returns it to the normal list.
+- **Native tracking and Focus (preview):** **Start tracking / Stop tracking** uses the application's own time tracker. **Focus mode** opens Super Productivity's native Focus interface; it does **not** automatically start a Pomodoro or replace its built-in timer.
+
 - **Today’s tasks:** See tasks due today, with subtasks nested beneath their parents. Overdue and completed tasks are hidden at first; you can show either when needed.
 - **Native Won't Do:** Tap **Won’t Do** to invoke Super Productivity’s native skip using its task-row menu. Today+ briefly visits the native task list if needed, visually conceals only the temporary task menu, and returns to Today+. Task details do not open. If the native menu cannot be reached, it leaves the task unchanged and shows guidance. Native recurrence and completion semantics are preserved.
 - **Scheduled habits:** Read existing enabled habits from Super Productivity. Follow weekday schedules; show weekly-frequency habits during the week.
@@ -39,6 +44,8 @@ Super Productivity organizes tasks and habits in different views. Today+ brings 
 No separate login, external service, duplicate tasks, or additional local data store is required.
 
 > **Known limitation in v1.2.0:** Won't Do uses Super Productivity's native task menu through a plugin-side workaround. Today+ may briefly switch to the host task list and back, causing a momentary screen blink. We are retaining this behavior for now rather than faking task completion or changing recurring-task schedules. The action is verified by checking the native `wontDoOn` state; UI automation may need maintenance after host updates.
+
+> **v1.3.0-beta.1 preview:** The new ordering and Working Now features are in an unreleased branch for testing, not in the official v1.2.0 download below. Install the preview ZIP from the GitHub Actions artifact when available. See [workspace QA checklist](docs/WORKSPACE-VERIFICATION.md). The existing native Won't Do workaround and its brief screen blink are unchanged.
 
 ## Install
 
@@ -56,6 +63,14 @@ today-plus-super-productivity.zip
 ├── index.html
 └── icon.svg
 ```
+
+## Organizing tasks and habits
+
+Open **Arrange** in either list to reveal a drag handle and Move to top/up/down buttons. Parent task rows move as a group, and subtasks are rearranged inside their parent. On phones and with keyboard or assistive technology, the explicit buttons are an alternative to dragging.
+
+Today+'s task order resets each logical day; recurring habits retain the order you chose until you change it. Ordering and the Working Now task ID are stored as preferences, not copied tasks. No native task project order is changed, and progress totals still include the task in Working Now.
+
+Selecting a task for Working Now does not start time tracking. Start/Stop operates on the native tracker when supported. The app's `currentTaskChange` event supplies updates while Today+ is running; a refreshed iframe cannot reliably read the already-active tracker, so it does not claim tracking is active unless confirmed. Removing a task from Working Now does not stop native tracking.
 
 ## How the daily view works
 
