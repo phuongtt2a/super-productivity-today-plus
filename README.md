@@ -21,6 +21,15 @@ Today+ uses one consistent calendar-and-check icon in both the Super Productivit
 
 </details>
 
+<details>
+<summary>New in the workspace preview: active task and rearranging a day</summary>
+
+![Today+ Working Now with a selected task and its subtasks](docs/screenshots/working-now-active.webp)
+
+![Today+ mobile arrangement mode with Move to top and up/down controls](docs/screenshots/arrange-mode-phone.webp)
+
+</details>
+
 ## Why Today+?
 
 Super Productivity organizes tasks and habits in different views. Today+ brings **tasks due today** and **habits scheduled for today** onto one screen, reducing the need to switch back and forth while keeping Super Productivity as the source of truth. You can complete tasks, update habit goals, and manually log time without replacing the native habit tracker.
