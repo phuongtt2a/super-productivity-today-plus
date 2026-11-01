@@ -25,7 +25,8 @@ API="""window.PluginAPI={
  getAllSimpleCounters:async()=>[
   {id:'read',title:'Đọc sách 20 phút',isEnabled:true,type:'ClickCounter',isTrackStreaks:true,streakMinValue:1,streakWeekDays:{0:true,1:true,2:true,3:true,4:true,5:true,6:true},countOnDay:{}},
   {id:'water',title:'Uống đủ nước',isEnabled:true,type:'ClickCounter',isTrackStreaks:true,streakMinValue:6,countOnDay:{}},
-  {id:'exercise',title:'Tập thể dục 30 phút',isEnabled:true,type:'StopWatch',isOn:false,isTrackStreaks:true,streakMinValue:1800000,countOnDay:{[__DATE__]:600000}}
+  {id:'exercise',title:'Tập thể dục 30 phút',isEnabled:true,type:'StopWatch',isOn:false,isTrackStreaks:true,streakMinValue:1800000,countOnDay:{[__DATE__]:600000}},
+  {id:'piano',title:'Luyện đàn piano 60 phút',isEnabled:true,type:'StopWatch',isOn:false,isTrackStreaks:true,streakMinValue:3600000,countOnDay:{[__DATE__]:3600000}}
  ],
  updateTask:async()=>{},selectTask:async()=>{},setCounter:async()=>{},
  loadSyncedData:async()=>null,persistDataSynced:async()=>{},
@@ -88,6 +89,13 @@ with sync_playwright() as playwright:
    assert page.evaluate("document.documentElement.scrollWidth<=innerWidth+1")
    pic=page.screenshot(type="png",full_page=True,animations="disabled")
    Image.open(BytesIO(pic)).convert("RGB").save(OUT/"working-habit-phone.webp",format="WEBP",quality=86,method=6)
+   page.locator('#working-card [data-work-clear]').click()
+   page.locator('[data-work-habit="piano"]').click()
+   page.wait_for_selector('#working-card [data-sort-id="piano"].is-done')
+   assert page.locator('#working-card [data-log-time="piano"]').is_enabled()
+   assert page.locator('#habits [data-sort-id="piano"]').count()==0
+   pic=page.screenshot(type="png",full_page=True,animations="disabled")
+   Image.open(BytesIO(pic)).convert("RGB").save(OUT/"goal-reached-habit-phone.webp",format="WEBP",quality=86,method=6)
   print("captured",filename)
   page.close()
  browser.close()
