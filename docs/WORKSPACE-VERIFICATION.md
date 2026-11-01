@@ -1,6 +1,6 @@
 # Today+ Working Now and Order — v1.3.0-beta.1 QA
 
-**Status:** preview branch only. Do not merge or publish as stable until real-host verification. GitHub CI runs DOM mocks and screenshots; these do not replace actual installed testing.
+**Status:** v1.3.0-beta.2 preview branch only. Do not merge or publish as stable until real-host verification. GitHub CI runs DOM mocks and screenshots; these do not replace actual installed testing.
 
 ## Core order behavior
 
@@ -15,30 +15,33 @@
 
 ## Working Now
 
-1. Select a task through its target icon. Confirm **only one task** is in Working Now and the task is not duplicated in the list.
+1. Select a task through its target icon. Confirm **only one task or habit** is in Working Now and the task is not duplicated in the list.
 2. Select a different task and verify it replaces the former task; the former task returns to the list.
 3. Select a task with subtasks and verify the entire group stays accessible and its subtasks can be completed.
 4. Test selecting a subtask. Verify the parent remains in Tasks while the selected subtask moves to Working Now.
 5. Remove the selected task. Verify it returns to Tasks **without stopping native tracking**.
 6. Complete the task or choose **Won't Do** from Working Now. Verify the native record is correct, the Working Zone becomes empty and overall progress is counted only once.
+7. Select a **habit** from Habits. Confirm it appears in Working Now, disappears from Habits without duplicating progress, and retains its Complete, +/−, or Log time control as appropriate. Completing it should empty Working Now.
+8. Replace a Working Now task with a habit and vice versa. Confirm the previous item returns to its original list.
+9. Ensure habits do not show native task-tracking or Focus-mode buttons.
 7. Test unfinished overdue, completed, deleted and rescheduled tasks after a restart. Invalid Working Now references must not surface ghost tasks.
 
 ## Native tracking and Focus
 
 1. Selecting a task must **not** start tracking automatically.
-2. Click Start tracking; verify Super Productivity tracks the correct task (for a parent, it may track the first unfinished subtask).
+2. Click Start tracking; verify Super Productivity tracks the correct task (for a parent, it may track the first unfinished subtask). Repeat on a host without `startTracking` but with the allowed `[Task] SetCurrentTask` action; the button should stay usable.
 3. Click Stop tracking; verify the native timer stops and no duplicate elapsed-time counter exists in Today+.
 4. Change tracked task from another Super Productivity view. Confirm the Working Now state updates through currentTaskChange when Today+ is active.
 5. Restart Today+ during an active tracking session. The API does not provide a direct initial-current-tracker read; the interface must not pretend the tracker was confirmed until it receives a hook or explicitly starts it.
-6. Click Focus mode. Verify it opens the application's native Focus interface and does **not** forcibly start a Pomodoro/Countdown session.
-7. Test with an old host lacking the optional tracking or logical-day API: controls must disable/fallback safely.
+6. Click **Focus on task**. Verify it first activates exactly the Working Now task as the native tracked task and then opens the Focus interface without forcing a Pomodoro/Countdown session. Confirm it does not open unrelated task details.
+7. Test with an old host lacking the optional tracking or logical-day API: controls must fall back through allowed native actions or explain unavailability. Confirm no fake timer and no unsafe state writes.
 
 ## Visual, input and persistence quality
 
 1. At 320px, 390px, tablet and desktop widths: no horizontal scroll, clipped text, or overlapped buttons.
 2. Test with real mouse, touch (tap/drag), keyboard-only Tab/Enter/Space, screen reader labels.
 3. Drag handles must not accidentally scroll the task instead of reordering, or prevent scrolling elsewhere.
-4. Check light/dark themes, custom wallpaper transparency, native application font with Vietnamese and long task titles.
+4. Check light/dark themes, custom wallpaper transparency, native application font with Vietnamese and long task titles. Verify the active Working Now green-and-gold treatment stands out while Arrange is clearly a separate operation from Overdue/Finished filters.
 5. Check refresh while an interaction is in progress; task actions must not vanish mid-tap.
 6. Force plugin storage errors: Today+ should preserve the task state, explain the preference save failure, and never mutate project ordering.
 7. Verify original task/habit controls and native Won't Do remain functional with the known brief navigation blink.
