@@ -9,6 +9,12 @@ on:
 permissions:
   contents: write
 
+# Keep the newest PR screenshot job; overlapping runs can race to commit the
+# same rendered files and cause avoidable non-fast-forward push failures.
+concurrency:
+  group: today-plus-check-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -36,6 +42,7 @@ jobs:
           python tests/browser_task_view_check.py
           python tests/browser_native_menu_adapter_check.py
           python tests/browser_native_navigation_check.py
+          python tests/browser_workspace_check.py
           python tests/integration_check.py
           python tests/browser_check.py
       - name: Regenerate documentary screenshots with host font
@@ -60,7 +67,8 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/screenshots/today-plus-tasks-desktop-v1.1.0.webp \
                   docs/screenshots/today-plus-tasks-phone-v1.1.0.webp \
-                  docs/screenshots/small-phone.webp docs/screenshots/log-time.webp
+                  docs/screenshots/small-phone.webp docs/screenshots/log-time.webp \
+                  docs/screenshots/working-now-active.webp docs/screenshots/arrange-mode-phone.webp docs/screenshots/working-habit-phone.webp docs/screenshots/goal-reached-habit-phone.webp
           if ! git diff --cached --quiet; then
             git commit -m "docs: refresh NEO-Zen Today+ screenshots"
             git push origin "HEAD:$HEAD_REF"

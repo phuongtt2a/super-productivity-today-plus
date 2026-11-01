@@ -25,9 +25,13 @@ API="""window.PluginAPI={
  getAllSimpleCounters:async()=>[
   {id:'read',title:'Đọc sách 20 phút',isEnabled:true,type:'ClickCounter',isTrackStreaks:true,streakMinValue:1,streakWeekDays:{0:true,1:true,2:true,3:true,4:true,5:true,6:true},countOnDay:{}},
   {id:'water',title:'Uống đủ nước',isEnabled:true,type:'ClickCounter',isTrackStreaks:true,streakMinValue:6,countOnDay:{}},
-  {id:'exercise',title:'Tập thể dục 30 phút',isEnabled:true,type:'StopWatch',isOn:false,isTrackStreaks:true,streakMinValue:1800000,countOnDay:{[__DATE__]:600000}}
+  {id:'exercise',title:'Tập thể dục 30 phút',isEnabled:true,type:'StopWatch',isOn:false,isTrackStreaks:true,streakMinValue:1800000,countOnDay:{[__DATE__]:600000}},
+  {id:'piano',title:'Luyện đàn piano 60 phút',isEnabled:true,type:'StopWatch',isOn:false,isTrackStreaks:true,streakMinValue:3600000,countOnDay:{[__DATE__]:3600000}}
  ],
- updateTask:async()=>{},selectTask:async()=>{},setCounter:async()=>{}
+ updateTask:async()=>{},selectTask:async()=>{},setCounter:async()=>{},
+ loadSyncedData:async()=>null,persistDataSynced:async()=>{},
+ getDayContext:async()=>({todayStr:__DATE__}),
+ startTracking:async()=>{},stopTracking:async()=>{},dispatchAction:()=>{}
 };""".replace("__TASKS__",json.dumps(TASKS,ensure_ascii=False)).replace("__DATE__",json.dumps(TODAY))
 WALLPAPER="""html::before{
  content:'';position:fixed;pointer-events:none;inset:0;z-index:-1;
@@ -64,6 +68,34 @@ with sync_playwright() as playwright:
    page.wait_for_selector('#time-overlay:not(.hidden)')
    pic=page.screenshot(type="png",full_page=False,animations="disabled")
    Image.open(BytesIO(pic)).convert("RGB").save(OUT/"log-time.webp",format="WEBP",quality=86,method=6)
+   page.locator('#time-close').click()
+   page.locator('[data-work="report"]').click()
+   page.wait_for_selector('#working-card [data-sort-id="report"]')
+   assert page.locator('#tasks [data-sort-id="report"]').count()==0
+   shot=page.screenshot(type="png",full_page=True,animations="disabled")
+   Image.open(BytesIO(shot)).convert("RGB").save(OUT/"working-now-active.webp",format="WEBP",quality=86,method=6)
+  if width==390:
+   page.locator('#arrange-tasks').click()
+   page.locator('#arrange-habits').click()
+   assert page.locator('#tasks [data-move="top"]').count()>0
+   assert page.evaluate("document.documentElement.scrollWidth<=innerWidth+1")
+   shot=page.screenshot(type="png",full_page=True,animations="disabled")
+   Image.open(BytesIO(shot)).convert("RGB").save(OUT/"arrange-mode-phone.webp",format="WEBP",quality=86,method=6)
+   page.locator('#arrange-tasks').click()
+   page.locator('#arrange-habits').click()
+   page.locator('[data-work-habit="water"]').click()
+   page.wait_for_selector('#working-card [data-sort-id="water"]')
+   assert page.locator('#habits [data-sort-id="water"]').count()==0
+   assert page.evaluate("document.documentElement.scrollWidth<=innerWidth+1")
+   pic=page.screenshot(type="png",full_page=True,animations="disabled")
+   Image.open(BytesIO(pic)).convert("RGB").save(OUT/"working-habit-phone.webp",format="WEBP",quality=86,method=6)
+   page.locator('#working-card [data-work-clear]').click()
+   page.locator('[data-work-habit="piano"]').click()
+   page.wait_for_selector('#working-card [data-sort-id="piano"].is-done')
+   assert page.locator('#working-card [data-log-time="piano"]').is_enabled()
+   assert page.locator('#habits [data-sort-id="piano"]').count()==0
+   pic=page.screenshot(type="png",full_page=True,animations="disabled")
+   Image.open(BytesIO(pic)).convert("RGB").save(OUT/"goal-reached-habit-phone.webp",format="WEBP",quality=86,method=6)
   print("captured",filename)
   page.close()
  browser.close()

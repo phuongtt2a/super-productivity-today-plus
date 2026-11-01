@@ -1,8 +1,8 @@
 {
   "id": "sp-today-tasks-habits",
   "name": "Today+",
-  "version": "1.2.0",
-  "description": "Today+ brings tasks due today and scheduled habits into one calm view, with subtasks and optional overdue and finished tasks.",
+  "version": "2.0.0",
+  "description": "Today+ combines today's tasks and habits with personal ordering, Working Now, native time tracking, and Focus mode.",
   "manifestVersion": 1,
   "minSupVersion": "14.0.0",
   "author": "phuongtt2a",
@@ -15,12 +15,22 @@
     "getAllSimpleCounters",
     "updateTask",
     "setCounter",
-    "selectTask"
+    "selectTask",
+    "loadSyncedData",
+    "persistDataSynced",
+    "startTracking",
+    "stopTracking",
+    "dispatchAction",
+    "getDayContext"
   ],
   "hooks": [
     "taskCreated",
     "taskUpdate",
     "taskComplete",
-    "taskDelete"
+    "taskDelete",
+    "currentTaskChange",
+    "dataChanged",
+    "dayChange",
+    "persistedDataChanged"
   ]
 }

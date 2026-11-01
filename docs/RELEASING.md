@@ -2,6 +2,12 @@
 
 Repository: https://github.com/phuongtt2a/super-productivity-today-plus
 
+## Current major release: v2.0.0
+
+Version `2.0.0` replaces the public v1.2.x line after the user's installed-app acceptance of Working Now, personal task/habit order, task tracking/Focus handoff, and continued progress after a habit goal. The release is created from the merged `main` manifest; `CHANGELOG.md` provides version-specific GitHub release notes.
+
+The ZIP under **Assets** is the installable plugin. The four root files are `manifest.json`, `plugin.js`, `index.html`, and `icon.svg`. For screenshots and feature behavior, see [README](../README.md) and [workspace QA](WORKSPACE-VERIFICATION.md).
+
 ## Workflow: issue → PR → merge → published ZIP
 
 1. Track bugs and enhancements in GitHub Issues.

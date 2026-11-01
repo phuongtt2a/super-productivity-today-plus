@@ -217,6 +217,97 @@ html,body,.app{background:transparent!important}
 #tasks>.item-task.is-done{background:var(--neo-card)}
 @media(max-width:380px){#tasks>.item-task{padding:10px 7px}}
 
+
+/* Working Now and arrange mode: compact NEO-Zen surfaces, no forced page opacity. */
+.working-zone{margin:0 0 clamp(23px,3.5vw,39px);min-width:0}
+.working-heading{margin-bottom:10px}
+.working-caption{font-size:11px;color:var(--today-muted)}
+.working-surface{border:2px solid var(--neo-stroke);border-radius:5px;
+  box-shadow:3px 3px 0 var(--neo-stroke);background:var(--neo-gold);
+  padding:clamp(12px,2vw,18px);min-width:0}
+.working-empty{display:flex;gap:12px;align-items:center;min-height:54px;color:var(--today-muted);font-size:13px;line-height:1.5}
+.working-empty svg{flex:none;width:23px;height:23px;stroke:var(--today-text);stroke-width:1.8;fill:none}
+.working-surface .task-group{background:var(--neo-card);margin:9px 3px 14px 0}
+.working-surface>.item{background:var(--neo-card);border:2px solid var(--neo-stroke);border-radius:5px;
+  padding:8px 10px;margin:9px 3px 14px 0}
+.working-actions{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin-top:12px}
+.working-actions .action-btn{min-height:40px}
+.working-actions .action-btn:disabled{opacity:.48}
+.working-state{font-size:12px;color:var(--today-muted);font-weight:600}
+.working-eyebrow{color:var(--today-muted);font-weight:800;font-size:10px;letter-spacing:.085em;text-transform:uppercase}
+.working-title{font-size:14px;line-height:1.45;margin:8px 0 4px;overflow-wrap:anywhere}
+.workspace-note{font-size:12px;line-height:1.45;margin:11px 0 0;color:var(--today-text)}
+.task-controls{justify-self:end;display:inline-flex;align-items:center;gap:5px;min-width:0}
+.work-pick{display:grid;place-items:center;width:40px;height:40px;min-width:40px;
+  border:1px solid var(--today-line);border-radius:12px;padding:0;
+  color:var(--today-text);background:var(--today-bg)}
+.work-pick:hover,.work-pick:focus-visible{border-color:var(--today-accent);background:var(--today-hover)}
+.work-pick svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;pointer-events:none}
+.work-pick[aria-pressed=true]{background:var(--neo-gold);border-color:var(--neo-stroke)}
+.arrange-tools{grid-column:1 / -1;display:flex;align-items:center;justify-content:flex-end;
+  gap:5px;flex-wrap:wrap;min-width:0;margin-top:7px;padding-top:6px;
+  border-top:1px dashed var(--today-line)}
+.arrange-label{font-size:10px;color:var(--today-muted);margin-right:auto}
+.arrange-control{display:grid;place-items:center;min-width:40px;min-height:40px;
+  border:1px solid var(--neo-stroke);border-radius:5px;background:var(--neo-card);
+  color:var(--today-text);padding:0 7px;font-weight:700;font-size:15px}
+.arrange-control:hover,.arrange-control:focus-visible{background:var(--neo-gold)}
+.arrange-control:disabled{opacity:.38}
+.drag-handle{cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.drag-handle:active{cursor:grabbing}
+.sort-drop-target{outline:2px dashed var(--today-accent);outline-offset:-3px}
+#tasks .task-group>.item:has(.arrange-tools){border-bottom:0}
+.section-head:has(.chip[data-arrange]){flex-wrap:wrap}
+@media(max-width:380px){
+  .task-controls{gap:3px}.working-actions{gap:7px}
+  .working-actions .action-btn{padding:9px 10px;white-space:normal}
+  .section-actions{flex-wrap:wrap}
+  .arrange-tools{justify-content:flex-end}
+  .arrange-label{flex-basis:100%;margin-right:0}
+}
+
+
+/* Workspace emphasis: warm green priority area, small amber accent, translucent to host wallpaper. */
+.working-surface{position:relative;isolation:isolate;
+  border:2px solid var(--today-accent);
+  background:color-mix(in srgb,var(--neo-mint) 86%,var(--today-accent) 14%);
+  box-shadow:4px 4px 0 var(--neo-stroke);
+  padding:clamp(13px,2vw,19px);
+}
+.working-surface.has-priority{border-width:3px;
+  background:color-mix(in srgb,var(--today-accent) 21%,var(--neo-card) 79%);
+  box-shadow:4px 4px 0 var(--neo-stroke),inset 5px 0 0 var(--neo-gold);
+}
+.working-surface.has-priority .working-eyebrow{font-weight:900;color:var(--today-text)}
+.working-heading h2{color:var(--today-accent);font-weight:850}
+.working-caption{padding:5px 8px;border:1px solid var(--today-accent);
+  border-radius:5px;background:var(--neo-gold);font-weight:800;color:var(--today-text)}
+/* Arrange is an action, not a data filter. Preserve the smaller filter chips. */
+.section-actions .arrange-toggle{
+  display:inline-flex;align-items:center;gap:5px;min-height:36px;
+  border:2px solid var(--neo-stroke);border-radius:5px;
+  background:var(--neo-mint);color:var(--today-text);font-weight:800;
+  box-shadow:2px 2px 0 var(--neo-stroke);margin-right:7px;
+}
+.section-actions .arrange-toggle[aria-pressed=true]{
+  background:var(--neo-gold);box-shadow:1px 1px 0 var(--neo-stroke);
+}
+.section-actions .arrange-toggle:hover{background:var(--neo-gold)}
+.section-actions .arrange-toggle span{font-size:16px;line-height:1}
+.working-habit-note{font-size:12px;line-height:1.4;color:var(--today-muted);
+  margin:10px 0 0}
+@media(max-width:380px){
+  .section-actions .arrange-toggle{margin-right:4px;padding:6px 8px}
+  .working-caption{font-size:10px}
+  .working-surface{padding:12px}
+}
+/* Arrange belongs at the far right: visually separate layout actions from filters. */
+.section-actions .arrange-toggle{margin-left:7px;margin-right:0}
+.working-surface .item.is-done .item-name{text-decoration:none;color:var(--today-text)}
+.working-surface .item.is-done .item-meta{color:var(--today-muted)}
+@media(max-width:380px){
+  .section-actions .arrange-toggle{margin-left:4px;margin-right:0}
+}
 </style>
 </head>
 <body>
@@ -232,17 +323,26 @@ html,body,.app{background:transparent!important}
   <div class="hero"><div><h1>Focus on what matters.</h1><p>Not another endless checklist.</p></div><div class="overall" aria-live="polite"><strong id="done-count">0 of 0</strong>complete<div class="overall-bar"><span id="done-bar"></span></div></div></div>
   <p class="demo-note hidden" id="demo-note">Preview data only. Install this plugin in Super Productivity to see your real tasks and habits.</p>
   <p class="error-note hidden" id="error-note" role="alert"></p>
+
+  <section class="working-zone" aria-labelledby="working-heading">
+    <div class="section-head working-heading">
+      <div class="section-title"><h2 id="working-heading">Working Now</h2></div>
+      <span class="working-caption">One priority at a time</span>
+    </div>
+    <div class="working-surface" id="working-card" aria-live="polite"></div>
+    <p class="workspace-note hidden" id="workspace-note" role="status" aria-live="polite"></p>
+  </section>
   <div class="workspace">
     <section class="section" aria-labelledby="task-heading">
-      <div class="section-head"><div class="section-title"><h2 id="task-heading">Tasks</h2><span class="count" id="task-count">0</span></div><div class="section-actions"><button class="chip" id="overdue-filter" type="button" aria-pressed="false">Overdue</button><button class="chip" id="completed-filter" type="button" aria-pressed="false">Finished</button></div></div>
+      <div class="section-head"><div class="section-title"><h2 id="task-heading">Tasks</h2><span class="count" id="task-count">0</span></div><div class="section-actions"><button class="chip" id="overdue-filter" type="button" aria-pressed="false">Overdue</button><button class="chip" id="completed-filter" type="button" aria-pressed="false">Finished</button><button class="chip arrange-toggle" id="arrange-tasks" data-arrange="task" type="button" aria-pressed="false" title="Reorder tasks"><span aria-hidden="true">↕</span> Arrange</button></div></div>
       <div id="tasks"></div><p id="task-action-note" class="task-note hidden" role="status" aria-live="polite"></p>
     </section>
     <section class="section" aria-labelledby="habit-heading">
-      <div class="section-head"><div class="section-title"><h2 id="habit-heading">Habits</h2><span class="count" id="habit-count">0</span></div><span class="today-date" id="habit-caption">TODAY</span></div>
+      <div class="section-head"><div class="section-title"><h2 id="habit-heading">Habits</h2><span class="count" id="habit-count">0</span></div><div class="section-actions"><span class="today-date" id="habit-caption">TODAY</span><button class="chip arrange-toggle" id="arrange-habits" data-arrange="habit" type="button" aria-pressed="false" title="Reorder habits"><span aria-hidden="true">↕</span> Arrange</button></div></div>
       <div id="habits"></div>
     </section>
   </div>
-  <footer class="foot">Tasks and habits stay in sync with Super Productivity. Today+ does not change your existing routines or timers.</footer>
+  <footer class="foot">Tasks and habits stay in sync with Super Productivity. Your order and Working Now selection are Today+ preferences; time tracking and Focus mode use the app.</footer>
 </main>
 <div id="time-overlay" class="time-overlay hidden" role="presentation">
   <section class="time-dialog" role="dialog" aria-modal="true" aria-labelledby="time-title" aria-describedby="time-help">
@@ -260,7 +360,7 @@ html,body,.app{background:transparent!important}
 <script>
 'use strict';
 const $ = id => document.getElementById(id);
-const state = {api:null, tasks:[], habits:[], projects:new Map(), today:'', showOverdue:false, showFinished:false, demo:false, refreshing:false, busy:new Set(), pointerActive:false, refreshDeferred:false, timeHabitId:null, previousFocus:null};
+const state = {api:null, tasks:[], habits:[], projects:new Map(), today:'', logicalDay:null, showOverdue:false, showFinished:false, demo:false, refreshing:false, busy:new Set(), pointerActive:false, refreshDeferred:false, timeHabitId:null, previousFocus:null, arrange:{task:false,habit:false}, prefs:{version:1,day:'',taskOrder:[],childOrder:{},habitOrder:[],workingId:null,workingKind:'task'}, preferenceWrite:Promise.resolve(), preferenceRevision:0, externalPrefsDeferred:false, dragging:null, trackedTaskId:null, trackingKnown:false};
 const safe = str => String(str ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const localDay = (date=new Date()) => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
 const dueKey = t => t.dueDay || (Number.isFinite(t.dueWithTime)?localDay(new Date(t.dueWithTime)):null);
@@ -289,6 +389,133 @@ function weekProgress(h, date=getToday()) {
   for(let i=0;i<7;i++){const day=new Date(monday);day.setDate(monday.getDate()+i);if(Number(h.countOnDay?.[localDay(day)]||0)>=habitGoal(h))done++}
   return {done,goal:Number(h.streakWeeklyFrequency)>0?Number(h.streakWeeklyFrequency):1};
 }
+
+const PREF_KEY='todayplus.workspace.v1';
+// Today+ presentation order is intentionally independent of project/task order.
+function safeIds(ids) {
+  return Array.isArray(ids) ? [...new Set(ids.filter(id=>typeof id==='string'&&id.length>0&&id.length<=256))].slice(0,2000):[];
+}
+function normalizePrefs(raw) {
+  const value=raw&&typeof raw==='object'?raw:{};
+  const childOrder={};
+  if(value.childOrder&&typeof value.childOrder==='object'){
+    for(const [parent,ids] of Object.entries(value.childOrder).slice(0,500))
+      if(typeof parent==='string'&&parent.length<=256)childOrder[parent]=safeIds(ids);
+  }
+  return {version:1,day:typeof value.day==='string'?value.day:'',
+    taskOrder:safeIds(value.taskOrder),childOrder,
+    habitOrder:safeIds(value.habitOrder),
+    // Legacy v1.3.0-beta.1 preferences stored only a task ID.
+    workingId:typeof value.workingId==='string'&&value.workingId.length<=256?value.workingId:null,
+    workingKind:value.workingKind==='habit'?'habit':'task'};
+}
+function ensureDayPrefs(){
+  if(state.prefs.day===state.today)return;
+  state.prefs.day=state.today;
+  state.prefs.taskOrder=[];
+  state.prefs.childOrder={};
+  // Habit order is an ongoing routine; today's task order is a daily choice.
+}
+async function loadPrefs(){
+  if(!state.api||typeof state.api.loadSyncedData!=='function')return;
+  const startedAtRevision=state.preferenceRevision;
+  try{
+    const raw=await state.api.loadSyncedData(PREF_KEY);
+    // A slow remote read must never overwrite an interaction made since the
+    // read began. Hook refreshes never write back to synced state.
+    if(raw&&startedAtRevision===state.preferenceRevision)
+      state.prefs=normalizePrefs(JSON.parse(raw));
+  }catch(err){noteWorkspace('Could not load your saved arrangement. Changes will remain on this screen until storage is available.');}
+}
+function noteWorkspace(message){
+  const el=$('workspace-note');
+  el.textContent=message;el.classList.toggle('hidden',!message);
+}
+function savePrefs(){
+  if(!state.api||typeof state.api.persistDataSynced!=='function')return;
+  // Copy now: queued asynchronous writes must not accidentally all save the
+  // newest state or race and overwrite an earlier user command.
+  const data=JSON.stringify(state.prefs);
+  state.preferenceRevision++;
+  state.preferenceWrite=state.preferenceWrite.catch(()=>{}).then(()=>
+    state.api.persistDataSynced(data,PREF_KEY)
+  );
+  state.preferenceWrite.catch(()=>noteWorkspace('Could not save this arrangement. Try again when Super Productivity is connected.'));
+}
+function orderedBy(items,ids,otherwise){
+  const ranks=new Map(safeIds(ids).map((id,index)=>[id,index]));
+  return items.slice().sort((a,b)=>{
+    const ra=ranks.has(a.id)?ranks.get(a.id):Infinity;
+    const rb=ranks.has(b.id)?ranks.get(b.id):Infinity;
+    return ra-rb||(otherwise?otherwise(a,b):0);
+  });
+}
+function validWorkingTask(){
+  if(state.prefs.workingKind==='habit')return null;
+  const id=state.prefs.workingId;
+  if(!id)return null;
+  const task=state.tasks.find(t=>t.id===id);
+  if(!task||task.isDone)return null;
+  const parent=task.parentId?state.tasks.find(t=>t.id===task.parentId):null;
+  const due=dueKey(task)||dueKey(parent||{});
+  return due&&due<=state.today?task:null;
+}
+function validWorkingHabit(){
+  if(state.prefs.workingKind!=='habit'||!state.prefs.workingId)return null;
+  const habit=state.habits.find(h=>h.id===state.prefs.workingId);
+  // Reaching a daily goal is a milestone, not a stop-work command.
+  // The user may keep the habit in Working Now and log more time/progress.
+  return habit&&habitDue(habit)?habit:null;
+}
+function moveList(kind,parentId){
+  if(kind==='task')return taskGroups().map(g=>g.task.id);
+  if(kind==='habit')return todayHabits().map(h=>h.id);
+  if(kind==='child'){
+    const group=taskGroups().find(g=>g.task.id===parentId);
+    return group?group.children.map(t=>t.id):[];
+  }
+  return [];
+}
+function saveVisibleOrder(kind,parentId,ids){
+  if(kind==='task')state.prefs.taskOrder=[...ids,...state.prefs.taskOrder.filter(id=>!ids.includes(id))];
+  else if(kind==='habit')state.prefs.habitOrder=[...ids,...state.prefs.habitOrder.filter(id=>!ids.includes(id))];
+  else if(kind==='child'){
+    const previous=state.prefs.childOrder[parentId]||[];
+    state.prefs.childOrder[parentId]=[...ids,...previous.filter(id=>!ids.includes(id))];
+  }
+  savePrefs();render();
+}
+function moveItem(kind,id,direction,parentId=''){
+  const ids=moveList(kind,parentId);
+  const index=ids.indexOf(id);
+  if(index<0)return;
+  let destination=direction==='top'?0:direction==='up'?Math.max(0,index-1):Math.min(ids.length-1,index+1);
+  if(index===destination)return;
+  ids.splice(index,1);ids.splice(destination,0,id);
+  saveVisibleOrder(kind,parentId,ids);
+}
+function dropItem(kind,id,targetId,parentId='',after=false){
+  const ids=moveList(kind,parentId);
+  if(!ids.includes(id)||!ids.includes(targetId)||id===targetId)return;
+  ids.splice(ids.indexOf(id),1);
+  ids.splice(ids.indexOf(targetId)+(after?1:0),0,id);
+  saveVisibleOrder(kind,parentId,ids);
+}
+function sortToolbar(kind,id,title,parentId=''){
+  const enabled=kind==='habit'?state.arrange.habit:state.arrange.task;
+  if(!enabled)return '';
+  const safeId=safe(id),safeParent=safe(parentId),safeKind=safe(kind),safeTitle=safe(title);
+  const ids=moveList(kind,parentId);
+  const index=ids.indexOf(id);
+  return `<div class="arrange-tools" role="group" aria-label="Arrange ${safeTitle}">
+    <span class="arrange-label">Arrange</span>
+    <button class="arrange-control drag-handle" type="button" data-drag-kind="${safeKind}" data-drag-id="${safeId}" data-drag-parent="${safeParent}" title="Drag to reorder" aria-label="Drag to reorder ${safeTitle}">⠿</button>
+    <button class="arrange-control" type="button" data-move="top" data-order-kind="${safeKind}" data-order-id="${safeId}" data-order-parent="${safeParent}" title="Move to top" aria-label="Move ${safeTitle} to top" ${index<=0?'disabled':''}>⇧</button>
+    <button class="arrange-control" type="button" data-move="up" data-order-kind="${safeKind}" data-order-id="${safeId}" data-order-parent="${safeParent}" title="Move up" aria-label="Move ${safeTitle} up" ${index<=0?'disabled':''}>↑</button>
+    <button class="arrange-control" type="button" data-move="down" data-order-kind="${safeKind}" data-order-id="${safeId}" data-order-parent="${safeParent}" title="Move down" aria-label="Move ${safeTitle} down" ${index>=ids.length-1?'disabled':''}>↓</button>
+  </div>`;
+}
+
 function isScheduledInView(t){
   const d=dueKey(t);
   if(!d||d>state.today)return false;
@@ -320,25 +547,29 @@ function taskGroups(){
       return selectedIds.has(t.id);
     });
   }
-  return [...roots.values()].sort((a,b)=>taskOrder(a.task,b.task));
+  const sorted=orderedBy([...roots.values()].map(g=>({id:g.task.id,group:g})),state.prefs.taskOrder,(a,b)=>taskOrder(a.group.task,b.group.task));
+  return sorted.map(x=>({...x.group,children:orderedBy(x.group.children,state.prefs.childOrder[x.id]||[])}));
 }
-function todayHabits(){return state.habits.filter(h=>habitDue(h));}
+function todayHabits(){return orderedBy(state.habits.filter(h=>habitDue(h)),state.prefs.habitOrder);}
 function sectionEmpty(name,caption){return `<div class="empty"><strong>${safe(name)}</strong>${safe(caption)}</div>`;}
-function taskRow(t,level=0,context=false){
+function taskRow(t,level=0,context=false,rootId='',working=false){
   const id=safe(t.id),d=dueKey(t),project=state.projects.get(t.projectId)||'Inbox';
   const isOverdue=d&&d<state.today;
   const status=context?'Parent task':isWontDo(t)?"Won't Do":t.isDone?'Finished':isOverdue?'Overdue':d===state.today?'Due today':'Subtask';
   const marker=context?'<span class="check" aria-hidden="true"></span>':`<button class="check ${t.isDone?'is-done':''}" data-task="${id}" aria-label="${t.isDone?'Return to do':'Mark as completed'}: ${safe(t.title)}" type="button">${t.isDone?(isWontDo(t)?'×':'✓'):''}</button>`;
-  // Even an unscheduled subtask can be intentionally skipped.
-  const action=context||t.isDone?'':`<button type="button" class="task-skip" data-wont-do="${id}" aria-label="Won't Do" title="Won't Do"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4.5" y="2.5" width="15" height="19" rx="2"/><path d="M8 7h8M9 12l6 6m0-6-6 6"/></svg></button>`;
-  return `<article class="item item-task ${t.isDone?'is-done':''} ${context?'task-context':''} ${level?'subtask':''}">${marker}<div class="item-copy" data-open="${id}" tabindex="0" role="button" aria-label="Open ${level?'subtask':'task'}: ${safe(t.title)}"><p class="item-name">${safe(t.title)}</p><p class="item-meta"><span>${safe(project)}</span><span class="dot">·</span><span>${safe(status)}${d&&d!==state.today?' · '+safe(fmtDate(d)):''}</span></p></div>${action}</article>`;
+  const wontDo=context||t.isDone?'':`<button type="button" class="task-skip" data-wont-do="${id}" aria-label="Won't Do" title="Won't Do"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4.5" y="2.5" width="15" height="19" rx="2"/><path d="M8 7h8M9 12l6 6m0-6-6 6"/></svg></button>`;
+  const pick=context||t.isDone||working?'':`<button class="work-pick" type="button" data-work="${id}" aria-label="Work on ${safe(t.title)}" title="Work on this task" aria-pressed="${state.prefs.workingKind!=='habit'&&state.prefs.workingId===t.id}"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4"/></svg></button>`;
+  const controls=pick||wontDo?`<div class="task-controls">${pick}${wontDo}</div>`:'';
+  const kind=level?'child':'task',parent=level?rootId:'';
+  const arrange=working?'':sortToolbar(kind,t.id,t.title,parent);
+  return `<article class="item item-task ${t.isDone?'is-done':''} ${context?'task-context':''} ${level?'subtask':''}" data-sort-kind="${kind}" data-sort-id="${id}" data-sort-parent="${safe(parent)}">${marker}<div class="item-copy" data-open="${id}" tabindex="0" role="button" aria-label="Open ${level?'subtask':'task'}: ${safe(t.title)}"><p class="item-name">${safe(t.title)}</p><p class="item-meta"><span>${safe(project)}</span><span class="dot">·</span><span>${safe(status)}${d&&d!==state.today?' · '+safe(fmtDate(d)):''}</span></p></div>${controls}${arrange}</article>`;
 }
-function taskGroupRow(group){
-  const children=group.children.map(t=>taskRow(t,1)).join('');
-  if(!children)return taskRow(group.task,0,group.context);
-  return `<div class="task-group">${taskRow(group.task,0,group.context)}<div class="task-children">${children}</div></div>`;
+function taskGroupRow(group,working=false){
+  const children=group.children.map(t=>taskRow(t,1,false,group.task.id,working)).join('');
+  if(!children)return taskRow(group.task,0,group.context,'',working);
+  return `<div class="task-group">${taskRow(group.task,0,group.context,'',working)}<div class="task-children">${children}</div></div>`;
 }
-function habitRow(h){
+function habitRow(h,working=false){
   const id=safe(h.id),value=habitValue(h),goal=habitGoal(h),done=dailyDone(h),weekly=h.streakMode==='weekly-frequency'?weekProgress(h):null;
   const stopwatch=h.type==='StopWatch',simple=isSimpleHabit(h),percent=Math.min(100,value/goal*100);
   const status=stopwatch?`${formatMinutes(value)} / ${formatMinutes(goal)}`:weekly?`${weekly.done}/${weekly.goal} days this week`:simple?(done?'Done':'To do'):`${value} / ${goal}`;
@@ -349,7 +580,8 @@ function habitRow(h){
     :`<div class="counter-btns"><button type="button" class="mini-btn" data-less="${id}" aria-label="Decrease ${safe(h.title)}" ${value<=0?'disabled':''}>−</button><span class="counter-value">${value}</span><button type="button" class="mini-btn" data-more="${id}" aria-label="Increase ${safe(h.title)}">+</button></div>`;
   const marker=simple?`<button type="button" class="check ${done?'is-done':''}" data-habit="${id}" aria-label="${done?'Undo':'Complete'} habit: ${safe(h.title)}">${done?'✓':''}</button>`
     :`<span class="habit-symbol" aria-hidden="true">${stopwatch?'◷':'◈'}</span>`;
-  return `<article class="item ${done?'is-done':''}">${marker}<div class="item-copy"><p class="item-name">${safe(h.title)}</p><p class="item-meta"><span>${safe(desc)}</span><span class="dot">·</span><span>${safe(status)}</span></p>${!simple?`<div class="habit-progress" aria-label="Progress ${Math.round(percent)} percent"><span style="width:${percent}%"></span></div>`:''}</div>${control}</article>`;
+  const pick=working?'':`<button class="work-pick" type="button" data-work-habit="${id}" aria-label="Work on habit: ${safe(h.title)}" title="Work on this habit" aria-pressed="${state.prefs.workingKind==='habit'&&state.prefs.workingId===h.id}"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4"/></svg></button>`;
+  return `<article data-sort-kind="habit" data-sort-id="${id}" class="item ${done?'is-done':''}">${marker}<div class="item-copy"><p class="item-name">${safe(h.title)}</p><p class="item-meta"><span>${safe(desc)}</span><span class="dot">·</span><span>${safe(status)}</span></p>${!simple?`<div class="habit-progress" aria-label="Progress ${Math.round(percent)} percent"><span style="width:${percent}%"></span></div>`:''}</div><div class="task-controls">${pick}${control}</div>${working?'':sortToolbar("habit",h.id,h.title)}</article>`;
 }
 function taskSummary(){
   // Summary includes finished tasks even while the Finished filter hides their
@@ -369,11 +601,67 @@ function taskSummary(){
   }
   return state.tasks.filter(t=>ids.has(t.id));
 }
-function render(){state.today=localDay();$('today-date').textContent=new Date().toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'});const groups=taskGroups(),habits=todayHabits(),summary=taskSummary(),totalTasks=summary.length;const taskDone=summary.filter(t=>t.isDone&&!isWontDo(t)).length,habitDone=habits.filter(h=>dailyDone(h)).length;
-  $('tasks').innerHTML=groups.length?groups.map(taskGroupRow).join(''):sectionEmpty('All clear','No tasks due today in this view.');
-  $('habits').innerHTML=habits.length?habits.map(habitRow).join(''):sectionEmpty('No habits scheduled','Enabled habits will show here on their scheduled days.');
-  $('task-count').textContent=String(groups.reduce((n,g)=>n+Number(!g.context)+g.children.length,0));$('habit-count').textContent=String(habits.length);$('done-count').textContent=`${taskDone+habitDone} of ${totalTasks+habits.length}`;
-  $('done-bar').style.width=((totalTasks+habits.length)?Math.round(100*(taskDone+habitDone)/(totalTasks+habits.length)):0)+'%';$('overdue-filter').setAttribute('aria-pressed',String(state.showOverdue));$('completed-filter').setAttribute('aria-pressed',String(state.showFinished));
+function renderWorking(workingTask,workingHabit,groups){
+  const hasSelection=!!(workingTask||workingHabit);
+  $('working-card').classList.toggle('has-priority',hasSelection);
+  if(!hasSelection){
+    $('working-card').innerHTML='<div class="working-empty"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg><span>Tap the target icon beside a task or habit to make it your current priority. This does not start tracking.</span></div>';
+    return;
+  }
+  if(workingHabit){
+    $('working-card').innerHTML=
+      '<div class="working-eyebrow">Current priority · Daily habit</div>'+
+      habitRow(workingHabit,true)+
+      '<p class="working-habit-note">'+
+      (dailyDone(workingHabit)
+        ? 'Goal reached — you can keep working on this habit and log more progress. Remove it whenever you choose.'
+        : 'Complete or log progress here. Even after reaching the goal, the habit stays until you remove or replace it.')+
+      ' Task tracking and Focus sessions apply only to tasks.</p>'+
+      '<div class="working-actions"><button type="button" class="action-btn" data-work-clear>Remove</button><span class="working-state">Habit in progress</span></div>';
+    return;
+  }
+  const group=groups.find(g=>g.task.id===workingTask.id);
+  const row=group?taskGroupRow(group,true):taskRow(workingTask,workingTask.parentId?1:0,false,workingTask.parentId||'',true);
+  const tracked=state.trackingKnown&&state.trackedTaskId&&
+    (state.trackedTaskId===workingTask.id||state.tasks.some(t=>t.id===state.trackedTaskId&&t.parentId===workingTask.id));
+  const canTrack=!!state.api&&(typeof state.api.startTracking==='function'||typeof state.api.dispatchAction==='function');
+  const canFocus=canTrack&&typeof state.api.dispatchAction==='function';
+  const trackButton=tracked
+    ?'<button type="button" class="action-btn" data-track-stop title="Stop the native task timer">Stop tracking</button>'
+    :`<button type="button" class="action-btn filled" data-track-start title="Start Super Productivity's time tracker" ${canTrack?'':'disabled'}>Start tracking</button>`;
+  $('working-card').innerHTML=
+    '<div class="working-eyebrow">Current priority · Task</div>'+
+    row+
+    `<div class="working-actions">${trackButton}<button type="button" class="action-btn" data-focus-open title="Focus on this task in Super Productivity" ${canFocus?'':'disabled'}>Focus on task</button><button type="button" class="action-btn" data-work-clear>Remove</button><span class="working-state">${tracked?'Tracking in Super Productivity':canTrack?'Not tracking':'Tracking unavailable'}</span></div>`;
+}
+function render(){
+  state.today=state.logicalDay||localDay();
+  ensureDayPrefs();
+  $('today-date').textContent=new Date().toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'});
+  const groups=taskGroups(),habits=todayHabits(),summary=taskSummary(),totalTasks=summary.length;
+  const taskDone=summary.filter(t=>t.isDone&&!isWontDo(t)).length;
+  const habitDone=habits.filter(h=>dailyDone(h)).length;
+  const working=validWorkingTask();
+  const workingHabit=validWorkingHabit();
+  renderWorking(working,workingHabit,groups);
+  const visibleGroups=working
+    ?groups.filter(group=>group.task.id!==working.id).map(group=>
+      ({...group,children:group.children.filter(child=>child.id!==working.id)}))
+    :groups;
+  const visibleHabits=workingHabit?habits.filter(h=>h.id!==workingHabit.id):habits;
+  $('tasks').innerHTML=visibleGroups.length?visibleGroups.map(group=>taskGroupRow(group)).join(''):
+    sectionEmpty('All clear','No other tasks due today in this view.');
+  $('habits').innerHTML=visibleHabits.length?visibleHabits.map(h=>habitRow(h)).join(''):
+    sectionEmpty('No other habits','Your current habit is in Working Now, or none is scheduled today.');
+  $('task-count').textContent=String(visibleGroups.reduce((n,g)=>n+Number(!g.context)+g.children.length,0));
+  $('habit-count').textContent=String(visibleHabits.length);
+  $('done-count').textContent=`${taskDone+habitDone} of ${totalTasks+habits.length}`;
+  $('done-bar').style.width=((totalTasks+habits.length)?
+    Math.round(100*(taskDone+habitDone)/(totalTasks+habits.length)):0)+'%';
+  $('overdue-filter').setAttribute('aria-pressed',String(state.showOverdue));
+  $('completed-filter').setAttribute('aria-pressed',String(state.showFinished));
+  $('arrange-tasks').setAttribute('aria-pressed',String(state.arrange.task));
+  $('arrange-habits').setAttribute('aria-pressed',String(state.arrange.habit));
 }
 function demoData(){const today=localDay();const yesterday=new Date();yesterday.setDate(yesterday.getDate()-1);
   state.tasks=[{id:'t1',title:'Complete the proposal draft',projectId:'work',dueDay:today,isDone:false,subTaskIds:['t1a','t1b']},{id:'t1a',parentId:'t1',title:'Outline the key sections',projectId:'work',isDone:false},{id:'t1b',parentId:'t1',title:'Collect supporting examples',projectId:'work',isDone:false},{id:'t2',title:'Review the team feedback',projectId:'work',dueDay:today,isDone:false},{id:'t3',title:'Gửi báo cáo tiến độ dự án',projectId:'work',dueDay:today,isDone:false},{id:'t4',title:'Follow up on an overdue task',projectId:'personal',dueDay:localDay(yesterday),isDone:false},{id:'t5',title:'Plan tomorrow',projectId:'personal',dueDay:today,isDone:true}];
@@ -382,8 +670,19 @@ function demoData(){const today=localDay();const yesterday=new Date();yesterday.
 function reportError(err){$('error-note').textContent=`Could not refresh from Super Productivity: ${err?.message||err}`;$('error-note').classList.remove('hidden');}
 // A focus refresh can otherwise replace a row between pointerdown and click.
 // Keep the existing DOM until a pending tap has completed, then fetch fresh data.
+function flushExternalPrefs(){
+  if(!state.externalPrefsDeferred)return;
+  if(state.pointerActive||state.refreshing||state.busy.size)return;
+  state.externalPrefsDeferred=false;
+  void loadPrefs().then(()=>{
+    if(state.pointerActive||state.busy.size){state.externalPrefsDeferred=true;return;}
+    render();
+  });
+}
 function flushDeferredRefresh(){
-  if(!state.refreshDeferred||state.pointerActive||state.refreshing||state.busy.size)return;
+  if(state.pointerActive||state.refreshing||state.busy.size)return;
+  flushExternalPrefs();
+  if(!state.refreshDeferred)return;
   state.refreshDeferred=false;
   void refresh();
 }
@@ -404,7 +703,8 @@ async function refresh(){
     if(!state.api){
       if(!state.demo){state.demo=true;demoData();$('demo-note').classList.remove('hidden');shouldRender=true;}
     }else{
-      const [tasks,habits,projects]=await Promise.all([state.api.getTasks(),state.api.getAllSimpleCounters(),state.api.getAllProjects()]);
+      const [tasks,habits,projects,day]=await Promise.all([state.api.getTasks(),state.api.getAllSimpleCounters(),state.api.getAllProjects(),typeof state.api.getDayContext==='function'?state.api.getDayContext().catch(()=>null):null]);
+      if(day&&typeof day.todayStr==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(day.todayStr))state.logicalDay=day.todayStr;
       if(!Array.isArray(tasks)||!Array.isArray(habits))throw new Error('Unexpected tasks or habits response');
       if(state.pointerActive||state.busy.size){state.refreshDeferred=true;return;}
       state.tasks=tasks;state.habits=habits;state.projects=new Map((projects||[]).map(p=>[p.id,p.title]));
@@ -421,9 +721,10 @@ async function refresh(){
       state.refreshDeferred=false;
       setTimeout(()=>void refresh(),0);
     }
+    flushExternalPrefs();
   }
 }
-async function updateTask(id){if(state.busy.has('t:'+id))return;const t=state.tasks.find(x=>x.id===id);if(!t)return;if(!state.api){t.isDone=!t.isDone;render();return;}state.busy.add('t:'+id);try{await state.api.updateTask(id,{isDone:!t.isDone});t.isDone=!t.isDone;render();}catch(err){reportError(err)}finally{state.busy.delete('t:'+id);flushDeferredRefresh()}}
+async function updateTask(id){if(state.busy.has('t:'+id))return;const t=state.tasks.find(x=>x.id===id);if(!t)return;const nextDone=!t.isDone;if(!state.api){t.isDone=nextDone;if(nextDone&&state.prefs.workingId===id)state.prefs.workingId=null;render();return;}state.busy.add('t:'+id);try{await state.api.updateTask(id,{isDone:nextDone});t.isDone=nextDone;if(nextDone&&state.prefs.workingId===id){state.prefs.workingId=null;savePrefs();}render();}catch(err){reportError(err)}finally{state.busy.delete('t:'+id);flushDeferredRefresh()}}
 async function updateHabit(id,delta){if(state.busy.has('h:'+id))return;const h=state.habits.find(x=>x.id===id);if(!h)return;if(h.type==='StopWatch')return;const value=habitValue(h),next=delta==='toggle'?(value>0?0:1):Math.max(0,value+delta);if(!state.api){h.countOnDay={...h.countOnDay,[state.today]:next};render();return;}state.busy.add('h:'+id);try{await state.api.setCounter(id,next);h.countOnDay={...h.countOnDay,[state.today]:next};render();}catch(err){reportError(err)}finally{state.busy.delete('h:'+id)}}
 function openTimeEditor(id){
   const h=state.habits.find(x=>x.id===id);
@@ -528,13 +829,178 @@ async function wontDo(id){
     flushDeferredRefresh();
   }
 }
-document.addEventListener('click',event=>{const target=event.target.closest('button,[data-open]');if(!target)return;const d=target.dataset;if(d.task)void updateTask(d.task);else if(d.wontDo)void wontDo(d.wontDo);else if(d.habit)void updateHabit(d.habit,'toggle');else if(d.more)void updateHabit(d.more,1);else if(d.less)void updateHabit(d.less,-1);else if(d.logTime)openTimeEditor(d.logTime);else if(d.open)void openTask(d.open);});
+
+function chooseWorking(id,kind='task'){
+  const item=kind==='habit'
+    ?state.habits.find(h=>h.id===id&&habitDue(h))
+    :state.tasks.find(t=>t.id===id&&!t.isDone);
+  if(!item)return;
+  state.prefs.workingId=id;
+  state.prefs.workingKind=kind==='habit'?'habit':'task';
+  savePrefs();noteWorkspace('');
+  render();
+}
+function removeWorking(){
+  state.prefs.workingId=null;
+  state.prefs.workingKind='task';
+  savePrefs();
+  noteWorkspace('Removed from Working Now. Native task tracking, if active, continues until stopped.');
+  render();
+}
+// Older Super Productivity hosts expose the approved NgRx task tracking action
+// even when the newer optional PluginAPI.startTracking() is absent.
+async function selectNativeTrackedTask(task){
+  if(!state.api)throw new Error('Super Productivity is not connected.');
+  if(typeof state.api.startTracking==='function'){
+    await state.api.startTracking(task.id);
+  }else if(typeof state.api.dispatchAction==='function'){
+    state.api.dispatchAction({type:'[Task] SetCurrentTask',id:task.id});
+  }else{
+    throw new Error('Native time tracking is unavailable in this host version.');
+  }
+  state.trackedTaskId=task.id;
+  state.trackingKnown=true;
+}
+async function startWorkingTracking(){
+  const task=validWorkingTask();
+  if(!task)return;
+  if(state.busy.has('tracking'))return;
+  state.busy.add('tracking');
+  try{
+    await selectNativeTrackedTask(task);
+    noteWorkspace('Super Productivity is tracking this task. The app owns the timer.');
+    render();
+  }catch(err){noteWorkspace('Could not start tracking: '+String(err?.message||err));}
+  finally{state.busy.delete('tracking');flushDeferredRefresh();}
+}
+async function stopWorkingTracking(){
+  const task=validWorkingTask();
+  if(!task||!state.trackingKnown||!state.trackedTaskId)return;
+  const current=state.tasks.find(t=>t.id===state.trackedTaskId);
+  if(state.trackedTaskId!==task.id&&current?.parentId!==task.id)return;
+  if(state.busy.has('tracking'))return;
+  state.busy.add('tracking');
+  try{
+    if(typeof state.api?.stopTracking==='function')await state.api.stopTracking();
+    else if(typeof state.api?.dispatchAction==='function')
+      state.api.dispatchAction({type:'[Task] SetCurrentTask',id:null});
+    else throw new Error('Native stop tracking is unavailable in this host version.');
+    state.trackedTaskId=null;state.trackingKnown=true;
+    noteWorkspace('Native time tracking stopped.');
+    render();
+  }catch(err){noteWorkspace('Could not stop tracking: '+String(err?.message||err));}
+  finally{state.busy.delete('tracking');flushDeferredRefresh();}
+}
+async function openNativeFocus(){
+  const task=validWorkingTask();
+  if(!task)return;
+  if(!state.api||typeof state.api.dispatchAction!=='function'){
+    noteWorkspace('Native Focus mode is unavailable in this host version.');return;
+  }
+  if(state.busy.has('tracking'))return;
+  state.busy.add('tracking');
+  try{
+    const tracked=state.trackingKnown&&state.trackedTaskId===task.id;
+    if(!tracked){
+      // Focus on this task is an explicit user request to activate it.
+      // Do not trigger the unsupported Start Session action; the native
+      // Focus interface still owns duration/mode/session confirmation.
+      await selectNativeTrackedTask(task);
+    }
+    state.api.dispatchAction({type:'[FocusMode] Show Overlay'});
+    noteWorkspace('Opened native Focus mode with this task active. Choose your session in Super Productivity.');
+    render();
+  }catch(err){noteWorkspace('Could not prepare Focus mode: '+String(err?.message||err));}
+  finally{state.busy.delete('tracking');flushDeferredRefresh();}
+}
+function clearDragMarker(){
+  document.querySelectorAll('.sort-drop-target').forEach(el=>el.classList.remove('sort-drop-target'));
+}
+document.addEventListener('pointerdown',event=>{
+  const handle=event.target.closest('[data-drag-kind]');
+  if(!handle||handle.disabled||event.button!==0)return;
+  state.pointerActive=true;
+  state.dragging={pointerId:event.pointerId,kind:handle.dataset.dragKind,
+    id:handle.dataset.dragId,parentId:handle.dataset.dragParent||'',
+    x:event.clientX,y:event.clientY,targetId:null,after:false,started:false};
+  try{handle.setPointerCapture(event.pointerId);}catch(_err){}
+},false);
+document.addEventListener('pointermove',event=>{
+  const drag=state.dragging;
+  if(!drag||drag.pointerId!==event.pointerId)return;
+  if(Math.hypot(event.clientX-drag.x,event.clientY-drag.y)<7&&!drag.started)return;
+  drag.started=true;
+  clearDragMarker();
+  const over=document.elementFromPoint(event.clientX,event.clientY)?.closest('[data-sort-kind]');
+  if(!over||over.dataset.sortKind!==drag.kind||
+    (over.dataset.sortParent||'')!==drag.parentId||over.dataset.sortId===drag.id){
+    drag.targetId=null;return;
+  }
+  drag.targetId=over.dataset.sortId;
+  const box=over.getBoundingClientRect();
+  drag.after=event.clientY>=box.top+box.height/2;
+  over.classList.add('sort-drop-target');
+},false);
+function finishDrag(event){
+  const drag=state.dragging;
+  if(!drag||drag.pointerId!==event.pointerId)return;
+  state.dragging=null;
+  clearDragMarker();
+  if(event.type==='pointerup'&&drag.started&&drag.targetId)
+    dropItem(drag.kind,drag.id,drag.targetId,drag.parentId,drag.after);
+}
+document.addEventListener('pointerup',finishDrag,false);
+document.addEventListener('pointercancel',finishDrag,false);
+
+document.addEventListener('click',event=>{const target=event.target.closest('button,[data-open]');if(!target)return;const d=target.dataset;
+  if(d.move)moveItem(d.orderKind,d.orderId,d.move,d.orderParent);
+  else if(d.work)chooseWorking(d.work,'task');
+  else if(d.workHabit)chooseWorking(d.workHabit,'habit');
+  else if('workClear' in d)removeWorking();
+  else if('trackStart' in d)void startWorkingTracking();
+  else if('trackStop' in d)void stopWorkingTracking();
+  else if('focusOpen' in d)void openNativeFocus();
+  else if(d.task)void updateTask(d.task);
+  else if(d.wontDo)void wontDo(d.wontDo);
+  else if(d.habit)void updateHabit(d.habit,'toggle');
+  else if(d.more)void updateHabit(d.more,1);
+  else if(d.less)void updateHabit(d.less,-1);
+  else if(d.logTime)openTimeEditor(d.logTime);
+  else if(d.open)void openTask(d.open);
+});
 document.addEventListener('keydown',event=>{if((event.key==='Enter'||event.key===' ')&&event.target.matches('[data-open]')){event.preventDefault();void openTask(event.target.dataset.open)}});
+$('arrange-tasks').addEventListener('click',()=>{state.arrange.task=!state.arrange.task;render();});
+$('arrange-habits').addEventListener('click',()=>{state.arrange.habit=!state.arrange.habit;render();});
 $('refresh').addEventListener('click',()=>{ $('task-action-note').classList.add('hidden');void refresh() });$('overdue-filter').addEventListener('click',()=>{state.showOverdue=!state.showOverdue;render()});$('completed-filter').addEventListener('click',()=>{state.showFinished=!state.showFinished;render()});
 window.addEventListener('focus',()=>void refresh());document.addEventListener('visibilitychange',()=>{if(!document.hidden)void refresh()});
 const api=window.PluginAPI;
-if(api){state.api=api;if(typeof api.registerHook==='function'&&api.Hooks){for(const hook of ['TASK_CREATED','TASK_UPDATE','TASK_COMPLETE','TASK_DELETE']){if(api.Hooks[hook])try{api.registerHook(api.Hooks[hook],()=>void refresh())}catch(err){console.warn('Today+ hook unavailable',err)}}}}
-void refresh();setInterval(()=>{if(document.visibilityState!=='hidden')void refresh()},30000);
+if(api){
+  state.api=api;
+  if(typeof api.registerHook==='function'&&api.Hooks){
+    for(const hook of ['TASK_CREATED','TASK_UPDATE','TASK_COMPLETE','TASK_DELETE','DATA_CHANGED','DAY_CHANGE']){
+      if(api.Hooks[hook])try{api.registerHook(api.Hooks[hook],()=>void refresh())}
+      catch(err){console.warn('Today+ hook unavailable',err);}
+    }
+    if(api.Hooks.PERSISTED_DATA_CHANGED)try{
+      api.registerHook(api.Hooks.PERSISTED_DATA_CHANGED,payload=>{
+        // External sync may update this plugin's preferences. Read only:
+        // never persist from a sync hook or it would cause write loops.
+        if(payload?.key&&payload.key!==PREF_KEY)return;
+        state.externalPrefsDeferred=true;
+        flushExternalPrefs();
+      });
+    }catch(err){console.warn('Today+ persistence hook unavailable',err);}
+    if(api.Hooks.CURRENT_TASK_CHANGE)try{
+      api.registerHook(api.Hooks.CURRENT_TASK_CHANGE,payload=>{
+        state.trackedTaskId=payload?.current?.id||null;
+        state.trackingKnown=true;
+        render();
+      });
+    }catch(err){console.warn('Today+ tracking hook unavailable',err);}
+  }
+}
+void (async()=>{await loadPrefs();await refresh();})();
+setInterval(()=>{if(document.visibilityState!=='hidden')void refresh()},30000);
 </script>
 </body>
 </html>

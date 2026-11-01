@@ -6,18 +6,28 @@
 
 [![For Super Productivity](https://img.shields.io/badge/For-Super%20Productivity-4d7560)](https://app.super-productivity.com/) [![MIT License](https://img.shields.io/badge/license-MIT-informational)](LICENSE)
 
-## Preview
+## Today+ 2.0 — Your daily workspace
 
-Today+ uses one consistent calendar-and-check icon in both the Super Productivity plugin menu and the dashboard header.
+Manage today's **tasks and habits together**, arrange them in your preferred order, and bring one task or habit into **Working Now**. Uses Super Productivity's data, native task tracking, and Focus mode—without creating duplicate tasks or timers.
 
-![Today+ desktop view with tasks, subtasks and habits](docs/screenshots/today-plus-tasks-desktop-v1.1.0.webp)
+### Working Now — task and habit previews
+
+| Working on a task (desktop) | Continuing a completed habit (mobile) |
+| :--- | :--- |
+| ![Working Now with a selected task and subtasks](docs/screenshots/working-now-active.webp) | ![Working Now with a goal-met stopwatch habit, still eligible to log more time](docs/screenshots/goal-reached-habit-phone.webp) |
 
 <details>
-<summary>Mobile layout and manual time entry</summary>
+<summary>More screenshots — arranging, habits, and compact mobile layout</summary>
 
-![Today+ mobile view with subtasks beneath the parent](docs/screenshots/today-plus-tasks-phone-v1.1.0.webp)
+![Arrange tasks and habits independently on mobile](docs/screenshots/arrange-mode-phone.webp)
 
-![Today+ manual time entry for stopwatch habits](docs/screenshots/log-time.webp)
+![Working Now with a counter habit on mobile](docs/screenshots/working-habit-phone.webp)
+
+![Full Today+ dashboard with tasks, subtasks, and habits](docs/screenshots/today-plus-tasks-desktop-v1.1.0.webp)
+
+![Compact phone dashboard](docs/screenshots/today-plus-tasks-phone-v1.1.0.webp)
+
+![Manual time entry for stopwatch habits](docs/screenshots/log-time.webp)
 
 </details>
 
@@ -26,6 +36,11 @@ Today+ uses one consistent calendar-and-check icon in both the Super Productivit
 Super Productivity organizes tasks and habits in different views. Today+ brings **tasks due today** and **habits scheduled for today** onto one screen, reducing the need to switch back and forth while keeping Super Productivity as the source of truth. You can complete tasks, update habit goals, and manually log time without replacing the native habit tracker.
 
 ## Features
+
+- **Arrange your day:** Open **Arrange** in Tasks or Habits. Drag by the grip or use the keyboard/touch-friendly **Move to top / Move up / Move down** controls. Top-level tasks move as a group; subtasks are arranged within their parent. This changes only Today+'s display, not project order.
+- **Saved routines:** Task order is saved per logical day; habit order remains your preferred recurring daily routine. Today+ saves the preferences using Super Productivity's synced plugin storage, where supported.
+- **Working Now:** Tap the target icon on one task or habit to bring it into **Working Now**, without copying, completing, or automatically tracking it. Pick another task or habit to replace it; **Remove** returns it to the normal list. Habits retain their native Complete/Increase/Log time controls, even after meeting their daily goal.
+- **Native tracking and Focus:** **Start tracking / Stop tracking** uses the application's own time tracker, with an approved action fallback for older hosts lacking the newer optional tracking methods. **Focus on task** activates your selected Working Now task before opening Super Productivity's native Focus interface. It does **not** automatically start a Pomodoro or replace its built-in timer. Native task tracking and Focus sessions do not apply to habits.
 
 - **Today’s tasks:** See tasks due today, with subtasks nested beneath their parents. Overdue and completed tasks are hidden at first; you can show either when needed.
 - **Native Won't Do:** Tap **Won’t Do** to invoke Super Productivity’s native skip using its task-row menu. Today+ briefly visits the native task list if needed, visually conceals only the temporary task menu, and returns to Today+. Task details do not open. If the native menu cannot be reached, it leaves the task unchanged and shows guidance. Native recurrence and completion semantics are preserved.
@@ -38,7 +53,9 @@ Super Productivity organizes tasks and habits in different views. Today+ brings 
 
 No separate login, external service, duplicate tasks, or additional local data store is required.
 
-> **Known limitation in v1.2.0:** Won't Do uses Super Productivity's native task menu through a plugin-side workaround. Today+ may briefly switch to the host task list and back, causing a momentary screen blink. We are retaining this behavior for now rather than faking task completion or changing recurring-task schedules. The action is verified by checking the native `wontDoOn` state; UI automation may need maintenance after host updates.
+> **Known limitation in v2.0.0:** Won't Do uses Super Productivity's native task menu through a plugin-side workaround. Today+ may briefly switch to the host task list and back, causing a momentary screen blink. We are retaining this behavior for now rather than faking task completion or changing recurring-task schedules. The action is verified by checking the native `wontDoOn` state; UI automation may need maintenance after host updates.
+
+> **What's new in v2.0.0:** User-tested Working Now for tasks and habits, persistent display order, native tracking/Focus handoff, and the NEO-Zen responsive layout. See [2.0.0 release notes](CHANGELOG.md) and [workspace verification](docs/WORKSPACE-VERIFICATION.md).
 
 ## Install
 
@@ -56,6 +73,24 @@ today-plus-super-productivity.zip
 ├── index.html
 └── icon.svg
 ```
+
+## What's new in 2.0
+
+**Choose your current priority.** Tap the target icon beside a task or habit to move it to the green-and-gold **Working Now** area. Select something else to replace it, or use **Remove**. Nothing is duplicated; progress stays accurate.
+
+**Arrange the day your way.** The **Arrange** action sits at the far right of Tasks and Habits, separate from the Overdue/Finished filters. Drag rows or use accessible Move to top, Up and Down controls. Task/subtask order is specific to the day; habit order is a recurring preference.
+
+**Use Super Productivity's own tools.** A task in Working Now offers **Start tracking**, **Stop tracking**, and **Focus on task**. The plugin hands off to the application's native tracker and focus interface. `Not tracking` and `Tracking in Super Productivity` describe status, not separate timers. Focus on task selects the task first; the native app controls the focus session.
+
+**Keep going after a habit goal.** Even if a habit is already Done for the day, it can go into Working Now. Example: a 60-minute reading or piano habit can accumulate 90 minutes without counting as two completed habits. You decide when to remove it.
+
+## Organizing tasks and habits
+
+Open **Arrange** in either list to reveal a drag handle and Move to top/up/down buttons. Parent task rows move as a group, and subtasks are rearranged inside their parent. On phones and with keyboard or assistive technology, the explicit buttons are an alternative to dragging.
+
+Today+'s task order resets each logical day; recurring habits retain the order you chose until you change it. Ordering and the Working Now selection (task or habit) are stored as preferences, not copied items. No native task project order is changed, and progress totals still include the task in Working Now.
+
+Selecting a task for Working Now does not start time tracking. Start/Stop operates on the native tracker when supported. The app's `currentTaskChange` event supplies updates while Today+ is running; a refreshed iframe cannot reliably read the already-active tracker, so it does not claim tracking is active unless confirmed. Removing a task from Working Now does not stop native tracking.
 
 ## How the daily view works
 
@@ -96,7 +131,7 @@ Run from the repository root:
 
 ```bash
 python -m unittest discover -s tests -p 'test_*.py' -v
-python scripts/package.py --tag v1.2.0
+python scripts/package.py --tag v2.0.0
 ```
 
 For browser tests, install Python Playwright and Chromium, then run `python tests/integration_check.py` and `python tests/browser_check.py`. See [development notes](docs/DEVELOPMENT.md) and [release instructions](docs/RELEASING.md).
