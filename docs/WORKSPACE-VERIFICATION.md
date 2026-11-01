@@ -1,6 +1,6 @@
-# Today+ Working Now and Order — v1.3.0-beta.3 QA
+# Today+ v2.0.0 — Working Now, Ordering & Release QA
 
-**Status:** v1.3.0-beta.3 preview branch only. Do not merge or publish as stable until real-host verification. GitHub CI runs DOM mocks and screenshots; these do not replace actual installed testing.
+**Status:** Approved for v2.0.0 release. The user confirmed all primary features work in the installed Super Productivity app, including the last feedback corrections (timer status, right-aligned Arrange, and continuing a goal-met habit). Automated CI and screenshots supplement, rather than replace, the user's live-app verification. Device-to-device preference propagation and unusual legacy-host cases are still environment-dependent; avoid presenting them as universally tested.
 
 ## Core order behavior
 
@@ -26,7 +26,7 @@
 8. Replace a Working Now task with a habit and vice versa. Confirm the previous item returns to its original list.
 9. Ensure habits do not show native task-tracking or Focus-mode buttons.
 10. Confirm Arrange appears at the far right of Tasks and Habits and is visually distinct from the Overdue/Finished filters.
-7. Test unfinished overdue, completed, deleted and rescheduled tasks after a restart. Invalid Working Now references must not surface ghost tasks.
+11. Test unfinished overdue, completed, deleted and rescheduled tasks after a restart. Invalid Working Now references must not surface ghost tasks.
 
 ## Native tracking and Focus
 
@@ -48,10 +48,12 @@
 6. Force plugin storage errors: Today+ should preserve the task state, explain the preference save failure, and never mutate project ordering.
 7. Verify original task/habit controls and native Won't Do remain functional with the known brief navigation blink.
 
-## Release blockers
+## v2.0.0 release acceptance
 
-- Native tracking Start/Stop and Focus overlay tested on an installed current app version.
-- No double counting or duplicate Working Now cards.
-- Preference loading and day transition tested.
-- Small-screen layout and actual touch drag tested.
-- Review README and Changelog, update screenshot references if needed.
+- [x] User verified the primary task, habit, arrange, tracking, Focus, and goal-met-habit workflows in the installed app.
+- [x] Browser regression verifies no double counting or duplicate Working Now cards.
+- [x] Browser regression covers preference restoration, task/subtask order and remote-preference update behavior.
+- [x] Browser regression covers 320px mobile layout, drag and accessible reorder controls.
+- [x] README, screenshots, changelog, and stable version updated.
+- [ ] Optional follow-up: verify cross-device syncing with two real installations, physical touch on additional hardware, and unusual host versions.
+- [ ] Future UX improvement: remove the accepted brief screen blink when invoking native Won't Do.
