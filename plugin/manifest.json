@@ -30,6 +30,7 @@
     "taskDelete",
     "currentTaskChange",
     "dataChanged",
-    "dayChange"
+    "dayChange",
+    "persistedDataChanged"
   ]
 }
