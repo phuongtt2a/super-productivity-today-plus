@@ -54,7 +54,7 @@ class TestPlugin(unittest.TestCase):
         self.assertIn('width:40px;height:40px;min-width:40px;max-width:40px',html)
         self.assertIn('<rect x="4.5" y="2.5"',html)
         self.assertNotIn('aria-label="Won’t Do:',html)
-        self.assertIn('const action=context||t.isDone?',html)
+        self.assertIn('const wontDo=context||t.isDone?',html)
         self.assertIn('async function wontDo(id)',html)
         self.assertIn('requestNativeWontDo(id)',html)
         self.assertIn("isWontDo(t)",html)
