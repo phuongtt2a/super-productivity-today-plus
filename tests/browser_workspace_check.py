@@ -20,7 +20,8 @@ tasks = [
 habits = [
     {"id":"h1","title":"Drink enough water","type":"ClickCounter","isEnabled":True,"isTrackStreaks":True,"streakMinValue":8,"countOnDay":{}},
     {"id":"h2","title":"Read","type":"ClickCounter","isEnabled":True,"isTrackStreaks":True,"streakMinValue":1,"countOnDay":{}},
-    {"id":"h3","title":"Go jogging","type":"ClickCounter","isEnabled":True,"isTrackStreaks":True,"streakMinValue":1,"countOnDay":{}}
+    {"id":"h3","title":"Go jogging","type":"ClickCounter","isEnabled":True,"isTrackStreaks":True,"streakMinValue":1,"countOnDay":{}},
+    {"id":"h4","title":"Practice piano","type":"StopWatch","isEnabled":True,"isTrackStreaks":True,"streakMinValue":3600000,"countOnDay":{TODAY:3600000}}
 ]
 API = r"""
 window.__dataTasks = __TASKS__;
@@ -189,6 +190,11 @@ with sync_playwright() as p:
         assert ui.locator('#arrange-tasks.arrange-toggle').count()==1
         assert ui.locator('#arrange-habits.arrange-toggle').count()==1
         assert ui.locator('#overdue-filter.arrange-toggle').count()==0
+        # Verify visual DOM order, independent of CSS or responsive wrapping.
+        assert ui.locator('#task-heading').locator('xpath=../..').locator('.section-actions button').evaluate_all(
+            "(buttons)=>buttons.map(b=>b.id)"
+        ) == ['overdue-filter','completed-filter','arrange-tasks']
+        assert ui.locator('#habit-caption').locator('xpath=..').locator('button').last.get_attribute('id')=='arrange-habits'
         assert ui.evaluate('document.documentElement.scrollWidth<=innerWidth')
         ui.locator('#habits [data-work-habit="h3"]').click()
         assert ui.locator('#working-card [data-sort-id="h3"]').count()==1
@@ -200,10 +206,35 @@ with sync_playwright() as p:
         prefs=ui.evaluate("JSON.parse(window.__saved['todayplus.workspace.v1'])")
         assert prefs['workingKind']=='habit' and prefs['workingId']=='h3',prefs
         ui.locator('#working-card [data-habit="h3"]').click()
-        ui.wait_for_selector('#working-card .working-empty')
-        assert ui.locator('#habits [data-sort-id="h3"] .check.is-done').count()==1
+        ui.wait_for_selector('#working-card [data-sort-id="h3"].is-done')
+        assert ui.locator('#working-card [data-sort-id="h3"]').count()==1
+        assert ui.locator('#habits [data-sort-id="h3"]').count()==0
+        assert ui.locator('#working-card [data-work-clear]').count()==1
         assert ui.evaluate('document.documentElement.scrollWidth<=innerWidth')
-        print('habit in Working Now, native completion, no second timer: PASS')
+        print('completed habit stays in Working Now until manually removed: PASS')
+
+        # A habit that already reached its 60-minute goal can still be
+        # selected, and its native time log can exceed the daily goal.
+        ui.locator('#working-card [data-work-clear]').click()
+        assert ui.locator('#habits [data-sort-id="h3"] .check.is-done').count()==1
+        ui.locator('#habits [data-work-habit="h4"]').click()
+        assert ui.locator('#working-card [data-sort-id="h4"].is-done').count()==1
+        assert ui.locator('#habits [data-sort-id="h4"]').count()==0
+        assert 'Goal reached' in ui.locator('#working-card .working-habit-note').inner_text()
+        assert ui.locator('#working-card [data-log-time="h4"]').is_enabled()
+        ui.locator('#working-card [data-log-time="h4"]').click()
+        ui.wait_for_selector('#time-overlay:not(.hidden)')
+        ui.locator('#time-minutes').fill('30')
+        ui.locator('#time-save').click()
+        ui.wait_for_selector('#time-overlay.hidden')
+        ui.wait_for_function("document.querySelector('#working-card [data-sort-id=h4] .item-meta').textContent.includes('1h 30m')")
+        assert ui.locator('#working-card [data-sort-id="h4"].is-done').count()==1
+        assert ui.locator('#habits [data-sort-id="h4"]').count()==0
+        assert ui.evaluate("window.__dataHabits.find(h=>h.id==='h4').countOnDay[window.__today]") == 5400000
+        assert ui.locator('#done-count').inner_text().strip().split(' of ')[0]=='1'
+        ui.locator('#working-card [data-work-clear]').click()
+        assert ui.locator('#habits [data-sort-id="h4"]').count()==1
+        print('met-goal stopwatch habit can be selected, extended and removed: PASS')
 
         ui.locator('#habits [data-work-habit="h1"]').click()
         assert ui.locator('#working-card [data-more="h1"]').count()==1
