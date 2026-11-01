@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.3.0-beta.1 — Working Now and personal daily ordering (preview only)
+
+- Add independent user-defined ordering of task groups, nested subtasks and daily habits, with drag handles and accessible Move to top/up/down buttons.
+- Save task order for each logical day, a recurring habit routine across days, and a single Working Now task using synced plugin preferences.
+- Add a dedicated Working Now area without duplicating its task or altering completion statistics.
+- Integrate native Start/Stop tracking and Open Focus overlay; no second timer and no unsupported start-session actions.
+- Preserve NEO-Zen styling, transparency, host fonts, existing Won't Do behavior and small-screen usability.
+- Preview release only: do not merge into main until mobile and real-host tests pass.
+
+
 ## 1.2.0 — Native Won't Do and clear task actions
 
 - Replace **Not Today** (which cleared due dates) with Super Productivity's genuine **Won't Do** task operation; recurring tasks retain the host's scheduling behavior.
