@@ -318,7 +318,7 @@ html,body,.app{background:transparent!important}
 <script>
 'use strict';
 const $ = id => document.getElementById(id);
-const state = {api:null, tasks:[], habits:[], projects:new Map(), today:'', showOverdue:false, showFinished:false, demo:false, refreshing:false, busy:new Set(), pointerActive:false, refreshDeferred:false, timeHabitId:null, previousFocus:null};
+const state = {api:null, tasks:[], habits:[], projects:new Map(), today:'', logicalDay:null, showOverdue:false, showFinished:false, demo:false, refreshing:false, busy:new Set(), pointerActive:false, refreshDeferred:false, timeHabitId:null, previousFocus:null, arrange:{task:false,habit:false}, prefs:{version:1,day:'',taskOrder:[],childOrder:{},habitOrder:[],workingId:null}, preferenceWrite:Promise.resolve(), dragging:null, trackedTaskId:null, trackingKnown:false};
 const safe = str => String(str ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const localDay = (date=new Date()) => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
 const dueKey = t => t.dueDay || (Number.isFinite(t.dueWithTime)?localDay(new Date(t.dueWithTime)):null);
@@ -347,6 +347,118 @@ function weekProgress(h, date=getToday()) {
   for(let i=0;i<7;i++){const day=new Date(monday);day.setDate(monday.getDate()+i);if(Number(h.countOnDay?.[localDay(day)]||0)>=habitGoal(h))done++}
   return {done,goal:Number(h.streakWeeklyFrequency)>0?Number(h.streakWeeklyFrequency):1};
 }
+
+const PREF_KEY='todayplus.workspace.v1';
+// Today+ presentation order is intentionally independent of project/task order.
+function safeIds(ids) {
+  return Array.isArray(ids) ? [...new Set(ids.filter(id=>typeof id==='string'&&id.length>0&&id.length<=256))].slice(0,2000):[];
+}
+function normalizePrefs(raw) {
+  const value=raw&&typeof raw==='object'?raw:{};
+  const childOrder={};
+  if(value.childOrder&&typeof value.childOrder==='object'){
+    for(const [parent,ids] of Object.entries(value.childOrder).slice(0,500))
+      if(typeof parent==='string'&&parent.length<=256)childOrder[parent]=safeIds(ids);
+  }
+  return {version:1,day:typeof value.day==='string'?value.day:'',
+    taskOrder:safeIds(value.taskOrder),childOrder,
+    habitOrder:safeIds(value.habitOrder),
+    workingId:typeof value.workingId==='string'&&value.workingId.length<=256?value.workingId:null};
+}
+function ensureDayPrefs(){
+  if(state.prefs.day===state.today)return;
+  state.prefs.day=state.today;
+  state.prefs.taskOrder=[];
+  state.prefs.childOrder={};
+  // Habit order is an ongoing routine; today's task order is a daily choice.
+}
+async function loadPrefs(){
+  if(!state.api||typeof state.api.loadSyncedData!=='function')return;
+  try{
+    const raw=await state.api.loadSyncedData(PREF_KEY);
+    if(raw)state.prefs=normalizePrefs(JSON.parse(raw));
+  }catch(err){noteWorkspace('Could not load your saved arrangement. Changes will remain on this screen until storage is available.');}
+}
+function noteWorkspace(message){
+  const el=$('workspace-note');
+  el.textContent=message;el.classList.toggle('hidden',!message);
+}
+function savePrefs(){
+  if(!state.api||typeof state.api.persistDataSynced!=='function')return;
+  // Copy now: queued asynchronous writes must not accidentally all save the
+  // newest state or race and overwrite an earlier user command.
+  const data=JSON.stringify(state.prefs);
+  state.preferenceWrite=state.preferenceWrite.catch(()=>{}).then(()=>
+    state.api.persistDataSynced(data,PREF_KEY)
+  );
+  state.preferenceWrite.catch(()=>noteWorkspace('Could not save this arrangement. Try again when Super Productivity is connected.'));
+}
+function orderedBy(items,ids,otherwise){
+  const ranks=new Map(safeIds(ids).map((id,index)=>[id,index]));
+  return items.slice().sort((a,b)=>{
+    const ra=ranks.has(a.id)?ranks.get(a.id):Infinity;
+    const rb=ranks.has(b.id)?ranks.get(b.id):Infinity;
+    return ra-rb||(otherwise?otherwise(a,b):0);
+  });
+}
+function validWorkingTask(){
+  const id=state.prefs.workingId;
+  if(!id)return null;
+  const task=state.tasks.find(t=>t.id===id);
+  if(!task||task.isDone)return null;
+  const parent=task.parentId?state.tasks.find(t=>t.id===task.parentId):null;
+  const due=dueKey(task)||dueKey(parent||{});
+  return due&&due<=state.today?task:null;
+}
+function moveList(kind,parentId){
+  if(kind==='task')return taskGroups().map(g=>g.task.id);
+  if(kind==='habit')return todayHabits().map(h=>h.id);
+  if(kind==='child'){
+    const group=taskGroups().find(g=>g.task.id===parentId);
+    return group?group.children.map(t=>t.id):[];
+  }
+  return [];
+}
+function saveVisibleOrder(kind,parentId,ids){
+  if(kind==='task')state.prefs.taskOrder=[...ids,...state.prefs.taskOrder.filter(id=>!ids.includes(id))];
+  else if(kind==='habit')state.prefs.habitOrder=[...ids,...state.prefs.habitOrder.filter(id=>!ids.includes(id))];
+  else if(kind==='child'){
+    const previous=state.prefs.childOrder[parentId]||[];
+    state.prefs.childOrder[parentId]=[...ids,...previous.filter(id=>!ids.includes(id))];
+  }
+  savePrefs();render();
+}
+function moveItem(kind,id,direction,parentId=''){
+  const ids=moveList(kind,parentId);
+  const index=ids.indexOf(id);
+  if(index<0)return;
+  let destination=direction==='top'?0:direction==='up'?Math.max(0,index-1):Math.min(ids.length-1,index+1);
+  if(index===destination)return;
+  ids.splice(index,1);ids.splice(destination,0,id);
+  saveVisibleOrder(kind,parentId,ids);
+}
+function dropItem(kind,id,targetId,parentId='',after=false){
+  const ids=moveList(kind,parentId);
+  if(!ids.includes(id)||!ids.includes(targetId)||id===targetId)return;
+  ids.splice(ids.indexOf(id),1);
+  ids.splice(ids.indexOf(targetId)+(after?1:0),0,id);
+  saveVisibleOrder(kind,parentId,ids);
+}
+function sortToolbar(kind,id,title,parentId=''){
+  const enabled=kind==='habit'?state.arrange.habit:state.arrange.task;
+  if(!enabled)return '';
+  const safeId=safe(id),safeParent=safe(parentId),safeKind=safe(kind),safeTitle=safe(title);
+  const ids=moveList(kind,parentId);
+  const index=ids.indexOf(id);
+  return `<div class="arrange-tools" role="group" aria-label="Arrange ${safeTitle}">
+    <span class="arrange-label">Arrange</span>
+    <button class="arrange-control drag-handle" type="button" data-drag-kind="${safeKind}" data-drag-id="${safeId}" data-drag-parent="${safeParent}" title="Drag to reorder" aria-label="Drag to reorder ${safeTitle}">⠿</button>
+    <button class="arrange-control" type="button" data-move="top" data-order-kind="${safeKind}" data-order-id="${safeId}" data-order-parent="${safeParent}" title="Move to top" aria-label="Move ${safeTitle} to top" ${index<=0?'disabled':''}>⇧</button>
+    <button class="arrange-control" type="button" data-move="up" data-order-kind="${safeKind}" data-order-id="${safeId}" data-order-parent="${safeParent}" title="Move up" aria-label="Move ${safeTitle} up" ${index<=0?'disabled':''}>↑</button>
+    <button class="arrange-control" type="button" data-move="down" data-order-kind="${safeKind}" data-order-id="${safeId}" data-order-parent="${safeParent}" title="Move down" aria-label="Move ${safeTitle} down" ${index>=ids.length-1?'disabled':''}>↓</button>
+  </div>`;
+}
+
 function isScheduledInView(t){
   const d=dueKey(t);
   if(!d||d>state.today)return false;
@@ -378,9 +490,10 @@ function taskGroups(){
       return selectedIds.has(t.id);
     });
   }
-  return [...roots.values()].sort((a,b)=>taskOrder(a.task,b.task));
+  const sorted=orderedBy([...roots.values()].map(g=>({id:g.task.id,group:g})),state.prefs.taskOrder,(a,b)=>taskOrder(a.group.task,b.group.task));
+  return sorted.map(x=>({...x.group,children:orderedBy(x.group.children,state.prefs.childOrder[x.id]||[],taskOrder)}));
 }
-function todayHabits(){return state.habits.filter(h=>habitDue(h));}
+function todayHabits(){return orderedBy(state.habits.filter(h=>habitDue(h)),state.prefs.habitOrder);}
 function sectionEmpty(name,caption){return `<div class="empty"><strong>${safe(name)}</strong>${safe(caption)}</div>`;}
 function taskRow(t,level=0,context=false){
   const id=safe(t.id),d=dueKey(t),project=state.projects.get(t.projectId)||'Inbox';
@@ -427,7 +540,7 @@ function taskSummary(){
   }
   return state.tasks.filter(t=>ids.has(t.id));
 }
-function render(){state.today=localDay();$('today-date').textContent=new Date().toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'});const groups=taskGroups(),habits=todayHabits(),summary=taskSummary(),totalTasks=summary.length;const taskDone=summary.filter(t=>t.isDone&&!isWontDo(t)).length,habitDone=habits.filter(h=>dailyDone(h)).length;
+function render(){state.today=state.logicalDay||localDay();ensureDayPrefs();$('today-date').textContent=new Date().toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'});const groups=taskGroups(),habits=todayHabits(),summary=taskSummary(),totalTasks=summary.length;const taskDone=summary.filter(t=>t.isDone&&!isWontDo(t)).length,habitDone=habits.filter(h=>dailyDone(h)).length;
   $('tasks').innerHTML=groups.length?groups.map(taskGroupRow).join(''):sectionEmpty('All clear','No tasks due today in this view.');
   $('habits').innerHTML=habits.length?habits.map(habitRow).join(''):sectionEmpty('No habits scheduled','Enabled habits will show here on their scheduled days.');
   $('task-count').textContent=String(groups.reduce((n,g)=>n+Number(!g.context)+g.children.length,0));$('habit-count').textContent=String(habits.length);$('done-count').textContent=`${taskDone+habitDone} of ${totalTasks+habits.length}`;
