@@ -53,7 +53,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--today-accent);o
 .chip{white-space:nowrap;font-size:11px;border:1px solid var(--today-line);border-radius:99px;background:transparent;padding:7px 11px;color:var(--today-muted)}
 .chip[aria-pressed=true]{background:var(--today-hover);border-color:var(--today-accent);color:var(--today-text)}
 .item{display:grid;grid-template-columns:29px minmax(0,1fr) auto;column-gap:12px;align-items:center;min-height:78px;padding:13px 1px;border-bottom:1px solid var(--today-line);min-width:0;}
-.check{width:25px;height:25px;min-width:25px;max-width:25px;aspect-ratio:1;border:1.5px solid var(--today-accent);background:transparent;border-radius:50%;padding:0;display:grid;place-items:center;color:var(--today-accent);font-size:16px;line-height:1;}
+/* Task/habit indicators remain true circles when a title wraps to several lines.
+   Lock both physical dimensions: a tall grid row must never stretch the check. */
+.check{width:25px;height:25px;min-width:25px;max-width:25px;min-height:25px;max-height:25px;aspect-ratio:1/1;flex:0 0 25px;align-self:center;justify-self:center;appearance:none;-webkit-appearance:none;border:1.5px solid var(--today-accent);background:transparent;border-radius:50%;padding:0;display:grid;place-items:center;color:var(--today-accent);font-size:16px;line-height:1;}
 .check:hover{background:var(--today-hover)}
 .check.is-done{background:var(--today-accent);color:white}
 .item-copy{min-width:0;overflow-wrap:anywhere}
