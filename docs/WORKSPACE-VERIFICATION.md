@@ -57,3 +57,10 @@
 - [x] README, screenshots, changelog, and stable version updated.
 - [ ] Optional follow-up: verify cross-device syncing with two real installations, physical touch on additional hardware, and unusual host versions.
 - [ ] Future UX improvement: remove the accepted brief screen blink when invoking native Won't Do.
+
+## v2.0.1 — Round completion controls with wrapped task titles
+
+- [ ] With long task, subtask, and simple-habit titles, each check indicator stays a **25 × 25 px circle**, including multiple lines on a narrow phone.
+- [ ] Check 320 px, 390 px, tablet and desktop widths, with Unassigned/Working Now equivalents where relevant.
+- [ ] Verify clicking the check still completes a task or habit; Native Won't Do, tracking, focus, ordering, and other actions remain unchanged.
+- [ ] Refer to `docs/screenshots/checkbox-long-titles-phone.webp` for the long-Vietnamese-title visual example.

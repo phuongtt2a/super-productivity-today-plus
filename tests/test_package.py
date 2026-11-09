@@ -5,7 +5,7 @@ class TestPlugin(unittest.TestCase):
     def test_manifest(self):
         data=json.loads((ROOT/'plugin/manifest.json').read_text())
         self.assertEqual(data['id'],'sp-today-tasks-habits')
-        self.assertEqual(data['version'],'2.0.0')
+        self.assertEqual(data['version'],'2.0.1')
         self.assertTrue(data['iFrame'])
         self.assertEqual(data['name'],'Today+')
         self.assertIn("today's tasks and habits",data['description'])
@@ -55,6 +55,9 @@ class TestPlugin(unittest.TestCase):
         self.assertIn('selectNativeTrackedTask(task)',html)
         self.assertIn('class="chip arrange-toggle"',html)
         self.assertIn('working-surface.has-priority',html)
+        # A title can span many lines but a completion control must stay round.
+        self.assertIn('min-height:25px;max-height:25px;aspect-ratio:1/1',html)
+        self.assertIn('align-self:center;justify-self:center;appearance:none',html)
         self.assertIn('function startWorkingTracking(',html)
         self.assertIn('function stopWorkingTracking(',html)
         self.assertIn("type:'[FocusMode] Show Overlay'",html)

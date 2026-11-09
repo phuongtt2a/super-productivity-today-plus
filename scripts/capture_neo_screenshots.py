@@ -96,6 +96,23 @@ with sync_playwright() as playwright:
    assert page.locator('#habits [data-sort-id="piano"]').count()==0
    pic=page.screenshot(type="png",full_page=True,animations="disabled")
    Image.open(BytesIO(pic)).convert("RGB").save(OUT/"goal-reached-habit-phone.webp",format="WEBP",quality=86,method=6)
+   # Stress-case documentary preview: long Vietnamese titles and a habit
+   # must keep the circular completion indicators at 25 by 25 pixels.
+   page.locator('#working-card [data-work-clear]').click()
+   page.evaluate("""() => {
+     const title='Đọc và kiểm tra kỹ từng hạng mục quan trọng của kế hoạch triển khai dự án, đặc biệt là các nội dung dài được xuống nhiều dòng trên màn hình điện thoại. ';
+     state.tasks.find(t=>t.id==='report').title=title+title;
+     state.tasks.find(t=>t.id==='research').title='Công việc con: '+title;
+     state.tasks.find(t=>t.id==='design').title='Kiểm tra giao diện: '+title;
+     state.habits.find(h=>h.id==='read').title='Thói quen: '+title;
+     render();
+   }""")
+   for check in page.locator('#tasks .check, #habits .check').all():
+    rect=check.bounding_box()
+    assert rect and abs(rect['width']-rect['height'])<0.3,rect
+   assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1')
+   png=page.screenshot(type="png",full_page=True,animations="disabled")
+   Image.open(BytesIO(png)).convert("RGB").save(OUT/"checkbox-long-titles-phone.webp",format="WEBP",quality=86,method=6)
   print("captured",filename)
   page.close()
  browser.close()
