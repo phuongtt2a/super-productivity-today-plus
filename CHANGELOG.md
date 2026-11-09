@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.1-beta.1 — Consistently round completion circles
+
+- Prevent task, subtask, and simple-habit checkboxes from becoming oval beside long or multi-line titles.
+- Keep each check circle at exactly 25 × 25 pixels and center it within its row on desktop, narrow views, and Working Now.
+- Preserve the NEO-Zen theme, task actions, sorting, native Won't Do, and all Today+ 2.0 functionality.
+
 ## 2.0.0 — Working Now and personalized daily priorities (major release)
 
 **Today+ is now a daily workspace, not just a combined checklist.** This version has been verified in the installed Super Productivity app by the user after three beta iterations.
