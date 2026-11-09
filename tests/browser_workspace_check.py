@@ -268,5 +268,55 @@ with sync_playwright() as p:
         assert older.evaluate("window.__events.some(e=>e.type==='select')") is False
         older.close()
         print('older host fallback and selected task activated before Focus: PASS')
+
+        # Regression: wrapped titles must never turn task or habit completion
+        # circles into ellipses, in task groups, subtasks, or Working Now.
+        wrap=browser.new_page(viewport={'width':320,'height':740},reduced_motion='reduce')
+        install(wrap)
+        wrap.evaluate("""() => {
+            const long='Hoàn thiện bản kế hoạch phát triển ứng dụng và kiểm tra khả năng hiển thị trên điện thoại nhỏ, bao gồm nội dung tiếng Việt nhiều dòng và từng bước kiểm thử thật chi tiết. ';
+            state.tasks.find(t=>t.id==='t1').title=long+long;
+            state.tasks.find(t=>t.id==='c1').title='Subtask: '+long;
+            state.tasks.find(t=>t.id==='t2').title='Review: '+long+long;
+            state.habits.find(h=>h.id==='h2').title='Habit: '+long;
+            render();
+        }""")
+        selectors=[
+            '#tasks [data-sort-id="t1"] > .check',
+            '#tasks [data-sort-id="c1"] > .check',
+            '#tasks [data-sort-id="t2"] > .check',
+            '#habits [data-sort-id="h2"] > .check'
+        ]
+        for width in (320,390,740,1200):
+            wrap.set_viewport_size({'width':width,'height':740})
+            assert wrap.evaluate('document.documentElement.scrollWidth <= innerWidth + 1'),width
+            for selector in selectors:
+                metrics=wrap.locator(selector).evaluate("""el=>{
+                    const r=el.getBoundingClientRect();
+                    const row=el.closest('.item').getBoundingClientRect();
+                    const css=getComputedStyle(el);
+                    return {width:r.width,height:r.height,rowHeight:row.height,
+                            minHeight:css.minHeight,maxHeight:css.maxHeight,
+                            radius:css.borderRadius,display:css.display};
+                }""")
+                assert abs(metrics['width']-25)<.2 and abs(metrics['height']-25)<.2, (width,selector,metrics)
+                assert metrics['rowHeight']>25, (width,selector,metrics)
+                assert metrics['minHeight']=='25px' and metrics['maxHeight']=='25px', (width,selector,metrics)
+                assert metrics['radius']=='50%', (width,selector,metrics)
+        # The long title really wraps on a phone, rather than being cut off.
+        wrap.set_viewport_size({'width':320,'height':740})
+        lines=wrap.locator('#tasks [data-sort-id="t2"] .item-name').evaluate("""el=>{
+            const css=getComputedStyle(el);
+            return el.getBoundingClientRect().height/parseFloat(css.lineHeight);
+        }""")
+        assert lines>=3,lines
+        wrap.locator('#tasks [data-work="t2"]').click()
+        assert wrap.locator('#working-card [data-sort-id="t2"] .check').count()==1
+        working=wrap.locator('#working-card [data-sort-id="t2"] .check').bounding_box()
+        assert abs(working['width']-working['height'])<.2 and abs(working['width']-25)<.2,working
+        wrap.locator('#working-card [data-task="t2"]').click()
+        wrap.wait_for_function("window.__dataTasks.find(t=>t.id==='t2').isDone===true")
+        wrap.close()
+        print('long multiline task, subtask, habit and Working Now circles stay 25x25 across 320–1200px: PASS')
     finally:
         browser.close()
