@@ -17,7 +17,8 @@ concurrency:
 
 jobs:
   check:
-    runs-on: ubuntu-latest
+    # Playwright 1.57's Chromium install does not support the newer ubuntu-26.04 runner.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
