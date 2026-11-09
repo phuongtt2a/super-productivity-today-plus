@@ -6,7 +6,9 @@
 
 [![For Super Productivity](https://img.shields.io/badge/For-Super%20Productivity-4d7560)](https://app.super-productivity.com/) [![MIT License](https://img.shields.io/badge/license-MIT-informational)](LICENSE)
 
-> **Preview fix (v2.0.1-beta.1):** Task, subtask, and simple-habit completion circles now keep the same shape even when titles wrap onto several lines. Stable v2.0.0 remains unchanged until this fix is reviewed.
+> **Today+ v2.0.1:** Task, subtask, and simple-habit completion circles now stay perfectly round when titles wrap onto multiple lines. This maintenance release preserves all v2.0.0 features.
+
+[Download Today+ v2.0.1](https://github.com/phuongtt2a/super-productivity-today-plus/releases/tag/v2.0.1) · [Installable ZIP](https://github.com/phuongtt2a/super-productivity-today-plus/releases/download/v2.0.1/today-plus-super-productivity.zip)
 
 ## Today+ 2.0 — Your daily workspace
 
