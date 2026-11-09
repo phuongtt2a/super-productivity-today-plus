@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.0.1-beta.1 — Consistently round completion circles
+## 2.0.1 — Consistently round completion circles (maintenance release)
 
 - Prevent task, subtask, and simple-habit checkboxes from becoming oval beside long or multi-line titles.
 - Keep each check circle at exactly 25 × 25 pixels and center it within its row on desktop, narrow views, and Working Now.
